@@ -505,3 +505,10 @@
 - [x] Add motto to landing page hero section
 - [x] Add motto to dashboard welcome message
 - [x] Test AI responses to ensure consistent personality
+
+### Resume Upload Crash Bug
+- [x] Debug PDF resume upload crash in AI chat helper
+- [x] Fix base64 parsing error (Cannot read properties of undefined reading 'slice')
+- [x] Ensure parseResume mutation uses protected procedure
+- [x] Add better error handling for resume parsing failures
+- [x] Test resume upload in AI onboarding without crash

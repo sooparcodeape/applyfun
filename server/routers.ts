@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { 
   getUserProfile, 
   upsertUserProfile, 
@@ -98,9 +99,22 @@ export const appRouter = router({
     parseResume: protectedProcedure
       .input(z.object({ resumeBase64: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        // Extract text from PDF and parse with LLM
-        const base64Data = input.resumeBase64.split(',')[1];
-        const buffer = Buffer.from(base64Data, 'base64');
+        // Extract base64 data - handle both data URL format and raw base64
+        let base64Data: string;
+        if (input.resumeBase64.includes(',')) {
+          // Data URL format: data:mime/type;base64,xxxxx
+          base64Data = input.resumeBase64.split(',')[1];
+        } else {
+          // Raw base64 string
+          base64Data = input.resumeBase64;
+        }
+        
+        if (!base64Data) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Invalid resume data format',
+          });
+        }
         
         // Use LLM to extract structured data from resume
         const { invokeLLM } = await import('./_core/llm');
