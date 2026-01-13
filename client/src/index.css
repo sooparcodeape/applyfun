@@ -120,6 +120,32 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Safe area support for notched devices */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Mobile viewport optimization */
+  @media (max-width: 768px) {
+    body {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+    
+    input, textarea, select, button {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Mobile-optimized touch targets */
+    button:not(.btn-sm), a:not(.btn-sm) {
+      min-height: 44px;
+    }
+  }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),

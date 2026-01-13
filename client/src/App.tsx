@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -73,7 +74,10 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <div className="pb-16 md:pb-0">
+            <Router />
+            <MobileBottomNav />
+          </div>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

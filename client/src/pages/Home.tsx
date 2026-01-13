@@ -37,13 +37,13 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
+      <main className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
           <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-sm mb-4">
             🚀 Powered by Token Burns & Crypto Credits
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
             Land Your Dream{" "}
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               Crypto Job
@@ -51,7 +51,7 @@ export default function Home() {
             {" "}Faster
           </h1>
           
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto">
             Stop wasting hours on job applications. apply.fun automatically applies
             to hundreds of Web3 jobs while you focus on what matters - building your
             career. Burn tokens for credits, target your dream companies, and let automation do the rest.</p>
@@ -66,7 +66,7 @@ export default function Home() {
             </div>
           )}
           
-          <div className="flex gap-4 justify-center pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4">
             <Button 
               onClick={handleGetStarted} 
               size="lg" 
