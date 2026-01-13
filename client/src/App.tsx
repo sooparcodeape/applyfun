@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Onboarding from "./pages/Onboarding";
+import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./components/DashboardLayout";
 import Profile from "./pages/Profile";
 import Jobs from "./pages/Jobs";
@@ -17,12 +18,11 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path="/onboarding" component={Onboarding} />     <Route path="/dashboard">
+      <Route path="/onboarding" component={Onboarding} />      <Route path="/dashboard">
         <DashboardLayout>
-          <Profile />
+          <Dashboard />
         </DashboardLayout>
-      </Route>
-      <Route path="/profile">
+      </Route>      <Route path="/profile">
         <DashboardLayout>
           <Profile />
         </DashboardLayout>

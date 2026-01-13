@@ -131,3 +131,20 @@
 - [x] Profile review and confirmation interface
 - [ ] Auto-populate profile fields from parsed data
 - [ ] Onboarding completion redirect to dashboard
+
+### Dashboard Homepage
+- [ ] Dashboard overview page at /dashboard route
+- [ ] Credits balance card with top-up CTA
+- [ ] Application stats (total sent, success rate, pending)
+- [ ] Recent activity feed
+- [ ] Quick action cards (Browse Jobs, View Queue, Add Credits)
+- [ ] Welcome message for new users
+
+### Auto-Apply Engine
+- [ ] Client-side form detection and field mapping
+- [ ] Auto-fill logic using stored profile data
+- [ ] Support for common ATS platforms (Ashby, Greenhouse, Lever)
+- [ ] Form submission with error handling
+- [ ] Application tracking and status updates
+- [ ] Credit deduction on successful submission
+- [ ] Retry logic for failed applications

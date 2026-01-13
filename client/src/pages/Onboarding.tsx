@@ -59,9 +59,19 @@ export default function Onboarding() {
     reader.readAsDataURL(file);
   };
 
+  const updateProfileMutation = trpc.profile.updateFromParsed.useMutation({
+    onSuccess: () => {
+      toast.success("Profile updated successfully!");
+      setLocation("/profile");
+    },
+    onError: (error) => {
+      toast.error("Failed to update profile: " + error.message);
+    },
+  });
+
   const handleConfirmParsedData = () => {
-    // Navigate to profile with parsed data
-    setLocation("/profile?parsed=true");
+    // Save parsed data to profile
+    updateProfileMutation.mutate(parsedData);
   };
 
   if (selectedMode === "easy" && !parsedData) {

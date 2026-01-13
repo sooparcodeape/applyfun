@@ -125,6 +125,67 @@ export const appRouter = router({
         const parsedData = typeof content === 'string' ? JSON.parse(content || '{}') : {};
         return parsedData;
       }),
+    updateFromParsed: protectedProcedure
+      .input(z.object({
+        name: z.string().optional(),
+        email: z.string().optional(),
+        phone: z.string().optional(),
+        location: z.string().optional(),
+        skills: z.array(z.string()).optional(),
+        experience: z.array(z.object({
+          title: z.string(),
+          company: z.string(),
+          duration: z.string().optional(),
+        })).optional(),
+        education: z.string().optional(),
+        github: z.string().optional(),
+        linkedin: z.string().optional(),
+        twitter: z.string().optional(),
+        telegram: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Update profile
+        await upsertUserProfile({
+          userId: ctx.user.id,
+          phone: input.phone || null,
+          location: input.location || null,
+          githubUrl: input.github || null,
+          linkedinUrl: input.linkedin || null,
+          twitterHandle: input.twitter || null,
+          telegramHandle: input.telegram || null,
+        });
+
+        // Add skills
+        if (input.skills && input.skills.length > 0) {
+          for (const skill of input.skills) {
+            await addSkill({
+              userId: ctx.user.id,
+              name: skill,
+              category: 'technical',
+            });
+          }
+        }
+
+        // Add work experiences
+        if (input.experience && input.experience.length > 0) {
+          for (const exp of input.experience) {
+            await addWorkExperience({
+              userId: ctx.user.id,
+              company: exp.company,
+              position: exp.title,
+              description: exp.duration || '',
+              startDate: new Date(),
+              endDate: null,
+              isCurrent: 0,
+            });
+          }
+        }
+
+        return { success: true };
+      }),
     get: protectedProcedure.query(async ({ ctx }) => {
       const profile = await getUserProfile(ctx.user.id);
       const workExperiences = await getUserWorkExperiences(ctx.user.id);
@@ -317,6 +378,52 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => deleteFromQueue(input.id)),
+    
+    remove: protectedProcedure
+      .input(z.object({ queueId: z.number() }))
+      .mutation(({ input }) => deleteFromQueue(input.queueId)),
+    
+    applyAll: protectedProcedure.mutation(async ({ ctx }) => {
+      // Get all pending queue items
+      const queueItems = await getApplicationQueue(ctx.user.id, 'pending');
+      
+      if (queueItems.length === 0) {
+        return { successful: 0, failed: 0 };
+      }
+
+      // Check credits
+      const { getUserCredits, deductCredits } = await import('./db-credits');
+      const credits = await getUserCredits(ctx.user.id);
+      const totalCost = queueItems.length * 100; // $1 per application
+
+      if (!credits.balance || credits.balance < totalCost) {
+        throw new Error('Insufficient credits');
+      }
+
+      // Apply to all jobs
+      const { addApplication } = await import('./db-jobs');
+      let successful = 0;
+      let failed = 0;
+
+      for (const item of queueItems) {
+        try {
+          await addApplication({
+            userId: ctx.user.id,
+            jobId: item.queueItem.jobId,
+            status: 'applied',
+          });
+          await deleteFromQueue(item.queueItem.id);
+          successful++;
+        } catch (error) {
+          failed++;
+        }
+      }
+
+      // Deduct credits
+      await deductCredits(ctx.user.id, successful * 100, 'application_fee', `Applied to ${successful} jobs`);
+
+      return { successful, failed };
+    }),
   }),
   
   scrapers: router({
