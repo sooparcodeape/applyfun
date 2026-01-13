@@ -314,3 +314,20 @@
 - [x] Add pagination/infinite scroll handling (up to 10 pages per source)
 - [x] Test scrapers - now pulling 155+ jobs (up from 67)
 - [x] Verify job counter updates automatically on homepage
+
+
+### Additional Job Sources Integration
+- [x] Research web3.career site structure (API not available, using HTML scraping)
+- [x] Build web3.career scraper with pagination (10 pages)
+- [x] Research cryptocurrencyjobs.co site structure
+- [x] Build cryptocurrencyjobs.co scraper with pagination (10 pages)
+- [x] Integrate both scrapers into all-scrapers.ts
+- [x] Updated web3career to use HTML scraping after API 404
+- [x] All 5 scrapers now integrated (cryptojobslist, remote3, solana, web3career, cryptocurrencyjobs)
+- [x] Test scrapers - 156 jobs (web3career/cryptocurrencyjobs blocked by Cloudflare)
+- [x] Run all tests - 18 tests passing, no regressions
+
+**Note:** web3.career and cryptocurrencyjobs.co are protected by Cloudflare anti-bot, preventing scraping. Consider:
+1. Using browser automation (Puppeteer/Playwright) to bypass Cloudflare
+2. Finding alternative job sources without Cloudflare protection
+3. Using paid scraping services or proxies

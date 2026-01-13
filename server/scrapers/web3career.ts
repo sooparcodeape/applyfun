@@ -23,91 +23,111 @@ interface ScrapedJob {
 
 export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
   const scrapedJobs: ScrapedJob[] = [];
+  const maxPages = 10;
   
   try {
-    console.log("[Web3Career] Starting scrape...");
+    console.log("[Web3Career] Starting scrape with pagination...");
     
-    // Scrape main page
-    const response = await axios.get("https://web3.career/", {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-    });
-    
-    const $ = cheerio.load(response.data);
-    
-    // Find job listings - they appear in table rows
-    $('tr').each((_index: number, element: any) => {
+    for (let page = 1; page <= maxPages; page++) {
       try {
-        const $row = $(element);
+        const url = page === 1
+          ? "https://web3.career/"
+          : `https://web3.career/?page=${page}`;
         
-        // Skip sponsored rows and headers
-        if ($row.attr("id")?.includes("sponsor")) return;
+        console.log(`[Web3Career] Scraping page ${page}...`);
         
-        // Extract job title and link
-        const titleLink = $row.find("a").first();
-        const title = titleLink.text().trim();
-        if (!title || title.includes("Bootcamp")) return;
+        const response = await axios.get(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          },
+          timeout: 10000,
+        });
         
-        // Extract company
-        const companyLink = $row.find("a").eq(1);
-        const company = companyLink.text().trim();
-        if (!company) return;
+        const $ = cheerio.load(response.data);
+        let jobsOnPage = 0;
         
-        // Extract location
-        const locationText = $row.text();
-        const isRemote = locationText.toLowerCase().includes("remote");
-        const location = isRemote ? "Remote" : "On-site";
-        
-        // Extract salary if present
-        let salaryMin: number | undefined;
-        let salaryMax: number | undefined;
-        let salaryCurrency = "USD";
-        
-        const salaryMatch = locationText.match(/\$(\d+)k\s*-\s*\$(\d+)k/);
-        if (salaryMatch) {
-          salaryMin = parseInt(salaryMatch[1]) * 1000;
-          salaryMax = parseInt(salaryMatch[2]) * 1000;
-        }
-        
-        // Extract tags
-        const tagLinks = $row.find("a").slice(2); // Skip title and company links
-        const tags: string[] = [];
-        tagLinks.each((_: number, tagEl: any) => {
-          const tag = $(tagEl).text().trim();
-          if (tag && !tag.includes("$") && tag.length < 30) {
-            tags.push(tag);
+        // Find job listings in table rows
+        $("tr").each((_: number, element: any) => {
+          try {
+            const $row = $(element);
+            
+            // Skip sponsored rows and headers
+            if ($row.attr("id")?.includes("sponsor")) return;
+            
+            // Extract title and company from links
+            const links = $row.find("a");
+            if (links.length < 2) return;
+            
+            const title = links.eq(0).text().trim();
+            const company = links.eq(1).text().trim();
+            
+            if (!title || !company || title.includes("Bootcamp")) return;
+            
+            // Extract location
+            const rowText = $row.text();
+            const isRemote = rowText.toLowerCase().includes("remote");
+            const location = isRemote ? "Remote" : "On-site";
+            
+            // Extract salary
+            let salaryMin: number | undefined;
+            let salaryMax: number | undefined;
+            const salaryMatch = rowText.match(/\$(\d+)k\s*-\s*\$(\d+)k/);
+            if (salaryMatch) {
+              salaryMin = parseInt(salaryMatch[1]) * 1000;
+              salaryMax = parseInt(salaryMatch[2]) * 1000;
+            }
+            
+            // Extract tags (remaining links after title and company)
+            const tags: string[] = [];
+            links.slice(2).each((_: number, tagEl: any) => {
+              const tag = $(tagEl).text().trim();
+              if (tag && tag.length < 30 && !tag.includes("$")) {
+                tags.push(tag);
+              }
+            });
+            
+            const jobSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const applyUrl = `https://web3.career/${jobSlug}`;
+            const externalId = `web3career-${company.toLowerCase().replace(/\s+/g, "-")}-${jobSlug}`;
+            
+            scrapedJobs.push({
+              externalId,
+              source: "web3.career",
+              title,
+              company,
+              location,
+              jobType: "Full-time",
+              salaryMin,
+              salaryMax,
+              salaryCurrency: "USD",
+              tags: JSON.stringify(tags),
+              applyUrl,
+              postedDate: new Date(),
+              isActive: 1,
+            });
+            
+            jobsOnPage++;
+          } catch (error) {
+            // Skip invalid jobs
           }
         });
         
-        // Generate job URL
-        const jobSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-        const applyUrl = `https://web3.career/${jobSlug}`;
+        console.log(`[Web3Career] Page ${page}: Found ${jobsOnPage} jobs`);
         
-        // Create external ID
-        const externalId = `web3career-${company.toLowerCase().replace(/\s+/g, "-")}-${jobSlug}`;
+        if (jobsOnPage === 0) {
+          console.log(`[Web3Career] No more jobs found, stopping at page ${page}`);
+          break;
+        }
         
-        scrapedJobs.push({
-          externalId,
-          source: "web3.career",
-          title,
-          company,
-          location,
-          jobType: "Full-time",
-          salaryMin,
-          salaryMax,
-          salaryCurrency,
-          tags: JSON.stringify(tags),
-          applyUrl,
-          postedDate: new Date(),
-          isActive: 1,
-        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
       } catch (error) {
-        console.error("[Web3Career] Error parsing job row:", error);
+        console.error(`[Web3Career] Error on page ${page}:`, error);
+        break;
       }
-    });
+    }
     
-    console.log(`[Web3Career] Found ${scrapedJobs.length} jobs`);
+    console.log(`[Web3Career] Total found: ${scrapedJobs.length} jobs`);
     return scrapedJobs;
     
   } catch (error) {

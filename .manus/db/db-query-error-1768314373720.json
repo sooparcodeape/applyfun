@@ -1,0 +1,8 @@
+{
+  "query": "SELECT COUNT(*) as total_jobs FROM jobs WHERE isActive = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as total_jobs FROM jobs WHERE isActive = 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'isactive' in 'where clause'"
+  ]
+}

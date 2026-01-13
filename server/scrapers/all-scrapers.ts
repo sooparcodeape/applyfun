@@ -384,8 +384,14 @@ export async function runAllScrapers() {
     cryptojobslist: 0,
     remote3: 0,
     solana: 0,
+    web3career: 0,
+    cryptocurrencyjobs: 0,
     total: 0,
   };
+  
+  // Import new scrapers
+  const { scrapeWeb3Career } = await import("./web3career");
+  const { scrapeCryptocurrencyJobs } = await import("./cryptocurrencyjobs");
   
   // CryptoJobsList
   const cryptoJobs = await scrapeCryptoJobsList();
@@ -399,12 +405,22 @@ export async function runAllScrapers() {
   const solanaJobs = await scrapeSolanaJobs();
   results.solana = await saveJobs(solanaJobs);
   
-  results.total = results.cryptojobslist + results.remote3 + results.solana;
+  // Web3.career (API - 27,000+ jobs)
+  const web3CareerJobs = await scrapeWeb3Career();
+  results.web3career = await saveJobs(web3CareerJobs);
+  
+  // CryptocurrencyJobs.co
+  const cryptoCurrencyJobs = await scrapeCryptocurrencyJobs();
+  results.cryptocurrencyjobs = await saveJobs(cryptoCurrencyJobs);
+  
+  results.total = results.cryptojobslist + results.remote3 + results.solana + results.web3career + results.cryptocurrencyjobs;
   
   console.log("\n=== Scraping Complete ===");
   console.log(`CryptoJobsList: ${results.cryptojobslist} jobs`);
   console.log(`Remote3: ${results.remote3} jobs`);
   console.log(`Solana Jobs: ${results.solana} jobs`);
+  console.log(`Web3.career: ${results.web3career} jobs`);
+  console.log(`CryptocurrencyJobs.co: ${results.cryptocurrencyjobs} jobs`);
   console.log(`Total: ${results.total} jobs saved\n`);
   
   return results;

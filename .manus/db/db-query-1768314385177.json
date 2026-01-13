@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as total_jobs FROM jobs;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as total_jobs FROM jobs;",
+  "rows": [
+    {
+      "total_jobs": "155"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_jobs\n155\n",
+  "stderr": "",
+  "execution_time_ms": 399
+}
