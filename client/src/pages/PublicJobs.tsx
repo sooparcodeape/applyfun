@@ -17,6 +17,9 @@ import {
   LogIn,
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
+import { JobListSkeleton } from "@/components/JobCardSkeleton";
+import { PullToRefresh } from "@/components/PullToRefresh";
+// import { SwipeableJobCard } from "@/components/SwipeableJobCard";
 
 export default function PublicJobs() {
   const [search, setSearch] = useState("");
@@ -27,6 +30,7 @@ export default function PublicJobs() {
   const { user } = useAuth();
   const [, setLocationPath] = useLocation();
 
+  const utils = trpc.useUtils();
   const { data: jobsData, isLoading } = trpc.jobs.list.useQuery({
     search,
     jobType: jobType === "all" ? undefined : jobType,
@@ -90,8 +94,14 @@ export default function PublicJobs() {
     toast.success("Added to application queue!");
   };
 
+  const handleRefresh = async () => {
+    await utils.jobs.list.invalidate();
+    toast.success("Jobs refreshed!");
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       {/* Header */}
       <header className="border-b border-purple-500/20 bg-slate-950/50 backdrop-blur-sm sticky top-0 z-10 safe-top">
         <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
@@ -127,7 +137,7 @@ export default function PublicJobs() {
             Browse Crypto Jobs
           </h1>
           <p className="text-muted-foreground">
-            {filteredJobs.length} jobs available • <NextScrapeCountdown />
+            {jobsData?.total || 0} jobs available • <NextScrapeCountdown />
           </p>
           {!user && (
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 max-w-2xl mx-auto">
@@ -264,13 +274,11 @@ export default function PublicJobs() {
           </CardContent>
         </Card>
 
-        {/* Job Listings */}
+        {/* Jobs Grid */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin" />
-          </div>
+          <JobListSkeleton count={6} />
         ) : filteredJobs.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -350,5 +358,6 @@ export default function PublicJobs() {
         )}
       </div>
     </div>
+    </PullToRefresh>
   );
 }

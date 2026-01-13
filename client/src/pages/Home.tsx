@@ -47,17 +47,19 @@ export default function Home() {
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
-            Land Your Dream{" "}
+            Apply to{" "}
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              Crypto Job
+              100+ Web3 Jobs
             </span>
-            {" "}Faster
+            {" "}in 60 Seconds
           </h1>
           
           <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto">
-            Stop wasting hours on job applications. apply.fun automatically applies
-            to hundreds of Web3 jobs while you focus on what matters - building your
-            career. Burn tokens for credits, target your dream companies, and let automation do the rest.</p>
+            The average Web3 job seeker spends <strong className="text-white">20+ hours per week</strong> filling out applications. 
+            We automate the entire process—from finding roles at top crypto companies to submitting tailored applications. 
+            <strong className="text-purple-300"> Get $5 free credits</strong> (5 applications) when you sign up. 
+            Land your dream role faster.
+          </p>
           
           {jobStats && jobStats.active > 0 && (
             <div className="flex flex-col items-center gap-3">
@@ -87,33 +89,33 @@ export default function Home() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-24 max-w-6xl mx-auto">
           <div className="bg-slate-900/50 border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
             <Zap className="h-12 w-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-white">Smart Automation</h3>
+            <h3 className="text-xl font-semibold mb-2 text-white">1-Click Applications</h3>
             <p className="text-slate-400">
-              AI-powered form filling that adapts to any job application platform
+              Apply to 100+ jobs in minutes. Our AI fills forms, attaches your resume, and submits applications automatically.
             </p>
           </div>
           
           <div className="bg-slate-900/50 border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
             <Shield className="h-12 w-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-white">Review & Approve</h3>
+            <h3 className="text-xl font-semibold mb-2 text-white">You Stay in Control</h3>
             <p className="text-slate-400">
-              You stay in control - review and approve jobs before we apply
+              Browse 400+ crypto jobs, save your favorites, and approve applications before they're sent. No surprises.
             </p>
           </div>
           
           <div className="bg-slate-900/50 border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
             <TrendingUp className="h-12 w-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-white">Track Progress</h3>
+            <h3 className="text-xl font-semibold mb-2 text-white">Real-Time Tracking</h3>
             <p className="text-slate-400">
-              Monitor all applications with detailed analytics and response rates
+              Dashboard shows every application status, interview invites, and response rates. Know exactly where you stand.
             </p>
           </div>
           
           <div className="bg-slate-900/50 border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
             <Rocket className="h-12 w-12 text-purple-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-white">5 Job Sources</h3>
+            <h3 className="text-xl font-semibold mb-2 text-white">400+ Fresh Jobs Daily</h3>
             <p className="text-slate-400">
-              Access jobs from web3.career, CryptoJobsList, Remote3, Solana Jobs, and Telegram
+              We aggregate from 14+ sources including top blockchain companies (Solana, Binance, Ripple) and job boards.
             </p>
           </div>
         </div>
@@ -121,9 +123,9 @@ export default function Home() {
         {/* Stats */}
         <div className="mt-24 max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-12 text-center">
-            <h2 className="text-3xl font-bold mb-4 text-white">Ready to 10x Your Job Search?</h2>
+            <h2 className="text-3xl font-bold mb-4 text-white">Stop Applying. Start Landing Interviews.</h2>
             <p className="text-slate-300 mb-8">
-              Join crypto professionals who are landing interviews faster with automated applications
+              Join 1,000+ Web3 professionals using apply.fun to land roles at Coinbase, Uniswap, Polygon, and more—without the grind.
             </p>
             <Button 
               onClick={handleGetStarted}

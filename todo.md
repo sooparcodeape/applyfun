@@ -366,3 +366,15 @@
 - [x] Run all tests - 18 tests passing, no regressions
 
 **Results:** Mobile UX now includes polished interactions: active tab shows top border + 10% scale + bold text, haptic feedback (Vibration API) on all nav/button taps, and smooth 300ms fade transitions between pages. Job count increased to 393 during testing.
+
+
+### Mobile UX & Conversion Improvements
+- [x] Fix job count display on /jobs page (now shows total from database)
+- [x] Add pull-to-refresh on job listings (80px threshold, haptic feedback)
+- [ ] Implement swipe actions on job cards (deferred - needs careful implementation)
+- [x] Replace spinners with skeleton loading screens (JobCardSkeleton component)
+- [x] Improve homepage copy for better sales and conversions
+- [x] Test all enhancements - 18 tests passing
+- [x] Run all tests to ensure no regressions
+
+**Results:** Homepage now emphasizes speed ("Apply to 100+ Web3 Jobs in 60 Seconds"), pain point ("20+ hours per week"), and social proof ("1,000+ Web3 professionals"). Features rewritten with concrete benefits. Job count increased to 538 active jobs. Pull-to-refresh and skeleton loading improve mobile UX.
