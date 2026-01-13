@@ -111,3 +111,12 @@
 - [ ] User interface for submitting burn proof (Solscan tx signature)
 - [ ] Transaction history showing burn-to-credit conversions
 - [ ] Admin settings for token address and tax rate
+
+### Rebranding to apply.fun
+- [x] Generate apply.fun logo
+- [x] Update app title to apply.fun
+- [x] Update all page titles and headers
+- [x] Update landing page branding
+- [x] Create and add favicon
+- [x] Update color scheme if needed
+- [x] Update meta tags and SEO

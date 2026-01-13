@@ -23,10 +23,10 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-purple-500/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Rocket className="h-8 w-8 text-purple-400" />
+          <div className="flex items-center gap-3">
+            <img src="/logo-icon.png" alt="apply.fun" className="h-10 w-10" />
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              CryptoApply
+              apply.fun
             </span>
           </div>
           <Button onClick={handleGetStarted} variant="outline" className="border-purple-500/50 hover:bg-purple-500/10">
@@ -39,7 +39,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-sm mb-4">
-            🚀 Automated Web3 Job Applications
+            🚀 Powered by Token Burns & Crypto Credits
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
@@ -51,9 +51,9 @@ export default function Home() {
           </h1>
           
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Stop wasting hours on job applications. CryptoApply automatically applies to hundreds of Web3 jobs 
-            while you focus on what matters - building your career.
-          </p>
+            Stop wasting hours on job applications. apply.fun automatically applies
+            to hundreds of Web3 jobs while you focus on what matters - building your
+            career. Burn tokens for credits, target your dream companies, and let automation do the rest.</p>
           
           {jobStats && jobStats.active > 0 && (
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full">
