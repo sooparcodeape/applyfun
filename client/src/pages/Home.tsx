@@ -12,7 +12,7 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      setLocation("/dashboard");
+      setLocation("/onboarding");
     } else {
       window.location.href = getLoginUrl();
     }

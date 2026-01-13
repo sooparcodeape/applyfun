@@ -123,3 +123,11 @@
 
 ### Bug Fixes
 - [x] Fix React key duplication error for duplicate location names in Jobs page
+
+### Onboarding Flow
+- [x] Onboarding selection page with Easy vs Manual options
+- [x] AI-assisted resume parser using LLM
+- [x] Resume text extraction from PDF
+- [x] Profile review and confirmation interface
+- [ ] Auto-populate profile fields from parsed data
+- [ ] Onboarding completion redirect to dashboard

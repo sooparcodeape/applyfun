@@ -49,6 +49,82 @@ export const appRouter = router({
   }),
 
   profile: router({
+    parseResume: protectedProcedure
+      .input(z.object({ resumeBase64: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        // Extract text from PDF and parse with LLM
+        const base64Data = input.resumeBase64.split(',')[1];
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Use LLM to extract structured data from resume
+        const { invokeLLM } = await import('./_core/llm');
+        
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a resume parser. Extract structured information from resumes and return JSON.',
+            },
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Parse this resume and extract: name, email, phone, location, skills (array), experience (array with title, company, duration), education, and social links (github, linkedin, twitter, telegram). Return only valid JSON.',
+                },
+                {
+                  type: 'file_url',
+                  file_url: {
+                    url: input.resumeBase64,
+                    mime_type: 'application/pdf',
+                  },
+                },
+              ],
+            },
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'resume_data',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'string' },
+                  location: { type: 'string' },
+                  skills: { type: 'array', items: { type: 'string' } },
+                  experience: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        title: { type: 'string' },
+                        company: { type: 'string' },
+                        duration: { type: 'string' },
+                      },
+                      required: ['title', 'company'],
+                      additionalProperties: false,
+                    },
+                  },
+                  education: { type: 'string' },
+                  github: { type: 'string' },
+                  linkedin: { type: 'string' },
+                  twitter: { type: 'string' },
+                  telegram: { type: 'string' },
+                },
+                required: [],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const content = response.choices[0]?.message?.content;
+        const parsedData = typeof content === 'string' ? JSON.parse(content || '{}') : {};
+        return parsedData;
+      }),
     get: protectedProcedure.query(async ({ ctx }) => {
       const profile = await getUserProfile(ctx.user.id);
       const workExperiences = await getUserWorkExperiences(ctx.user.id);
