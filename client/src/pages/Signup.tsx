@@ -18,7 +18,10 @@ export default function Signup() {
     onSuccess: (data) => {
       if (data.success) {
         toast.success('Account created! Redirecting to onboarding...');
-        window.location.href = '/ai-onboarding'; // Force reload to update auth state
+        // Small delay to ensure cookie is set, then navigate
+        setTimeout(() => {
+          setLocation('/ai-onboarding');
+        }, 500);
       } else {
         toast.error(data.error || 'Registration failed');
       }

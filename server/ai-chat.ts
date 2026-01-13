@@ -22,7 +22,7 @@ const SYSTEM_PROMPT = `You are the apply.fun AI assistant, helping users with cr
 **Tone:** Enthusiastic but professional, like a helpful career coach who genuinely wants them to succeed.`;
 
 export const aiRouter = router({
-  chat: protectedProcedure
+  chat: publicProcedure
     .input(
       z.object({
         message: z.string(),
@@ -36,6 +36,10 @@ export const aiRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      // Require auth for application context, but allow public access for onboarding
+      if (input.context === "application" && !ctx.user) {
+        throw new Error("Authentication required for application context");
+      }
       const { message, context, history } = input;
 
       // Build conversation history

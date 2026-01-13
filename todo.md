@@ -422,3 +422,11 @@
 - [x] Remove getLoginUrl() Manus OAuth redirects (updated to /login)
 - [x] Updated const.ts, main.tsx, DashboardLayout.tsx, useAuth.ts
 - [ ] Test complete onboarding flow without Manus redirects
+
+
+### Infinite Sign-in Loop Bug
+- [x] Debug why AI onboarding causes infinite redirect loop (AI chat used protectedProcedure)
+- [x] Changed AI chat endpoint to publicProcedure with auth check for application context only
+- [x] Updated signup to use setTimeout + setLocation instead of window.location.href
+- [x] AI onboarding now accessible immediately after signup without auth loop
+- [ ] Test complete signup → AI onboarding → dashboard flow
