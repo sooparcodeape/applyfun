@@ -463,3 +463,16 @@
 - [ ] Implement natural language understanding for job filters
 - [ ] Add quick action suggestions in chat
 - [ ] Test conversational flows for common user actions
+
+### Resume Parsing & Auto-Fill (Client-Side)
+- [x] Install client-side PDF parsing library (pdf.js via pdfjs-dist)
+- [x] Install client-side Word parsing library (mammoth browser version)
+- [x] Create client-side text extraction utility for PDF/Word files
+- [x] Integrate Manus frontend LLM API for client-side resume parsing
+- [x] Build resume parser using user's browser compute (zero server credits)
+- [x] Add file upload UI to AI chat for PDF/Word resume uploads
+- [x] Auto-fill profile fields from parsed resume data
+- [x] Store parsed resume data in user profile via tRPC
+- [ ] Add resume preview in profile page
+- [ ] Test resume parsing with various formats
+- [ ] Handle edge cases (scanned PDFs, unusual formats)

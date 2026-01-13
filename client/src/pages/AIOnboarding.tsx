@@ -1,19 +1,116 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { trpc } from "@/lib/trpc";
+import { parseResume } from "@/lib/resume-parser";
+import { Button } from "@/components/ui/button";
+import { Upload, Loader2 } from "lucide-react";
 
 export default function AIOnboarding() {
   const [, setLocation] = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isParsingResume, setIsParsingResume] = useState(false);
   
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "\ud83d\udc4b Hey there! I'm your apply.fun AI assistant. I'll help you get set up in just a minute. First, tell me a bit about yourself - what kind of Web3 role are you looking for?"
+      content: "👋 Hey there! I'm your apply.fun AI assistant. I'll help you get set up in just a minute.\n\nYou can either:\n1. Upload your resume (PDF or Word) and I'll extract your info automatically\n2. Tell me about yourself manually\n\nWhat would you prefer?"
     }
   ]);
 
   const chatMutation = trpc.ai.chat.useMutation();
+  const updateProfileMutation = trpc.profile.update.useMutation();
+
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword"
+    ];
+    
+    if (!validTypes.includes(file.type)) {
+      const errorMsg: Message = {
+        role: "assistant",
+        content: "❌ Invalid file type. Please upload a PDF or Word document (.pdf, .doc, .docx)"
+      };
+      setMessages(prev => [...prev, errorMsg]);
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      const errorMsg: Message = {
+        role: "assistant",
+        content: "❌ File too large. Please upload a file smaller than 10MB."
+      };
+      setMessages(prev => [...prev, errorMsg]);
+      return;
+    }
+
+    setIsParsingResume(true);
+    
+    // Add message showing we're processing
+    const processingMessage: Message = {
+      role: "assistant",
+      content: `📄 Got your resume! Parsing ${file.name} using your browser... This won't cost any credits!`
+    };
+    setMessages(prev => [...prev, processingMessage]);
+
+    try {
+      // Parse resume on client-side (uses user's compute, zero server credits!)
+      const parsed = await parseResume(file);
+      
+      // Update profile with parsed data
+      await updateProfileMutation.mutateAsync({
+        phone: parsed.phone,
+        location: parsed.location,
+        bio: parsed.summary,
+        githubUrl: parsed.links?.github,
+        linkedinUrl: parsed.links?.linkedin,
+        twitterHandle: parsed.links?.twitter,
+      });
+
+      // Show success message with extracted info
+      const successMessage: Message = {
+        role: "assistant",
+        content: `✅ Perfect! I've extracted your information:\n\n` +
+          `**Name:** ${parsed.name || "Not found"}\n` +
+          `**Email:** ${parsed.email || "Not found"}\n` +
+          `**Skills:** ${parsed.skills.slice(0, 5).join(", ")}${parsed.skills.length > 5 ? " and more" : ""}\n` +
+          `**Experience:** ${parsed.experience.length} positions\n` +
+          `**Education:** ${parsed.education.length} entries\n\n` +
+          `Your profile has been auto-filled! You're all set to start applying. Ready to see matching jobs?`
+      };
+      setMessages(prev => [...prev, successMessage]);
+
+      // Success - info shown in chat message
+
+      // Auto-redirect to dashboard after 3 seconds
+      setTimeout(() => {
+        setLocation("/dashboard");
+      }, 3000);
+
+    } catch (error: any) {
+      console.error("[Resume Upload] Error:", error);
+      const errorMessage: Message = {
+        role: "assistant",
+        content: `❌ Sorry, I couldn't parse your resume: ${error.message}\n\nNo worries! You can tell me about yourself manually instead.`
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      
+      // Error shown in chat message
+    } finally {
+      setIsParsingResume(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleSendMessage = async (content: string) => {
     const userMessage: Message = { role: "user", content };
@@ -54,13 +151,45 @@ export default function AIOnboarding() {
           <h1 className="text-3xl font-bold text-white mb-2">apply.fun AI Assistant</h1>
           <p className="text-purple-200">Let's get you set up \ud83d\udc4b</p>
         </div>
-        <AIChatBox
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          isLoading={chatMutation.isPending}
-          placeholder="Type your message..."
-          height="600px"
-        />
+        <div className="relative">
+          <AIChatBox
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={chatMutation.isPending || isParsingResume}
+            placeholder="Type your message..."
+            height="600px"
+          />
+          
+          {/* Resume Upload Button */}
+          <div className="mt-4 flex justify-center">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+              onChange={handleResumeUpload}
+              className="hidden"
+              disabled={isParsingResume}
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isParsingResume}
+              variant="outline"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            >
+              {isParsingResume ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Parsing Resume...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Resume (PDF/Word)
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
