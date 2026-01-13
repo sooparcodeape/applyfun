@@ -243,6 +243,18 @@ export const appRouter = router({
       .mutation(({ input }) => deleteFromQueue(input.id)),
   }),
   
+  scrapers: router({
+    runAll: protectedProcedure.mutation(async () => {
+      const { runAllScrapers } = await import("./scrapers/all-scrapers");
+      return await runAllScrapers();
+    }),
+    
+    web3Career: protectedProcedure.mutation(async () => {
+      const { saveWeb3CareerJobs } = await import("./scrapers/web3career");
+      return await saveWeb3CareerJobs();
+    }),
+  }),
+  
   credits: router({
     balance: protectedProcedure.query(async ({ ctx }) => {
       const { getUserCredits } = await import("./db-credits");

@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Jobs from "./pages/Jobs";
 import Queue from "./pages/Queue";
 import Applications from "./pages/Applications";
+import Credits from "./pages/Credits";
 
 function Router() {
   return (
@@ -38,6 +39,11 @@ function Router() {
       <Route path="/applications">
         <DashboardLayout>
           <Applications />
+        </DashboardLayout>
+      </Route>
+      <Route path="/credits">
+        <DashboardLayout>
+          <Credits />
         </DashboardLayout>
       </Route>
       <Route path="/404" component={NotFound} />
