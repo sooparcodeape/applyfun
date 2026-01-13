@@ -1,0 +1,17 @@
+{
+  "query": "\nSELECT \n  (SELECT COUNT(*) FROM users) as user_count,\n  (SELECT COUNT(*) FROM user_profiles) as profile_count,\n  (SELECT COUNT(*) FROM skills) as skill_count,\n  (SELECT COUNT(*) FROM work_experiences) as experience_count,\n  (SELECT COUNT(*) FROM applications) as application_count;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute \nSELECT \n  (SELECT COUNT(*) FROM users) as user_count,\n  (SELECT COUNT(*) FROM user_profiles) as profile_count,\n  (SELECT COUNT(*) FROM skills) as skill_count,\n  (SELECT COUNT(*) FROM work_experiences) as experience_count,\n  (SELECT COUNT(*) FROM applications) as application_count;\n",
+  "rows": [
+    {
+      "user_count": "1",
+      "profile_count": "0",
+      "skill_count": "0",
+      "experience_count": "0",
+      "application_count": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "user_count\tprofile_count\tskill_count\texperience_count\tapplication_count\n1\t0\t0\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 386
+}

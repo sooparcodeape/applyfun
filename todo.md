@@ -519,3 +519,15 @@
 - [x] Fix Manus internal login screen appearing after PDF upload (should use custom auth)
 - [x] Ensure all auth flows use custom signup/login, never Manus internal auth
 - [x] AIOnboarding now redirects to /signup after resume parsing instead of /dashboard
+
+### Database Cleanup
+- [x] Clear all test user accounts from database
+- [x] Clear related user data (profiles, skills, work experiences, applications)
+- [x] Verify database is clean and ready for production
+
+### Resume Parsing Auth Bug
+- [x] Debug why resume parsing fails and redirects to login
+- [x] Check if parseResume requires authentication but is called from public page
+- [x] Added auth check to AIOnboarding page - redirects to signup if not authenticated
+- [x] Added loading state while checking authentication
+- [ ] Test resume upload flow end-to-end

@@ -1,13 +1,36 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { trpc } from "@/lib/trpc";
 import { type ParsedResume } from "@/lib/resume-parser";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2 } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AIOnboarding() {
+  const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
+  
+  // Redirect to signup if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      setLocation("/signup");
+    }
+  }, [user, loading, setLocation]);
+  
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
+  // This will redirect, but show nothing while redirecting
+  if (!user) {
+    return null;
+  }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isParsingResume, setIsParsingResume] = useState(false);
   
