@@ -386,12 +386,14 @@ export async function runAllScrapers() {
     solana: 0,
     web3career: 0,
     cryptocurrencyjobs: 0,
+    blockchainCareers: 0,
     total: 0,
   };
   
   // Import new scrapers
   const { scrapeWeb3Career } = await import("./web3career");
   const { scrapeCryptocurrencyJobs } = await import("./cryptocurrencyjobs");
+  const { scrapeBlockchainCareers } = await import("./blockchain-careers");
   
   // CryptoJobsList
   const cryptoJobs = await scrapeCryptoJobsList();
@@ -405,15 +407,19 @@ export async function runAllScrapers() {
   const solanaJobs = await scrapeSolanaJobs();
   results.solana = await saveJobs(solanaJobs);
   
-  // Web3.career (API - 27,000+ jobs)
+  // Web3.career (Cloudflare protected)
   const web3CareerJobs = await scrapeWeb3Career();
   results.web3career = await saveJobs(web3CareerJobs);
   
-  // CryptocurrencyJobs.co
+  // CryptocurrencyJobs.co (Cloudflare protected)
   const cryptoCurrencyJobs = await scrapeCryptocurrencyJobs();
   results.cryptocurrencyjobs = await saveJobs(cryptoCurrencyJobs);
   
-  results.total = results.cryptojobslist + results.remote3 + results.solana + results.web3career + results.cryptocurrencyjobs;
+  // Top 20 Blockchain Career Pages
+  const blockchainJobs = await scrapeBlockchainCareers();
+  results.blockchainCareers = await saveJobs(blockchainJobs);
+  
+  results.total = results.cryptojobslist + results.remote3 + results.solana + results.web3career + results.cryptocurrencyjobs + results.blockchainCareers;
   
   console.log("\n=== Scraping Complete ===");
   console.log(`CryptoJobsList: ${results.cryptojobslist} jobs`);
@@ -421,6 +427,7 @@ export async function runAllScrapers() {
   console.log(`Solana Jobs: ${results.solana} jobs`);
   console.log(`Web3.career: ${results.web3career} jobs`);
   console.log(`CryptocurrencyJobs.co: ${results.cryptocurrencyjobs} jobs`);
+  console.log(`Blockchain Career Pages: ${results.blockchainCareers} jobs`);
   console.log(`Total: ${results.total} jobs saved\n`);
   
   return results;

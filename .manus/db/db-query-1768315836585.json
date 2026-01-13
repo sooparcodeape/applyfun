@@ -1,0 +1,66 @@
+{
+  "query": "SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC;",
+  "rows": [
+    {
+      "source": "cryptojobslist.com",
+      "count": "115"
+    },
+    {
+      "source": "web3.career",
+      "count": "56"
+    },
+    {
+      "source": "Polygon",
+      "count": "20"
+    },
+    {
+      "source": "Solana",
+      "count": "19"
+    },
+    {
+      "source": "Ripple",
+      "count": "6"
+    },
+    {
+      "source": "Avalanche",
+      "count": "6"
+    },
+    {
+      "source": "cryptojobslist",
+      "count": "3"
+    },
+    {
+      "source": "jobs.solana.com",
+      "count": "3"
+    },
+    {
+      "source": "remote3",
+      "count": "3"
+    },
+    {
+      "source": "telegram",
+      "count": "3"
+    },
+    {
+      "source": "Arbitrum",
+      "count": "2"
+    },
+    {
+      "source": "Starknet",
+      "count": "2"
+    },
+    {
+      "source": "Polkadot",
+      "count": "1"
+    },
+    {
+      "source": "Ethereum",
+      "count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "source\tcount\ncryptojobslist.com\t115\nweb3.career\t56\nPolygon\t20\nSolana\t19\nRipple\t6\nAvalanche\t6\ncryptojobslist\t3\njobs.solana.com\t3\nremote3\t3\ntelegram\t3\nArbitrum\t2\nStarknet\t2\nPolkadot\t1\nEthereum\t1\n",
+  "stderr": "",
+  "execution_time_ms": 452
+}

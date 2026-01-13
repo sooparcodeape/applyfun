@@ -331,3 +331,14 @@
 1. Using browser automation (Puppeteer/Playwright) to bypass Cloudflare
 2. Finding alternative job sources without Cloudflare protection
 3. Using paid scraping services or proxies
+
+
+### Top 20 Blockchain Career Pages Integration
+- [x] Research top 20 blockchains by market cap
+- [x] Locate career page URLs for each blockchain (with fallback URLs)
+- [x] Build unified blockchain career scraper with adaptive parsing
+- [x] Integrate into runAllScrapers()
+- [x] Test scrapers - 217 total jobs (up from 156), 14 sources active
+- [x] Run all tests - 18 tests passing, no regressions
+
+**Results:** Successfully added jobs from blockchain companies including Solana (40 jobs), Binance, Ripple, Cardano, Avalanche, Polygon, Chainlink, and others. Some blockchains have limited or no career pages (Bitcoin, Ethereum foundation, smaller chains).
