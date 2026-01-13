@@ -4,9 +4,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import React from "react";
+import { toast } from "sonner";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const loginMutation = trpc.customAuth.login.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success('Login successful!');
+        window.location.href = '/dashboard'; // Force reload to update auth state
+      } else {
+        toast.error(data.error || 'Login failed');
+      }
+    },
+    onError: (error) => {
+      toast.error('Login failed: ' + error.message);
+    },
+  });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    loginMutation.mutate({ email, password });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
@@ -24,17 +52,37 @@ export default function Login() {
             <CardDescription>Sign in to your apply.fun account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" />
-            </div>
-            <Button className="w-full" disabled>
-              Sign In (Coming Soon)
-            </Button>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
@@ -85,9 +133,9 @@ export default function Login() {
             </div>
 
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-sm text-blue-300">
-              <p className="font-semibold mb-1">🚧 Authentication Coming Soon</p>
+              <p className="font-semibold mb-1">✨ Email/Password Login Ready!</p>
               <p className="text-xs">
-                We're building a custom authentication system. Browse jobs without logging in for now!
+                Social logins (Google, LinkedIn, Twitter) coming soon. For now, create an account with email/password.
               </p>
             </div>
           </CardContent>

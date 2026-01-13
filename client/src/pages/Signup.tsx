@@ -4,9 +4,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import React from "react";
+import { toast } from "sonner";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
+  const [name, setName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const registerMutation = trpc.customAuth.register.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success('Account created! Redirecting to onboarding...');
+        window.location.href = '/onboarding'; // Force reload to update auth state
+      } else {
+        toast.error(data.error || 'Registration failed');
+      }
+    },
+    onError: (error) => {
+      toast.error('Registration failed: ' + error.message);
+    },
+  });
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    registerMutation.mutate({ name, email, password });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
@@ -21,24 +54,52 @@ export default function Signup() {
         <Card>
           <CardHeader>
             <CardTitle>Create Account</CardTitle>
-            <CardDescription>Get started with apply.fun</CardDescription>
+            <CardDescription>Get started with apply.fun - Get $5 free credits!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="John Doe" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" />
-            </div>
-            <Button className="w-full" disabled>
-              Create Account (Coming Soon)
-            </Button>
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name" 
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={registerMutation.isPending}
+              >
+                {registerMutation.isPending ? 'Creating account...' : 'Create Account'}
+              </Button>
+            </form>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
@@ -88,10 +149,10 @@ export default function Signup() {
               </Button>
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-sm text-blue-300">
-              <p className="font-semibold mb-1">🚧 Authentication Coming Soon</p>
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 text-sm text-green-300">
+              <p className="font-semibold mb-1">🎉 Sign Up & Get $5 Free Credits!</p>
               <p className="text-xs">
-                We're building a custom authentication system with email/password and social logins. Check back soon!
+                Create your account now and receive 5 free job applications. Social logins coming soon!
               </p>
             </div>
           </CardContent>

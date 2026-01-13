@@ -49,9 +49,18 @@ describe("auth.logout", () => {
     const result = await caller.auth.logout();
 
     expect(result).toEqual({ success: true });
-    expect(clearedCookies).toHaveLength(1);
-    expect(clearedCookies[0]?.name).toBe(COOKIE_NAME);
+    expect(clearedCookies).toHaveLength(2);
+    
+    // Check auth_token cookie cleared
+    expect(clearedCookies[0]?.name).toBe('auth_token');
     expect(clearedCookies[0]?.options).toMatchObject({
+      maxAge: -1,
+      path: "/",
+    });
+    
+    // Check Manus OAuth cookie cleared
+    expect(clearedCookies[1]?.name).toBe(COOKIE_NAME);
+    expect(clearedCookies[1]?.options).toMatchObject({
       maxAge: -1,
       secure: true,
       sameSite: "none",

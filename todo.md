@@ -195,3 +195,61 @@
 - [x] Create placeholder login/signup pages
 - [ ] Make job browsing public (no auth required)
 - [x] Add "Coming Soon" message for auth features
+
+### Phase 1 - MVP Launch Features
+
+#### 1. Custom Authentication System ✅ COMPLETE
+- [x] Install bcrypt and jose dependencies
+- [x] Update user schema with passwordHash field
+- [x] Create registration endpoint with email validation
+- [x] Create login endpoint with bcrypt verification
+- [x] Implement JWT session management
+- [x] Update context.ts to verify JWT tokens
+- [x] Update Login page with working forms
+- [x] Update Signup page with working forms
+- [x] Update logout to clear both cookies
+- [x] Write comprehensive tests (7 tests, all passing)
+- [ ] Set up Google OAuth integration (future)
+- [ ] Set up LinkedIn OAuth integration (future)
+- [ ] Set up Twitter OAuth integration (future)
+
+#### 2. Public Job Browsing
+- [ ] Remove auth requirement from Jobs page
+- [ ] Make job listing publicly accessible
+- [ ] Add "Sign up to apply" CTA on job cards for non-authenticated users
+- [ ] Keep save/queue features behind auth
+
+#### 3. Auto-Apply Engine
+- [ ] Design auto-apply workflow (iframe vs new tab)
+- [ ] Build form field detection algorithm
+- [ ] Create profile data mapping system
+- [ ] Implement auto-fill logic for common fields
+- [ ] Add application submission tracking
+- [ ] Handle success/failure states
+- [ ] Add retry logic for failed applications
+- [ ] Create progress indicator UI
+
+#### 4. Application Success Tracking
+- [ ] Add status field to applications (applied, interview, rejected, offer)
+- [ ] Create status update UI in Applications page
+- [ ] Build analytics dashboard with conversion rates
+- [ ] Show success metrics by company and job type
+- [ ] Add timeline view for application progress
+- [ ] Calculate and display response rates
+
+#### 5. Smart Job Matching
+- [ ] Build matching algorithm based on skills
+- [ ] Calculate match score percentage (0-100%)
+- [ ] Add matchScore field to job cards
+- [ ] Sort jobs by match score
+- [ ] Add "Best Matches" filter
+- [ ] Show match breakdown (which skills matched)
+
+#### 6. Email Notifications
+- [ ] Set up email service (SendGrid or similar)
+- [ ] Create email templates
+- [ ] New job alerts (daily digest)
+- [ ] Application status updates
+- [ ] Weekly summary reports
+- [ ] Low credits warnings
+- [ ] Add email preferences page

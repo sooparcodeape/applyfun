@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "@shared/const";
+import { registerUser, loginUser } from './custom-auth';
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -37,10 +38,53 @@ import { storagePut } from "./storage";
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+  customAuth: router({
+    register: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+        name: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await registerUser(input);
+        if (result.success && result.token) {
+          // Set JWT token as cookie
+          ctx.res.cookie('auth_token', result.token, {
+            httpOnly: true,
+            secure: ctx.req.protocol === 'https',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            path: '/',
+          });
+        }
+        return result;
+      }),
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await loginUser(input);
+        if (result.success && result.token) {
+          // Set JWT token as cookie
+          ctx.res.cookie('auth_token', result.token, {
+            httpOnly: true,
+            secure: ctx.req.protocol === 'https',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            path: '/',
+          });
+        }
+        return result;
+      }),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
+      // Clear both custom auth token and Manus OAuth cookie
+      ctx.res.clearCookie('auth_token', { path: '/', maxAge: -1 });
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return {
         success: true,
