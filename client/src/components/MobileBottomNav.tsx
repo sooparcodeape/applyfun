@@ -21,14 +21,14 @@ export function MobileBottomNav() {
           
           return (
             <Link key={item.href} href={item.href}>
-              <a className={`flex flex-col items-center justify-center w-16 h-full transition-colors ${
+              <div className={`flex flex-col items-center justify-center w-16 h-full transition-colors cursor-pointer ${
                 isActive 
                   ? "text-primary" 
                   : "text-muted-foreground hover:text-foreground"
               }`}>
                 <Icon className="w-6 h-6" />
                 <span className="text-xs mt-1">{item.label}</span>
-              </a>
+              </div>
             </Link>
           );
         })}
