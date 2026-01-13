@@ -26,6 +26,92 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
+ * User credits and payment tracking
+ */
+export const userCredits = mysqlTable("user_credits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  balance: int("balance").notNull().default(0), // Balance in cents (USD)
+  totalEarned: int("total_earned").notNull().default(0),
+  totalSpent: int("total_spent").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserCredits = typeof userCredits.$inferSelect;
+export type InsertUserCredits = typeof userCredits.$inferInsert;
+
+/**
+ * Credit transactions (top-ups and spending)
+ */
+export const creditTransactions = mysqlTable("credit_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  amount: int("amount").notNull(), // Amount in cents, positive for credit, negative for debit
+  type: mysqlEnum("type", ["signup_bonus", "promo_code", "payment", "application_fee", "refund"]).notNull(),
+  description: text("description"),
+  referenceId: varchar("reference_id", { length: 255 }), // Payment ID or promo code
+  balanceAfter: int("balance_after").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type CreditTransaction = typeof creditTransactions.$inferSelect;
+export type InsertCreditTransaction = typeof creditTransactions.$inferInsert;
+
+/**
+ * Promo codes
+ */
+export const promoCodes = mysqlTable("promo_codes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  creditAmount: int("credit_amount").notNull(), // Amount in cents
+  maxUses: int("max_uses").notNull().default(0), // 0 = unlimited
+  currentUses: int("current_uses").notNull().default(0),
+  expiresAt: timestamp("expires_at"),
+  isActive: int("is_active").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = typeof promoCodes.$inferInsert;
+
+/**
+ * Promo code usage tracking
+ */
+export const promoCodeUsage = mysqlTable("promo_code_usage", {
+  id: int("id").autoincrement().primaryKey(),
+  promoCodeId: int("promo_code_id").notNull(),
+  userId: int("user_id").notNull(),
+  creditAmount: int("credit_amount").notNull(),
+  usedAt: timestamp("used_at").defaultNow().notNull(),
+});
+
+export type PromoCodeUsage = typeof promoCodeUsage.$inferSelect;
+export type InsertPromoCodeUsage = typeof promoCodeUsage.$inferInsert;
+
+/**
+ * Token burn transactions for credits top-up
+ */
+export const tokenBurns = mysqlTable("token_burns", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  txSignature: varchar("tx_signature", { length: 255 }).notNull().unique(),
+  tokenAmount: varchar("token_amount", { length: 50 }).notNull(), // Store as string to handle large numbers
+  tokenPriceUsd: varchar("token_price_usd", { length: 50 }).notNull(),
+  usdValue: int("usd_value").notNull(), // USD value in cents
+  creditsGranted: int("credits_granted").notNull(),
+  taxRate: int("tax_rate").notNull(), // Tax rate in basis points (e.g., 600 = 6%)
+  status: mysqlEnum("status", ["pending", "verified", "rejected"]).notNull().default("pending"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type TokenBurn = typeof tokenBurns.$inferSelect;
+export type InsertTokenBurn = typeof tokenBurns.$inferInsert;
+
+// TODO: Add your tables here
+
+/**
  * User profiles with extended information for job applications
  */
 export const userProfiles = mysqlTable("user_profiles", {

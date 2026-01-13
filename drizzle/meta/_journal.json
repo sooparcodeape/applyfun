@@ -15,6 +15,20 @@
       "when": 1768299154411,
       "tag": "0001_demonic_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768300781515,
+      "tag": "0002_square_magdalene",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1768302101270,
+      "tag": "0003_certain_tomas",
+      "breakpoints": true
     }
   ]
 }

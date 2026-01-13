@@ -66,3 +66,48 @@
 ### Landing Page Enhancements
 - [x] Live job counter on hero section showing total scraped jobs
 - [x] Dynamic CTA with real job count
+
+### Job Scraping Implementation
+- [ ] Test Telegram scraper with real channel data
+- [ ] Implement web3.career scraper
+- [ ] Implement cryptojobslist.com scraper
+- [ ] Implement remote3.co scraper
+- [ ] Implement jobs.solana.com scraper
+- [ ] Add job categorization (by role type)
+- [ ] Sort jobs by company, category, and posted date
+- [ ] Schedule automated scraping (daily/hourly)
+
+### User Onboarding Flow
+- [ ] Simplified onboarding: signup → fill one application → upload resume
+- [ ] Job targeting preferences (categories and companies)
+- [ ] Show estimated jobs available based on selected filters
+- [ ] Auto-save progress during onboarding
+
+### Payment & Credits System
+- [ ] Integrate NOWPayments for crypto payments (USDC, BTC, ETH)
+- [ ] Credits system: 1 USD = 1 job application
+- [ ] Account balance and top-up functionality
+- [ ] New user bonus: $5 free credits (5 applications)
+- [ ] Promo code system
+- [ ] DRSUESS50 promo code for $50 credits
+- [ ] Payment history and transaction log
+- [ ] Credit deduction on application submission
+
+### Job Categories & Filtering
+- [ ] Extract and normalize job categories from listings
+- [ ] Company-based filtering
+- [ ] Category-based filtering (Smart Contract, Frontend, Backend, etc.)
+- [ ] Real-time job count by category/company
+
+### Token Burn-to-Credits System
+- [x] Token burns database table
+- [x] Solana RPC integration for transaction verification
+- [x] DexScreener API integration for real-time token price
+- [x] Burn verification logic (check incinerator address, token contract)
+- [x] USD value calculation with tax adjustment (6-10%)
+- [x] Credits conversion (round up to nearest credit)
+- [x] Duplicate transaction prevention
+- [x] tRPC endpoints for burn submission and history
+- [ ] User interface for submitting burn proof (Solscan tx signature)
+- [ ] Transaction history showing burn-to-credit conversions
+- [ ] Admin settings for token address and tax rate

@@ -243,6 +243,48 @@ export const appRouter = router({
       .mutation(({ input }) => deleteFromQueue(input.id)),
   }),
   
+  credits: router({
+    balance: protectedProcedure.query(async ({ ctx }) => {
+      const { getUserCredits } = await import("./db-credits");
+      return await getUserCredits(ctx.user.id);
+    }),
+    
+    applyPromo: protectedProcedure
+      .input(z.object({ code: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const { applyPromoCode } = await import("./db-credits");
+        return await applyPromoCode(ctx.user.id, input.code);
+      }),
+    
+    transactions: protectedProcedure.query(async ({ ctx }) => {
+      const { getUserTransactions } = await import("./db-credits");
+      return await getUserTransactions(ctx.user.id);
+    }),
+    
+    burnToken: protectedProcedure
+      .input(
+        z.object({
+          txSignature: z.string(),
+          tokenAddress: z.string(),
+          taxRate: z.number().min(0).max(1000),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { processTokenBurn } = await import("./token-burn");
+        return await processTokenBurn(
+          ctx.user.id,
+          input.txSignature,
+          input.tokenAddress,
+          input.taxRate
+        );
+      }),
+    
+    burnHistory: protectedProcedure.query(async ({ ctx }) => {
+      const { getUserTokenBurns } = await import("./token-burn");
+      return await getUserTokenBurns(ctx.user.id);
+    }),
+  }),
+  
   applications: router({
     list: protectedProcedure.query(({ ctx }) => getUserApplications(ctx.user.id)),
     
