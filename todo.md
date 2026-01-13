@@ -512,3 +512,10 @@
 - [x] Ensure parseResume mutation uses protected procedure
 - [x] Add better error handling for resume parsing failures
 - [x] Test resume upload in AI onboarding without crash
+
+### UI/UX Bug Fixes
+- [x] Update favicon to match rocket logo
+- [x] Fix home page main CTA button to go to signup page instead of dashboard
+- [x] Fix Manus internal login screen appearing after PDF upload (should use custom auth)
+- [x] Ensure all auth flows use custom signup/login, never Manus internal auth
+- [x] AIOnboarding now redirects to /signup after resume parsing instead of /dashboard

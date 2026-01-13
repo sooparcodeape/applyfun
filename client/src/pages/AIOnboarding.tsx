@@ -144,9 +144,9 @@ export default function AIOnboarding() {
 
       // Success - info shown in chat message
 
-      // Auto-redirect to dashboard after 3 seconds
+      // Auto-redirect to signup after 3 seconds so user can create account
       setTimeout(() => {
-        setLocation("/dashboard");
+        setLocation("/signup");
       }, 3000);
 
     } catch (error: any) {

@@ -18,7 +18,7 @@ export default function Home() {
     if (isAuthenticated) {
       setLocation("/dashboard");
     } else {
-      setLocation("/jobs");
+      setLocation("/signup");
     }
   };
 
