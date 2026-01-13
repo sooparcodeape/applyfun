@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Upload, Plus, X, Loader2 } from "lucide-react";
+import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 
 export default function Profile() {
   const { data: profileData, isLoading, refetch } = trpc.profile.get.useQuery();
@@ -132,7 +133,10 @@ export default function Profile() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">Manage your profile and application information</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+          <p className="text-muted-foreground">Manage your profile and application information</p>
+          <NextScrapeCountdown />
+        </div>
       </div>
 
       <Tabs defaultValue="basic" className="w-full">

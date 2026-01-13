@@ -169,3 +169,8 @@
 - [x] Remove DRSUESS50 promo code from public Credits page
 - [x] Add countdown timer to homepage showing time until next scrape
 - [x] Display "More jobs coming in..." with countdown
+
+### Countdown Timer Repositioning
+- [x] Move countdown timer below job counter on homepage
+- [x] Add countdown timer to Jobs page
+- [x] Add countdown timer to Profile page

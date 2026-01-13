@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Bookmark,
 } from "lucide-react";
+import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 
 export default function Jobs() {
   const [search, setSearch] = useState("");
@@ -78,9 +79,12 @@ export default function Jobs() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Browse Crypto Jobs</h1>
-        <p className="text-muted-foreground mt-2">
-          {filteredJobs.length} jobs available • Select categories and companies to target
-        </p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+          <p className="text-muted-foreground">
+            {filteredJobs.length} jobs available • Select categories and companies to target
+          </p>
+          <NextScrapeCountdown />
+        </div>
       </div>
 
       {/* Search */}

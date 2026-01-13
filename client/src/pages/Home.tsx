@@ -1,49 +1,15 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Rocket, Zap, Shield, TrendingUp, ArrowRight, Clock } from "lucide-react";
+import { Rocket, Zap, Shield, TrendingUp, ArrowRight } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useState, useEffect } from "react";
+import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { data: jobStats } = trpc.jobs.stats.useQuery();
-  const [timeUntilNextScrape, setTimeUntilNextScrape] = useState("");
-
-  useEffect(() => {
-    const calculateTimeUntilNextScrape = () => {
-      const now = new Date();
-      const currentHour = now.getHours();
-      
-      // Scraper runs at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00
-      const scrapeHours = [0, 4, 8, 12, 16, 20];
-      
-      // Find next scrape hour
-      let nextScrapeHour = scrapeHours.find(h => h > currentHour);
-      if (!nextScrapeHour) {
-        nextScrapeHour = scrapeHours[0]; // Next day
-      }
-      
-      const nextScrape = new Date(now);
-      if (nextScrapeHour < currentHour) {
-        nextScrape.setDate(nextScrape.getDate() + 1);
-      }
-      nextScrape.setHours(nextScrapeHour, 0, 0, 0);
-      
-      const diff = nextScrape.getTime() - now.getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      
-      setTimeUntilNextScrape(`${hours}h ${minutes}m`);
-    };
-    
-    calculateTimeUntilNextScrape();
-    const interval = setInterval(calculateTimeUntilNextScrape, 60000); // Update every minute
-    
-    return () => clearInterval(interval);
-  }, []);
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -73,16 +39,8 @@ export default function Home() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="flex flex-col items-center gap-3 mb-4">
-            <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-sm">
-              🚀 Powered by Token Burns & Crypto Credits
-            </div>
-            {timeUntilNextScrape && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-300 text-sm">
-                <Clock className="w-4 h-4" />
-                <span>More jobs coming in... {timeUntilNextScrape}</span>
-              </div>
-            )}
+          <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-sm mb-4">
+            🚀 Powered by Token Burns & Crypto Credits
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
@@ -99,9 +57,12 @@ export default function Home() {
             career. Burn tokens for credits, target your dream companies, and let automation do the rest.</p>
           
           {jobStats && jobStats.active > 0 && (
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full">
-              <span className="text-2xl font-bold text-white">{jobStats.active.toLocaleString()}</span>
-              <span className="text-slate-300">active crypto jobs ready to apply</span>
+            <div className="flex flex-col items-center gap-3">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-purple-500/20 border border-purple-500/30 rounded-full text-lg font-semibold">
+                <span className="text-4xl font-bold text-purple-300">{jobStats?.total || 0}</span>
+                <span className="text-purple-200">active crypto jobs ready to apply</span>
+              </div>
+              <NextScrapeCountdown />
             </div>
           )}
           
