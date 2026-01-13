@@ -1,6 +1,15 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users, 
+  userProfiles, 
+  InsertUserProfile,
+  workExperiences,
+  InsertWorkExperience,
+  skills,
+  InsertSkill
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +98,68 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// User Profile Queries
+export async function getUserProfile(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function upsertUserProfile(profile: InsertUserProfile) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getUserProfile(profile.userId);
+  if (existing) {
+    await db.update(userProfiles).set(profile).where(eq(userProfiles.userId, profile.userId));
+  } else {
+    await db.insert(userProfiles).values(profile);
+  }
+}
+
+// Work Experience Queries
+export async function getUserWorkExperiences(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(workExperiences).where(eq(workExperiences.userId, userId)).orderBy(workExperiences.startDate);
+}
+
+export async function addWorkExperience(experience: InsertWorkExperience) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(workExperiences).values(experience);
+  return result;
+}
+
+export async function updateWorkExperience(id: number, experience: Partial<InsertWorkExperience>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(workExperiences).set(experience).where(eq(workExperiences.id, id));
+}
+
+export async function deleteWorkExperience(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(workExperiences).where(eq(workExperiences.id, id));
+}
+
+// Skills Queries
+export async function getUserSkills(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(skills).where(eq(skills.userId, userId));
+}
+
+export async function addSkill(skill: InsertSkill) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(skills).values(skill);
+  return result;
+}
+
+export async function deleteSkill(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(skills).where(eq(skills.id, id));
+}

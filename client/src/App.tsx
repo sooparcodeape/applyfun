@@ -5,14 +5,42 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import DashboardLayout from "./components/DashboardLayout";
+import Profile from "./pages/Profile";
+import Jobs from "./pages/Jobs";
+import Queue from "./pages/Queue";
+import Applications from "./pages/Applications";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard">
+        <DashboardLayout>
+          <Profile />
+        </DashboardLayout>
+      </Route>
+      <Route path="/profile">
+        <DashboardLayout>
+          <Profile />
+        </DashboardLayout>
+      </Route>
+      <Route path="/jobs">
+        <DashboardLayout>
+          <Jobs />
+        </DashboardLayout>
+      </Route>
+      <Route path="/queue">
+        <DashboardLayout>
+          <Queue />
+        </DashboardLayout>
+      </Route>
+      <Route path="/applications">
+        <DashboardLayout>
+          <Applications />
+        </DashboardLayout>
+      </Route>
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -27,8 +55,8 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="light"
-        // switchable
+        defaultTheme="dark"
+        switchable
       >
         <TooltipProvider>
           <Toaster />
