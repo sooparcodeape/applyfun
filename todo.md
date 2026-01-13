@@ -306,3 +306,11 @@
 - [x] Integrate notifications with applyAll mutation
 - [x] Integrate notifications with scraper runs
 - [x] Use Manus notifyOwner for all notifications
+
+
+### Scraper Enhancement
+- [x] Update cryptojobslist.com scraper to pull all available jobs (100+)
+- [x] Update remote3.co scraper to pull all available jobs (100+)
+- [x] Add pagination/infinite scroll handling (up to 10 pages per source)
+- [x] Test scrapers - now pulling 155+ jobs (up from 67)
+- [x] Verify job counter updates automatically on homepage

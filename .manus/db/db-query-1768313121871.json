@@ -1,0 +1,34 @@
+{
+  "query": "SELECT COUNT(*) as total_jobs, source FROM jobs WHERE is_active = 1 GROUP BY source;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as total_jobs, source FROM jobs WHERE is_active = 1 GROUP BY source;",
+  "rows": [
+    {
+      "total_jobs": "3",
+      "source": "remote3"
+    },
+    {
+      "total_jobs": "3",
+      "source": "telegram"
+    },
+    {
+      "total_jobs": "30",
+      "source": "web3.career"
+    },
+    {
+      "total_jobs": "3",
+      "source": "jobs.solana.com"
+    },
+    {
+      "total_jobs": "113",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "total_jobs": "3",
+      "source": "cryptojobslist"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_jobs\tsource\n3\tremote3\n3\ttelegram\n30\tweb3.career\n3\tjobs.solana.com\n113\tcryptojobslist.com\n3\tcryptojobslist\n",
+  "stderr": "",
+  "execution_time_ms": 404
+}
