@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { trpc } from "@/lib/trpc";
 import { Briefcase } from "lucide-react";
 import { toast } from "sonner";
-import { AutoApplyEngine } from "@/components/AutoApplyEngine";
+import { AIChatTerminal } from "@/components/AIChatTerminal";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
@@ -108,8 +108,9 @@ export default function Queue() {
           </CardContent>
         </Card>
       ) : showAutoApply ? (
-        <AutoApplyEngine 
-          queueItems={queueItems} 
+        <AIChatTerminal 
+          mode="application"
+          jobIds={queueItems.map((item: any) => item.jobId)}
           onComplete={handleAutoApplyComplete}
         />
       ) : (

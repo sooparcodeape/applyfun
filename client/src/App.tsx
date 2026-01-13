@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
+import AIOnboarding from "./pages/AIOnboarding";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./components/DashboardLayout";
 import Profile from "./pages/Profile";
@@ -25,7 +26,8 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
-      <Route path="/onboarding" component={Onboarding} />      <Route path="/dashboard">
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/ai-onboarding" component={AIOnboarding} />    <Route path="/dashboard">
         <DashboardLayout>
           <PageTransition>
             <Dashboard />

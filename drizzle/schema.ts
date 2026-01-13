@@ -22,6 +22,10 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  /** Unique referral code for this user */
+  referralCode: varchar("referral_code", { length: 20 }),
+  /** Referral code used by this user when signing up */
+  referredByCode: varchar("referred_by_code", { length: 20 }),
 });
 
 export type User = typeof users.$inferSelect;
@@ -50,7 +54,7 @@ export const creditTransactions = mysqlTable("credit_transactions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("user_id").notNull(),
   amount: int("amount").notNull(), // Amount in cents, positive for credit, negative for debit
-  type: mysqlEnum("type", ["signup_bonus", "promo_code", "payment", "application_fee", "refund"]).notNull(),
+  type: mysqlEnum("type", ["signup_bonus", "promo_code", "payment", "application_fee", "refund", "referral_bonus"]).notNull(),
   description: text("description"),
   referenceId: varchar("reference_id", { length: 255 }), // Payment ID or promo code
   balanceAfter: int("balance_after").notNull(),

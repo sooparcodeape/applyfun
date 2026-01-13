@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { runAllScrapers } from './scrapers/all-scrapers';
+import { runDripCampaign } from './email-drip';
 
 /**
  * Automated job scraping scheduler
@@ -36,4 +37,19 @@ export function initializeScheduler() {
     });
 
   console.log('[Scheduler] Automated scraping scheduled every 4 hours');
+
+  // Run drip campaign daily at 9 AM
+  cron.schedule('0 9 * * *', async () => {
+    const timestamp = new Date().toISOString();
+    console.log(`[Scheduler] Running daily drip campaign at ${timestamp}`);
+    
+    try {
+      await runDripCampaign();
+      console.log('[Scheduler] Drip campaign completed');
+    } catch (error) {
+      console.error('[Scheduler] Drip campaign error:', error);
+    }
+  });
+
+  console.log('[Scheduler] Email drip campaign scheduled daily at 9 AM');
 }

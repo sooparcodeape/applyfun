@@ -55,7 +55,7 @@ export async function getUserCredits(userId: number) {
 export async function addCredits(
   userId: number,
   amount: number,
-  type: "signup_bonus" | "promo_code" | "payment" | "refund",
+  type: "signup_bonus" | "promo_code" | "payment" | "refund" | "referral_bonus",
   description: string,
   referenceId?: string
 ) {

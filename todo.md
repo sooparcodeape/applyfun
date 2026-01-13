@@ -378,3 +378,39 @@
 - [x] Run all tests to ensure no regressions
 
 **Results:** Homepage now emphasizes speed ("Apply to 100+ Web3 Jobs in 60 Seconds"), pain point ("20+ hours per week"), and social proof ("1,000+ Web3 professionals"). Features rewritten with concrete benefits. Job count increased to 538 active jobs. Pull-to-refresh and skeleton loading improve mobile UX.
+
+
+### AI Chat Terminal & Engagement Features
+- [x] Build AI chat terminal component (ChatGPT-style interface)
+- [x] Integrate LLM for conversational onboarding
+- [x] Add real-time progress display during applications (like Manus thinking)
+- [x] Make AI terminal knowledgeable about product/features (system prompt)
+- [x] Add streaming responses for natural conversation flow (Streamdown)
+- [x] Replace current onboarding flow with AI chat terminal (/ai-onboarding)
+- [x] Add AI chat to application process to show live progress (Queue page)
+- [ ] Test AI terminal with various user scenarios
+
+### Email Drip Campaign
+- [x] Create email templates for drip campaign (3 templates)
+- [x] Set up trigger: user signs up but doesn't complete onboarding (24h)
+- [x] Set up trigger: user completes onboarding but doesn't apply to jobs (48h)
+- [x] Set up trigger: user applies but hasn't returned in 7 days
+- [x] Implement email sending via notifyOwner (production: integrate SendGrid)
+- [x] Add scheduler to run drip campaign daily at 9 AM
+- [ ] Test email campaign triggers with real users
+
+### Referral Program ($50 Reward)
+- [x] Add referral code generation for each user (8-char unique codes)
+- [x] Create referral tracking system in database (referrals table + user fields)
+- [x] Track when referred user signs up via referral code
+- [x] Track when referred user makes first credit purchase
+- [x] Award $50 credits to referrer upon purchase (auto via awardReferralBonus)
+- [x] Award $50 credits to referee upon purchase (auto via awardReferralBonus)
+- [x] Add referral_bonus transaction type to schema
+- [x] Implement referral stats tracking (total/successful/earnings)
+- [ ] Add "Invite Friends" page/modal in dashboard
+- [ ] Add referral stats to user dashboard
+- [ ] Build tRPC endpoints for referral operations
+- [ ] Add referral code input during signup
+- [ ] Hook up referral bonus to credit purchase flow
+- [ ] Test referral flow end-to-end
