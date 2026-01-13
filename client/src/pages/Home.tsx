@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Rocket, Zap, Shield, TrendingUp, ArrowRight } from "lucide-react";
-import { getLoginUrl } from "@/const";
+// import { getLoginUrl } from "@/const"; // Removed Manus OAuth
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
@@ -13,9 +13,9 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      setLocation("/onboarding");
+      setLocation("/dashboard");
     } else {
-      window.location.href = getLoginUrl();
+      setLocation("/login");
     }
   };
 

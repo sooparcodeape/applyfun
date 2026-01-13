@@ -174,3 +174,24 @@
 - [x] Move countdown timer below job counter on homepage
 - [x] Add countdown timer to Jobs page
 - [x] Add countdown timer to Profile page
+
+### Custom Authentication System
+- [ ] Replace Manus OAuth with custom email/password auth
+- [ ] Add password hashing with bcrypt
+- [ ] Create registration endpoint with email validation
+- [ ] Create login endpoint with session management
+- [ ] Add LinkedIn OAuth integration
+- [ ] Add Twitter/X OAuth integration
+- [ ] Add Google OAuth integration
+- [ ] Build registration page UI with social login buttons
+- [ ] Build login page UI with social login buttons
+- [ ] Add password reset functionality
+- [ ] Update user schema to include password and OAuth fields
+- [ ] Update all auth-dependent features
+- [ ] Remove Manus OAuth dependencies
+
+### URGENT: Remove Manus Login Redirects
+- [x] Remove Manus OAuth login redirects from homepage
+- [x] Create placeholder login/signup pages
+- [ ] Make job browsing public (no auth required)
+- [x] Add "Coming Soon" message for auth features
