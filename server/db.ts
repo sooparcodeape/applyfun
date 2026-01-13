@@ -39,6 +39,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
 
   try {
+    // Check if user already exists
+    const existingUser = await getUserByOpenId(user.openId);
+    const isNewUser = !existingUser;
+
     const values: InsertUser = {
       openId: user.openId,
     };
@@ -80,6 +84,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     await db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
+
+    // Grant $5 signup bonus for new users
+    if (isNewUser) {
+      const { addCredits } = await import('./db-credits');
+      const newUser = await getUserByOpenId(user.openId);
+      if (newUser) {
+        await addCredits(newUser.id, 500, 'signup_bonus', 'Welcome bonus: $5 free credits');
+      }
+    }
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;

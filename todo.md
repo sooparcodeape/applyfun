@@ -148,3 +148,12 @@
 - [ ] Application tracking and status updates
 - [ ] Credit deduction on successful submission
 - [ ] Retry logic for failed applications
+
+### Welcome Modal & Onboarding Flow
+- [x] Welcome modal on Credits page for new users
+- [x] Display $5 free credits notification
+- [x] Quick start instructions in modal
+- [x] Auto-apply enablement guide
+- [x] Redirect to Credits page after profile completion
+- [x] $5 signup bonus activation on first visit
+- [x] Modal dismissal and don't show again logic

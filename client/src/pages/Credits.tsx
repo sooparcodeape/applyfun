@@ -1,18 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Coins, Gift, Flame, ExternalLink } from "lucide-react";
+import { Loader2, Coins, Gift, Flame, ExternalLink, DollarSign, Rocket, Target } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
 
 export default function Credits() {
   const [promoCode, setPromoCode] = useState("");
   const [txSignature, setTxSignature] = useState("");
   const [tokenAddress, setTokenAddress] = useState("");
   const [taxRate, setTaxRate] = useState("600"); // 6% default
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [location] = useLocation();
+  
+  // Check if user is coming from onboarding
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('welcome') === 'true') {
+      setShowWelcome(true);
+      // Clean up URL
+      window.history.replaceState({}, '', '/credits');
+    }
+  }, [location]);
 
   const { data: credits, isLoading: creditsLoading, refetch: refetchCredits } = trpc.credits.balance.useQuery();
   const { data: transactions, isLoading: txLoading } = trpc.credits.transactions.useQuery();
@@ -85,7 +99,94 @@ export default function Credits() {
   const balanceUSD = (balance / 100).toFixed(2);
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <>
+      {/* Welcome Modal */}
+      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <Gift className="w-6 h-6 text-purple-500" />
+              <DialogTitle className="text-2xl">Welcome to apply.fun! 🎉</DialogTitle>
+            </div>
+            <DialogDescription className="text-base">
+              You've received <strong className="text-purple-500">$5.00 in free credits</strong> to get started!
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <DollarSign className="w-5 h-5 text-purple-500 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold mb-1">Your Credits</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Each job application costs $1.00. With your free credits, you can apply to 5 jobs right away!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Rocket className="w-5 h-5 text-purple-500" />
+                Quick Start Guide
+              </h4>
+              
+              <ol className="space-y-2 text-sm text-muted-foreground ml-7">
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold text-foreground">1.</span>
+                  <span>Browse <strong>67+ crypto jobs</strong> from top Web3 companies</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold text-foreground">2.</span>
+                  <span>Add jobs to your <strong>application queue</strong> for review</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold text-foreground">3.</span>
+                  <span>Click <strong>"Apply to All"</strong> to auto-apply in seconds</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold text-foreground">4.</span>
+                  <span>Track your applications and responses in the dashboard</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Target className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold mb-1">Need More Credits?</h4>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Top up using crypto or burn your tokens for credits at market price!
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Use promo code <code className="bg-purple-500/20 px-1 rounded">DRSUESS50</code> for $50 free credits</li>
+                    <li>• Burn tokens on Sol Incinerator for instant credits</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setShowWelcome(false)} className="flex-1">
+              I'll Explore Later
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowWelcome(false);
+                window.location.href = '/jobs';
+              }} 
+              className="flex-1"
+            >
+              Browse Jobs Now →
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="container mx-auto py-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Credits & Payments</h1>
         <p className="text-muted-foreground mt-2">
@@ -299,5 +400,6 @@ export default function Credits() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

@@ -30,7 +30,7 @@ export default function Onboarding() {
 
   const handleManualMode = () => {
     setSelectedMode("manual");
-    setLocation("/profile");
+    window.location.href = "/credits?welcome=true";
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +62,7 @@ export default function Onboarding() {
   const updateProfileMutation = trpc.profile.updateFromParsed.useMutation({
     onSuccess: () => {
       toast.success("Profile updated successfully!");
-      setLocation("/profile");
+      window.location.href = "/credits?welcome=true";
     },
     onError: (error) => {
       toast.error("Failed to update profile: " + error.message);
