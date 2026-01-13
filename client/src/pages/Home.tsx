@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Rocket, Zap, Shield, TrendingUp, ArrowRight } from "lucide-react";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const { data: jobStats } = trpc.jobs.stats.useQuery();
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -53,13 +55,23 @@ export default function Home() {
             while you focus on what matters - building your career.
           </p>
           
+          {jobStats && jobStats.active > 0 && (
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full">
+              <span className="text-2xl font-bold text-white">{jobStats.active.toLocaleString()}</span>
+              <span className="text-slate-300">active crypto jobs ready to apply</span>
+            </div>
+          )}
+          
           <div className="flex gap-4 justify-center pt-4">
             <Button 
               onClick={handleGetStarted} 
               size="lg" 
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8"
             >
-              Start Applying <ArrowRight className="ml-2 h-5 w-5" />
+              {jobStats && jobStats.active > 0 
+                ? `Apply to ${jobStats.active.toLocaleString()}+ Jobs Now` 
+                : "Start Applying"}
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>

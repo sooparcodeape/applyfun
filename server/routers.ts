@@ -29,6 +29,9 @@ import {
   updateApplicationStatus,
   getApplicationStats,
 } from "./db-jobs";
+import { getDb } from "./db";
+import { jobs } from "../drizzle/schema";
+import { sql, eq } from "drizzle-orm";
 import { storagePut } from "./storage";
 
 export const appRouter = router({
@@ -173,6 +176,19 @@ export const appRouter = router({
   }),
   
   jobs: router({
+    stats: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { total: 0, active: 0 };
+      
+      const totalResult = await db.select({ count: sql<number>`count(*)` }).from(jobs);
+      const activeResult = await db.select({ count: sql<number>`count(*)` }).from(jobs).where(eq(jobs.isActive, 1));
+      
+      return {
+        total: totalResult[0]?.count || 0,
+        active: activeResult[0]?.count || 0,
+      };
+    }),
+    
     list: publicProcedure
       .input(z.object({
         search: z.string().optional(),

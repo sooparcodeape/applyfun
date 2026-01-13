@@ -62,3 +62,7 @@
 - [ ] Dark/light theme support
 - [ ] Mobile responsive design
 - [ ] PWA manifest and service worker
+
+### Landing Page Enhancements
+- [x] Live job counter on hero section showing total scraped jobs
+- [x] Dynamic CTA with real job count
