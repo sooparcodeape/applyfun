@@ -40,9 +40,9 @@ export function NextScrapeCountdown() {
   if (!timeUntilNextScrape) return null;
 
   return (
-    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-300 text-sm">
+    <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-300 text-sm">
       <Clock className="w-4 h-4" />
       <span>More jobs coming in... {timeUntilNextScrape}</span>
-    </div>
+    </span>
   );
 }
