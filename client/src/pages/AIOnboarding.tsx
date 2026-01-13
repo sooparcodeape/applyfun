@@ -10,8 +10,24 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function AIOnboarding() {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isParsingResume, setIsParsingResume] = useState(false);
   
-  // Redirect to signup if not authenticated
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "🚀 Yooo what's good! I'm your apply.fun AI assistant and I'm literally about to get you EMPLOYED fr fr.\n\nEnjoy your freedom while it lasts, because we're getting you hired ASAP! 💯\n\nTwo ways to speedrun this:\n1. Upload your resume (PDF/Word) and I'll extract everything automatically - no cap this slaps\n2. Just tell me about yourself and we'll build it together\n\nWhat's the vibe?"
+    }
+  ]);
+
+  const chatMutation = trpc.ai.chat.useMutation();
+  const updateProfileMutation = trpc.profile.update.useMutation();
+  const uploadResumeMutation = trpc.profile.uploadResume.useMutation();
+  const parseResumeMutation = trpc.profile.parseResume.useMutation();
+  const addSkillMutation = trpc.skills.add.useMutation();
+  const addExperienceMutation = trpc.workExperience.add.useMutation();
+  
+  // Redirect to signup if not authenticated (after all hooks)
   useEffect(() => {
     if (!loading && !user) {
       setLocation("/signup");
@@ -31,22 +47,6 @@ export default function AIOnboarding() {
   if (!user) {
     return null;
   }
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isParsingResume, setIsParsingResume] = useState(false);
-  
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "🚀 Yooo what's good! I'm your apply.fun AI assistant and I'm literally about to get you EMPLOYED fr fr.\n\nEnjoy your freedom while it lasts, because we're getting you hired ASAP! 💯\n\nTwo ways to speedrun this:\n1. Upload your resume (PDF/Word) and I'll extract everything automatically - no cap this slaps\n2. Just tell me about yourself and we'll build it together\n\nWhat's the vibe?"
-    }
-  ]);
-
-  const chatMutation = trpc.ai.chat.useMutation();
-  const updateProfileMutation = trpc.profile.update.useMutation();
-  const uploadResumeMutation = trpc.profile.uploadResume.useMutation();
-  const parseResumeMutation = trpc.profile.parseResume.useMutation();
-  const addSkillMutation = trpc.skills.add.useMutation();
-  const addExperienceMutation = trpc.workExperience.add.useMutation();
 
   const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -167,9 +167,9 @@ export default function AIOnboarding() {
 
       // Success - info shown in chat message
 
-      // Auto-redirect to signup after 3 seconds so user can create account
+      // Auto-redirect to dashboard after 3 seconds
       setTimeout(() => {
-        setLocation("/signup");
+        setLocation("/dashboard");
       }, 3000);
 
     } catch (error: any) {

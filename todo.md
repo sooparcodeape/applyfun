@@ -531,3 +531,13 @@
 - [x] Added auth check to AIOnboarding page - redirects to signup if not authenticated
 - [x] Added loading state while checking authentication
 - [ ] Test resume upload flow end-to-end
+
+### Infinite Login Redirect Bug (Fixed)
+- [x] Debug why signing in redirects to another sign in page
+- [x] Root cause: React hooks order violation + wrong redirect after resume parsing
+- [x] Fixed React hooks order in AIOnboarding (all hooks before conditional returns)
+- [x] Fixed redirect after resume parsing to go to /dashboard instead of /signup
+- [x] Verified LLM integration uses server-side API keys (no Manus OAuth)
+- [x] Ensure AI features use custom auth system only
+- [x] Test complete login flow: signup -> AI onboarding (no Manus login!)
+- [x] Verify no Manus login screens appear anywhere
