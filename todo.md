@@ -476,3 +476,14 @@
 - [ ] Add resume preview in profile page
 - [ ] Test resume parsing with various formats
 - [ ] Handle edge cases (scanned PDFs, unusual formats)
+
+### Resume Parsing Enhancements
+- [x] Auto-populate skills tags from parsed resume (not just comma-separated string)
+- [x] Auto-populate work experience entries with proper date parsing
+- [x] Store uploaded resume file in S3 storage (during onboarding)
+- [x] Add resume upload button to Profile page
+- [x] Store uploaded resume file in S3 storage
+- [x] Display resume preview/download link in Profile page
+- [x] Show resume file metadata (filename, upload date, file size)
+- [x] Handle resume replacement (delete old file when uploading new one)
+- [x] Profile page resume upload auto-parses and populates skills/experience

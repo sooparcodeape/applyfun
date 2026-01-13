@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Upload, Plus, X, Loader2 } from "lucide-react";
+import { Upload, Plus, X, Loader2, FileText, Download } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
+import { parseResume } from "@/lib/resume-parser";
 
 export default function Profile() {
   const { data: profileData, isLoading, refetch } = trpc.profile.get.useQuery();
@@ -35,6 +36,8 @@ export default function Profile() {
 
   const [newSkill, setNewSkill] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update form data when profile loads
   useState(() => {
@@ -69,32 +72,109 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+    // Validate file type
+    const validTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/msword"
+    ];
+    
+    if (!validTypes.includes(file.type)) {
+      toast.error("Please upload a PDF or Word document (.pdf, .doc, .docx)");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
       return;
     }
 
     setUploading(true);
+    setParsing(true);
+    
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result?.toString().split(",")[1];
-        if (!base64) return;
+      // 1. Parse resume on client-side (uses user's compute, zero server credits!)
+      toast.info("Parsing your resume... This won't cost any credits!");
+      const parsed = await parseResume(file);
+      
+      // 2. Upload resume file to S3
+      const fileData = await file.arrayBuffer();
+      const base64Data = Buffer.from(fileData).toString('base64');
+      await uploadResume.mutateAsync({
+        fileName: file.name,
+        fileData: base64Data,
+        mimeType: file.type,
+      });
+      
+      setParsing(false);
+      
+      // 3. Update profile with parsed data
+      await updateProfile.mutateAsync({
+        phone: parsed.phone || formData.phone,
+        location: parsed.location || formData.location,
+        bio: parsed.summary || formData.bio,
+        githubUrl: parsed.links?.github || formData.githubUrl,
+        linkedinUrl: parsed.links?.linkedin || formData.linkedinUrl,
+        twitterHandle: parsed.links?.twitter || formData.twitterHandle,
+      });
+      
+      // 4. Add skills as individual tags
+      let skillsAdded = 0;
+      if (parsed.skills && parsed.skills.length > 0) {
+        for (const skill of parsed.skills) {
+          try {
+            await addSkill.mutateAsync({
+              name: skill,
+              category: 'technical',
+            });
+            skillsAdded++;
+          } catch (err) {
+            // Skip if skill already exists
+            console.log(`Skill "${skill}" already exists`);
+          }
+        }
+      }
+      
+      // 5. Add work experience entries
+      let experiencesAdded = 0;
+      if (parsed.experience && parsed.experience.length > 0) {
+        for (const exp of parsed.experience) {
+          try {
+            const startDate = exp.startDate ? new Date(exp.startDate) : new Date();
+            const endDate = exp.endDate && exp.endDate.toLowerCase() !== 'present' ? new Date(exp.endDate) : null;
+            const isCurrent = !endDate || exp.endDate?.toLowerCase() === 'present' ? 1 : 0;
+            
+            await addWorkExperience.mutateAsync({
+              company: exp.company,
+              position: exp.title,
+              description: exp.description || '',
+              startDate,
+              endDate: endDate || undefined,
+              isCurrent,
+            });
+            experiencesAdded++;
+          } catch (err) {
+            console.log(`Failed to add experience at ${exp.company}:`, err);
+          }
+        }
+      }
 
-        await uploadResume.mutateAsync({
-          fileName: file.name,
-          fileData: base64,
-          mimeType: file.type,
-        });
-
-        toast.success("Resume uploaded successfully!");
-        refetch();
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      toast.error("Failed to upload resume");
+      toast.success(
+        `Resume uploaded and parsed! Added ${skillsAdded} skills and ${experiencesAdded} work experiences.`,
+        { duration: 5000 }
+      );
+      refetch();
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error: any) {
+      console.error("[Resume Upload] Error:", error);
+      toast.error(`Failed to parse resume: ${error.message}`);
     } finally {
       setUploading(false);
+      setParsing(false);
     }
   };
 
@@ -280,40 +360,81 @@ export default function Profile() {
           <Card>
             <CardHeader>
               <CardTitle>Resume / CV</CardTitle>
-              <CardDescription>Upload your resume for auto-filling applications</CardDescription>
+              <CardDescription>
+                Upload your resume to auto-fill profile and applications. Parsing uses your browser compute - zero credits!
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {profileData?.profile?.resumeUrl && (
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">Current Resume:</p>
-                  <a
-                    href={profileData.profile.resumeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-purple-500 hover:underline"
-                  >
-                    View Resume
-                  </a>
+                <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium mb-1">Current Resume</p>
+                        <p className="text-xs text-muted-foreground">
+                          {profileData.profile.resumeFileKey?.split('/').pop() || 'resume.pdf'}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={profileData.profile.resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-purple-500 hover:text-purple-400"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </a>
+                  </div>
                 </div>
               )}
 
               <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mb-4">
-                  Upload a new resume (PDF, DOC, DOCX - Max 5MB)
-                </p>
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  className="max-w-xs mx-auto"
-                />
-                {uploading && (
-                  <div className="flex items-center justify-center mt-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
-                    <span className="ml-2 text-sm">Uploading...</span>
+                {parsing ? (
+                  <div className="space-y-4">
+                    <Loader2 className="h-12 w-12 mx-auto animate-spin text-purple-500" />
+                    <div>
+                      <p className="text-sm font-medium mb-1">Parsing your resume...</p>
+                      <p className="text-xs text-muted-foreground">
+                        Extracting skills, experience, and contact info using your browser
+                      </p>
+                    </div>
                   </div>
+                ) : uploading ? (
+                  <div className="space-y-4">
+                    <Loader2 className="h-12 w-12 mx-auto animate-spin text-purple-500" />
+                    <div>
+                      <p className="text-sm font-medium mb-1">Uploading to S3...</p>
+                      <p className="text-xs text-muted-foreground">Saving your resume file</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-sm font-medium mb-2">
+                      Upload a new resume
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      PDF, DOC, or DOCX • Max 10MB • Auto-parses skills & experience
+                    </p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+                      onChange={handleFileUpload}
+                      disabled={uploading || parsing}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading || parsing}
+                      variant="outline"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose File
+                    </Button>
+                  </>
                 )}
               </div>
             </CardContent>

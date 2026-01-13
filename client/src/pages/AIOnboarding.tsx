@@ -20,6 +20,9 @@ export default function AIOnboarding() {
 
   const chatMutation = trpc.ai.chat.useMutation();
   const updateProfileMutation = trpc.profile.update.useMutation();
+  const uploadResumeMutation = trpc.profile.uploadResume.useMutation();
+  const addSkillMutation = trpc.skills.add.useMutation();
+  const addExperienceMutation = trpc.workExperience.add.useMutation();
 
   const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -64,7 +67,16 @@ export default function AIOnboarding() {
       // Parse resume on client-side (uses user's compute, zero server credits!)
       const parsed = await parseResume(file);
       
-      // Update profile with parsed data
+      // 1. Upload resume file to S3
+      const fileData = await file.arrayBuffer();
+      const base64Data = Buffer.from(fileData).toString('base64');
+      await uploadResumeMutation.mutateAsync({
+        fileName: file.name,
+        fileData: base64Data,
+        mimeType: file.type,
+      });
+      
+      // 2. Update profile with parsed data
       await updateProfileMutation.mutateAsync({
         phone: parsed.phone,
         location: parsed.location,
@@ -73,6 +85,44 @@ export default function AIOnboarding() {
         linkedinUrl: parsed.links?.linkedin,
         twitterHandle: parsed.links?.twitter,
       });
+      
+      // 3. Add skills as individual tags
+      if (parsed.skills && parsed.skills.length > 0) {
+        for (const skill of parsed.skills) {
+          try {
+            await addSkillMutation.mutateAsync({
+              name: skill,
+              category: 'technical',
+            });
+          } catch (err) {
+            // Skip if skill already exists
+            console.log(`Skill "${skill}" already exists or failed to add`);
+          }
+        }
+      }
+      
+      // 4. Add work experience entries
+      if (parsed.experience && parsed.experience.length > 0) {
+        for (const exp of parsed.experience) {
+          try {
+            // Parse dates if available
+            const startDate = exp.startDate ? new Date(exp.startDate) : new Date();
+            const endDate = exp.endDate && exp.endDate.toLowerCase() !== 'present' ? new Date(exp.endDate) : null;
+            const isCurrent = !endDate || exp.endDate?.toLowerCase() === 'present' ? 1 : 0;
+            
+            await addExperienceMutation.mutateAsync({
+              company: exp.company,
+              position: exp.title,
+              description: exp.description || '',
+              startDate,
+              endDate: endDate || undefined,
+              isCurrent,
+            });
+          } catch (err) {
+            console.log(`Failed to add experience at ${exp.company}:`, err);
+          }
+        }
+      }
 
       // Show success message with extracted info
       const successMessage: Message = {
