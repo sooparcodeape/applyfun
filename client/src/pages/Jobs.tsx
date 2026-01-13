@@ -156,9 +156,9 @@ export default function Jobs() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categories.map((category, idx) => (
               <Button
-                key={category}
+                key={`category-${idx}-${category}`}
                 variant={selectedCategories.includes(category) ? "default" : "outline"}
                 size="sm"
                 onClick={() => {
@@ -186,9 +186,9 @@ export default function Jobs() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {companies.map((company) => (
+            {companies.map((company, idx) => (
               <Button
-                key={company}
+                key={`company-${idx}-${company}`}
                 variant={selectedCompanies.includes(company) ? "default" : "outline"}
                 size="sm"
                 onClick={() => {
@@ -247,9 +247,9 @@ export default function Jobs() {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-2">
-                    {JSON.parse(job.tags || "[]").map((tag: string) => (
+                    {JSON.parse(job.tags || "[]").map((tag: string, idx: number) => (
                       <span
-                        key={tag}
+                        key={`${job.id}-tag-${idx}`}
                         className="px-2 py-1 bg-purple-500/10 text-purple-500 rounded-full text-xs"
                       >
                         {tag}

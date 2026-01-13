@@ -120,3 +120,6 @@
 - [x] Create and add favicon
 - [x] Update color scheme if needed
 - [x] Update meta tags and SEO
+
+### Bug Fixes
+- [x] Fix React key duplication error for duplicate location names in Jobs page
