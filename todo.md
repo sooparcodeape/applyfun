@@ -164,3 +164,8 @@
 - [x] Add error handling and retry logic for failed scrapes
 - [x] Log scraping activity and results
 - [x] Hero page counter automatically updates with new jobs
+
+### UI Improvements
+- [x] Remove DRSUESS50 promo code from public Credits page
+- [x] Add countdown timer to homepage showing time until next scrape
+- [x] Display "More jobs coming in..." with countdown

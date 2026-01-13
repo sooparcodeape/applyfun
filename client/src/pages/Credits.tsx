@@ -161,7 +161,7 @@ export default function Credits() {
                     Top up using crypto or burn your tokens for credits at market price!
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• Use promo code <code className="bg-purple-500/20 px-1 rounded">DRSUESS50</code> for $50 free credits</li>
+                    <li>• Apply promo codes for bonus credits</li>
                     <li>• Burn tokens on Sol Incinerator for instant credits</li>
                   </ul>
                 </div>
@@ -236,7 +236,7 @@ export default function Credits() {
                 <Label htmlFor="promo">Promo Code</Label>
                 <Input
                   id="promo"
-                  placeholder="DRSUESS50"
+                  placeholder="Enter promo code"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                   disabled={applyPromoMutation.isPending}
