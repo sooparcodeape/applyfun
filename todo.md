@@ -157,3 +157,10 @@
 - [x] Redirect to Credits page after profile completion
 - [x] $5 signup bonus activation on first visit
 - [x] Modal dismissal and don't show again logic
+
+### Automated Job Scraping
+- [x] Set up cron scheduler for periodic scraping
+- [x] Configure 4-hour interval for all 5 job sources
+- [x] Add error handling and retry logic for failed scrapes
+- [x] Log scraping activity and results
+- [x] Hero page counter automatically updates with new jobs
