@@ -414,3 +414,11 @@
 - [ ] Add referral code input during signup
 - [ ] Hook up referral bonus to credit purchase flow
 - [ ] Test referral flow end-to-end
+
+
+### Critical Auth Bug Fix
+- [x] Fix AI onboarding redirecting to Manus login instead of custom auth
+- [x] Ensure all protected routes use custom JWT auth, not Manus OAuth
+- [x] Remove getLoginUrl() Manus OAuth redirects (updated to /login)
+- [x] Updated const.ts, main.tsx, DashboardLayout.tsx, useAuth.ts
+- [ ] Test complete onboarding flow without Manus redirects
