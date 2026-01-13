@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Rocket, Zap, Shield, TrendingUp, ArrowRight } from "lucide-react";
+import { useHaptic } from "@/hooks/useHaptic";
 // import { getLoginUrl } from "@/const"; // Removed Manus OAuth
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -10,8 +11,10 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const { data: jobStats } = trpc.jobs.stats.useQuery();
+  const { triggerHaptic } = useHaptic();
 
   const handleGetStarted = () => {
+    triggerHaptic("medium");
     if (isAuthenticated) {
       setLocation("/dashboard");
     } else {

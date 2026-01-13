@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { MobileBottomNav } from "./components/MobileBottomNav";
+import { PageTransition } from "./components/PageTransition";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -26,32 +27,44 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/onboarding" component={Onboarding} />      <Route path="/dashboard">
         <DashboardLayout>
-          <Dashboard />
+          <PageTransition>
+            <Dashboard />
+          </PageTransition>
         </DashboardLayout>
       </Route>      <Route path="/profile">
         <DashboardLayout>
-          <Profile />
+          <PageTransition>
+            <Profile />
+          </PageTransition>
         </DashboardLayout>
       </Route>
       <Route path="/jobs" component={PublicJobs} />
       <Route path="/dashboard/jobs">
         <DashboardLayout>
-          <Jobs />
+          <PageTransition>
+            <Jobs />
+          </PageTransition>
         </DashboardLayout>
       </Route>
       <Route path="/queue">
         <DashboardLayout>
-          <Queue />
+          <PageTransition>
+            <Queue />
+          </PageTransition>
         </DashboardLayout>
       </Route>
       <Route path="/applications">
         <DashboardLayout>
-          <Applications />
+          <PageTransition>
+            <Applications />
+          </PageTransition>
         </DashboardLayout>
       </Route>
       <Route path="/credits">
         <DashboardLayout>
-          <Credits />
+          <PageTransition>
+            <Credits />
+          </PageTransition>
         </DashboardLayout>
       </Route>
       <Route path="/404" component={NotFound} />
