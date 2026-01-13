@@ -9,12 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Upload, Plus, X, Loader2, FileText, Download } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
-import { parseResume } from "@/lib/resume-parser";
+import { type ParsedResume } from "@/lib/resume-parser";
 
 export default function Profile() {
   const { data: profileData, isLoading, refetch } = trpc.profile.get.useQuery();
   const updateProfile = trpc.profile.update.useMutation();
   const uploadResume = trpc.profile.uploadResume.useMutation();
+  const parseResumeMutation = trpc.profile.parseResume.useMutation();
   const addWorkExperience = trpc.workExperience.add.useMutation();
   const deleteWorkExperience = trpc.workExperience.delete.useMutation();
   const addSkill = trpc.skills.add.useMutation();
@@ -93,13 +94,17 @@ export default function Profile() {
     setParsing(true);
     
     try {
-      // 1. Parse resume on client-side (uses user's compute, zero server credits!)
-      toast.info("Parsing your resume... This won't cost any credits!");
-      const parsed = await parseResume(file);
+      // 1. Parse resume via server
+      toast.info("Parsing your resume...");
+      const fileData = await file.arrayBuffer();
+      const bytes = new Uint8Array(fileData);
+      const binaryString = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+      const base64Data = btoa(binaryString);
+      const parsed = await parseResumeMutation.mutateAsync({
+        resumeBase64: `data:${file.type};base64,${base64Data}`,
+      }) as ParsedResume;
       
       // 2. Upload resume file to S3
-      const fileData = await file.arrayBuffer();
-      const base64Data = Buffer.from(fileData).toString('base64');
       await uploadResume.mutateAsync({
         fileName: file.name,
         fileData: base64Data,
@@ -361,7 +366,7 @@ export default function Profile() {
             <CardHeader>
               <CardTitle>Resume / CV</CardTitle>
               <CardDescription>
-                Upload your resume to auto-fill profile and applications. Parsing uses your browser compute - zero credits!
+                Upload your resume to auto-fill profile and applications.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

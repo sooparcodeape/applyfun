@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { trpc } from "@/lib/trpc";
-import { parseResume } from "@/lib/resume-parser";
+import { type ParsedResume } from "@/lib/resume-parser";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2 } from "lucide-react";
 
@@ -21,6 +21,7 @@ export default function AIOnboarding() {
   const chatMutation = trpc.ai.chat.useMutation();
   const updateProfileMutation = trpc.profile.update.useMutation();
   const uploadResumeMutation = trpc.profile.uploadResume.useMutation();
+  const parseResumeMutation = trpc.profile.parseResume.useMutation();
   const addSkillMutation = trpc.skills.add.useMutation();
   const addExperienceMutation = trpc.workExperience.add.useMutation();
 
@@ -59,17 +60,21 @@ export default function AIOnboarding() {
     // Add message showing we're processing
     const processingMessage: Message = {
       role: "assistant",
-      content: `📄 Got your resume! Parsing ${file.name} using your browser... This won't cost any credits!`
+      content: `📄 Got your resume! Parsing ${file.name}...`
     };
     setMessages(prev => [...prev, processingMessage]);
 
     try {
-      // Parse resume on client-side (uses user's compute, zero server credits!)
-      const parsed = await parseResume(file);
+      // Parse resume via server
+      const fileData = await file.arrayBuffer();
+      const bytes = new Uint8Array(fileData);
+      const binaryString = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+      const base64Data = btoa(binaryString);
+      const parsed = await parseResumeMutation.mutateAsync({
+        resumeBase64: `data:${file.type};base64,${base64Data}`,
+      }) as ParsedResume;
       
       // 1. Upload resume file to S3
-      const fileData = await file.arrayBuffer();
-      const base64Data = Buffer.from(fileData).toString('base64');
       await uploadResumeMutation.mutateAsync({
         fileName: file.name,
         fileData: base64Data,

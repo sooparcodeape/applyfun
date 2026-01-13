@@ -487,3 +487,12 @@
 - [x] Show resume file metadata (filename, upload date, file size)
 - [x] Handle resume replacement (delete old file when uploading new one)
 - [x] Profile page resume upload auto-parses and populates skills/experience
+
+### Resume Parsing Bug Fixes
+- [x] Debug and fix resume parsing failure
+- [x] Remove all "zero credits" mentions from UI
+- [x] Remove all "local compute" / "browser compute" mentions from UI
+- [x] Remove all "won't cost any credits" messages
+- [x] Switch to server-side parsing using tRPC
+- [x] Test resume parsing with actual PDF/Word files
+- [x] Add better error handling and logging for parsing failures
