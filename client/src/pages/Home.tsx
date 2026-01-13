@@ -57,8 +57,11 @@ export default function Home() {
           <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto">
             The average Web3 job seeker spends <strong className="text-white">20+ hours per week</strong> filling out applications. 
             We automate the entire process—from finding roles at top crypto companies to submitting tailored applications. 
-            <strong className="text-purple-300"> Get $5 free credits</strong> (5 applications) when you sign up. 
-            Land your dream role faster.
+            <strong className="text-purple-300"> Get $5 free credits</strong> (5 applications) when you sign up.
+          </p>
+          
+          <p className="text-xl md:text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">
+            Enjoy your freedom while it lasts, because apply.fun is getting you employed!
           </p>
           
           {jobStats && jobStats.active > 0 && (

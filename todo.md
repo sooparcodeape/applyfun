@@ -496,3 +496,12 @@
 - [x] Switch to server-side parsing using tRPC
 - [x] Test resume parsing with actual PDF/Word files
 - [x] Add better error handling and logging for parsing failures
+
+### AI Assistant Personality Update
+- [x] Update AI system prompt to overconfident GenZ recruiter personality
+- [x] Add company motto "Enjoy your freedom while it lasts, because apply.fun is getting you employed!"
+- [x] Update AIOnboarding welcome message with new tone
+- [x] Update AI chat responses to use GenZ slang and overconfident tone (via system prompts)
+- [x] Add motto to landing page hero section
+- [x] Add motto to dashboard welcome message
+- [x] Test AI responses to ensure consistent personality

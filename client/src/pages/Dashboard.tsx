@@ -28,6 +28,9 @@ export default function Dashboard() {
             ? "Ready to apply to more crypto jobs?"
             : "Let's get your profile set up to start applying!"}
         </p>
+        <p className="text-sm font-semibold text-purple-400 mt-2">
+          🚀 Enjoy your freedom while it lasts, because apply.fun is getting you employed!
+        </p>
       </div>
 
       {/* Stats Grid */}

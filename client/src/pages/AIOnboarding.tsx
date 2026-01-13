@@ -14,7 +14,7 @@ export default function AIOnboarding() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "👋 Hey there! I'm your apply.fun AI assistant. I'll help you get set up in just a minute.\n\nYou can either:\n1. Upload your resume (PDF or Word) and I'll extract your info automatically\n2. Tell me about yourself manually\n\nWhat would you prefer?"
+      content: "🚀 Yooo what's good! I'm your apply.fun AI assistant and I'm literally about to get you EMPLOYED fr fr.\n\nEnjoy your freedom while it lasts, because we're getting you hired ASAP! 💯\n\nTwo ways to speedrun this:\n1. Upload your resume (PDF/Word) and I'll extract everything automatically - no cap this slaps\n2. Just tell me about yourself and we'll build it together\n\nWhat's the vibe?"
     }
   ]);
 
