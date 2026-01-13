@@ -253,3 +253,56 @@
 - [ ] Weekly summary reports
 - [ ] Low credits warnings
 - [ ] Add email preferences page
+
+#### 2. Public Job Browsing ✅ COMPLETE
+- [x] Create PublicJobs component without auth requirement
+- [x] Make job listing publicly accessible at /jobs
+- [x] Add "Sign up to apply" CTA on job cards for non-authenticated users
+- [x] Keep save/queue features behind auth with redirect to signup
+- [x] Update homepage to redirect to /jobs instead of /login
+- [x] Move authenticated jobs page to /dashboard/jobs
+
+#### 3. Auto-Apply Engine ✅ COMPLETE
+- [x] Create AutoApplyEngine component with progress tracking
+- [x] Build form detection simulation (MVP version)
+- [x] Implement auto-fill logic placeholder
+- [x] Add progress bar and status indicators
+- [x] Track success/failure for each application
+- [x] Integrate with Queue page
+- [x] Show application results with links
+- [x] Redirect to Applications page on completion
+- [x] Display cost breakdown before starting
+
+#### 4. Application Success Tracking ✅ COMPLETE
+- [x] Create comprehensive Applications page with status tracking
+- [x] Add status update UI with dialog
+- [x] Build stats dashboard (total, interviews, offers, success rate)
+- [x] Implement status filters (all, pending, applied, viewed, rejected, interview, offer, accepted)
+- [x] Add notes field for each application
+- [x] Show application timeline (applied date, last updated)
+- [x] Display application method (auto vs manual)
+- [x] Add external link to job posting
+- [x] Update backend to support notes in status updates
+
+#### 5. Smart Job Matching ✅ COMPLETE
+- [x] Create job matching algorithm with scoring system
+- [x] Implement skills matching (60% weight)
+- [x] Add experience level matching (20% weight)
+- [x] Include location preference matching (10% weight)
+- [x] Add job type preference matching (10% weight)
+- [x] Create BestMatches component for Jobs page
+- [x] Display match score with progress bar
+- [x] Show matched skills and missing skills
+- [x] Add match indicators (skills, experience, location)
+- [x] Integrate with tRPC endpoints
+
+#### 6. Email Notifications ✅ COMPLETE
+- [x] Create email notification system
+- [x] Add notification for job applications (with success/fail counts)
+- [x] Add notification for application status changes
+- [x] Add notification for new jobs scraped
+- [x] Add notification for user onboarding
+- [x] Add daily summary notification function
+- [x] Integrate notifications with applyAll mutation
+- [x] Integrate notifications with scraper runs
+- [x] Use Manus notifyOwner for all notifications

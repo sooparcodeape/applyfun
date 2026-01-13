@@ -227,12 +227,18 @@ export async function addApplication(application: InsertApplication) {
 
 export async function updateApplicationStatus(
   id: number,
-  status: "pending" | "applied" | "viewed" | "rejected" | "interview" | "offer" | "accepted"
+  status: "pending" | "applied" | "viewed" | "rejected" | "interview" | "offer" | "accepted",
+  notes?: string
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db.update(applications).set({ status, statusUpdatedAt: new Date() }).where(eq(applications.id, id));
+  const updates: any = { status, statusUpdatedAt: new Date() };
+  if (notes !== undefined) {
+    updates.notes = notes;
+  }
+
+  await db.update(applications).set(updates).where(eq(applications.id, id));
   return { success: true };
 }
 

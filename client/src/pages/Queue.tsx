@@ -3,8 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { trpc } from "@/lib/trpc";
 import { Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { AutoApplyEngine } from "@/components/AutoApplyEngine";
+import { useState } from "react";
+import { useLocation } from "wouter";
 
 export default function Queue() {
+  const [showAutoApply, setShowAutoApply] = useState(false);
+  const [, setLocation] = useLocation();
   const { data: queueItems, isLoading } = trpc.queue.list.useQuery({ status: 'pending' });
   const { data: credits } = trpc.credits.balance.useQuery();
   const utils = trpc.useUtils();
@@ -46,9 +51,15 @@ export default function Queue() {
       return;
     }
 
-    if (confirm(`Apply to ${queueItems.length} jobs? This will cost $${(totalCost / 100).toFixed(2)}`)) {
-      applyToJobs.mutate();
-    }
+    setShowAutoApply(true);
+  };
+
+  const handleAutoApplyComplete = () => {
+    setShowAutoApply(false);
+    utils.queue.list.invalidate();
+    utils.applications.list.invalidate();
+    utils.credits.balance.invalidate();
+    setLocation('/applications');
   };
 
   if (isLoading) {
@@ -96,6 +107,11 @@ export default function Queue() {
             </Button>
           </CardContent>
         </Card>
+      ) : showAutoApply ? (
+        <AutoApplyEngine 
+          queueItems={queueItems} 
+          onComplete={handleAutoApplyComplete}
+        />
       ) : (
         <div className="space-y-4">
           {queueItems.map((item: any) => (

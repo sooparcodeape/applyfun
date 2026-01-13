@@ -15,6 +15,7 @@ import Jobs from "./pages/Jobs";
 import Queue from "./pages/Queue";
 import Applications from "./pages/Applications";
 import Credits from "./pages/Credits";
+import PublicJobs from "./pages/PublicJobs";
 
 function Router() {
   return (
@@ -31,7 +32,8 @@ function Router() {
           <Profile />
         </DashboardLayout>
       </Route>
-      <Route path="/jobs">
+      <Route path="/jobs" component={PublicJobs} />
+      <Route path="/dashboard/jobs">
         <DashboardLayout>
           <Jobs />
         </DashboardLayout>

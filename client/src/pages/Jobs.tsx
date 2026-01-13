@@ -14,6 +14,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
+import { BestMatches } from "@/components/BestMatches";
 
 export default function Jobs() {
   const [search, setSearch] = useState("");
@@ -77,6 +78,8 @@ export default function Jobs() {
 
   return (
     <div className="space-y-6">
+      {/* Best Matches Section */}
+      <BestMatches onSaveJob={handleSaveJob} onAddToQueue={handleAddToQueue} />
       <div>
         <h1 className="text-3xl font-bold">Browse Crypto Jobs</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">

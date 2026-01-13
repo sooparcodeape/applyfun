@@ -466,6 +466,23 @@ export const appRouter = router({
       // Deduct credits
       await deductCredits(ctx.user.id, successful * 100, 'application_fee', `Applied to ${successful} jobs`);
 
+      // Send notification
+      if (successful > 0) {
+        const { notifyJobApplication } = await import('./email-notifications');
+        const jobsApplied = queueItems.slice(0, successful).map(item => ({
+          title: item.job.title,
+          company: item.job.company,
+          url: item.job.applyUrl,
+        }));
+        await notifyJobApplication({
+          userName: ctx.user.name || ctx.user.email,
+          userEmail: ctx.user.email,
+          jobsApplied,
+          successCount: successful,
+          failedCount: failed,
+        });
+      }
+
       return { successful, failed };
     }),
   }),
@@ -473,7 +490,21 @@ export const appRouter = router({
   scrapers: router({
     runAll: protectedProcedure.mutation(async () => {
       const { runAllScrapers } = await import("./scrapers/all-scrapers");
-      return await runAllScrapers();
+      const result = await runAllScrapers();
+      
+      // Send notification if new jobs found
+      if (result.total > 0) {
+        const { notifyNewJobs } = await import('./email-notifications');
+        const { getAllJobs } = await import('./db-jobs');
+        const jobsData = await getAllJobs({ limit: 1 });
+        await notifyNewJobs({
+          source: 'All Sources',
+          newJobsCount: result.total,
+          totalActiveJobs: jobsData.total,
+        });
+      }
+      
+      return result;
     }),
     
     web3Career: protectedProcedure.mutation(async () => {
@@ -543,10 +574,30 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
         status: z.enum(["pending", "applied", "viewed", "rejected", "interview", "offer", "accepted"]),
+        notes: z.string().optional(),
       }))
-      .mutation(({ input }) => updateApplicationStatus(input.id, input.status)),
+      .mutation(({ input }) => updateApplicationStatus(input.id, input.status, input.notes)),
     
     stats: protectedProcedure.query(({ ctx }) => getApplicationStats(ctx.user.id)),
+  }),
+  
+  matching: router({
+    calculateMatch: protectedProcedure
+      .input(z.object({ jobId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const { calculateJobMatch } = await import('./job-matching');
+        const { getJobById } = await import('./db-jobs');
+        const job = await getJobById(input.jobId);
+        if (!job) throw new Error('Job not found');
+        return await calculateJobMatch(ctx.user.id, job);
+      }),
+    
+    bestMatches: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ ctx, input }) => {
+        const { getBestMatchingJobs } = await import('./job-matching');
+        return await getBestMatchingJobs(ctx.user.id, input.limit || 20);
+      }),
   }),
 });
 
