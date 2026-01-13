@@ -26,6 +26,7 @@ import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
+import { FloatingChatButton } from "./FloatingChatButton";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -251,6 +252,7 @@ function DashboardLayoutContent({
       <SidebarInset>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </SidebarInset>
+      <FloatingChatButton />
     </>
   );
 }

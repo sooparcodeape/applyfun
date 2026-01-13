@@ -78,7 +78,11 @@ export function AIChatTerminal({ mode, onComplete, jobIds = [] }: AIChatTerminal
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    console.log('[Client] handleSend called, input:', input, 'isLoading:', isLoading);
+    if (!input.trim() || isLoading) {
+      console.log('[Client] Skipping send - empty input or already loading');
+      return;
+    }
 
     const userMessage: Message = {
       role: "user",
@@ -91,11 +95,13 @@ export function AIChatTerminal({ mode, onComplete, jobIds = [] }: AIChatTerminal
     setIsLoading(true);
 
     try {
+      console.log('[Client] Sending chat message:', input);
       const response = await chatMutation.mutateAsync({
         message: input,
         context: mode,
         history: messages.map(m => ({ role: m.role, content: m.content }))
       });
+      console.log('[Client] Received response:', response);
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -112,9 +118,11 @@ export function AIChatTerminal({ mode, onComplete, jobIds = [] }: AIChatTerminal
         }, 2000);
       }
     } catch (error) {
+      console.error('[Client] Chat error:', error);
+      alert(`Chat error: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: "Sorry, I encountered an error. Please try again or contact support if this persists.",
+        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again or contact support if this persists.`,
         timestamp: new Date()
       }]);
     } finally {
@@ -188,7 +196,7 @@ export function AIChatTerminal({ mode, onComplete, jobIds = [] }: AIChatTerminal
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder="Type your message..."
               className="flex-1 bg-slate-950 border-slate-700 focus:border-purple-500"
               disabled={isLoading}

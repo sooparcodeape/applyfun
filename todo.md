@@ -430,3 +430,36 @@
 - [x] Updated signup to use setTimeout + setLocation instead of window.location.href
 - [x] AI onboarding now accessible immediately after signup without auth loop
 - [ ] Test complete signup → AI onboarding → dashboard flow
+
+
+### AI Chat Not Responding Bug
+- [ ] Debug why AI chat doesn't respond to user messages
+- [ ] Check if LLM invocation is working
+- [ ] Verify response format matches expected structure
+- [ ] Add error logging to identify the issue
+- [ ] Test AI chat with sample messages
+
+
+### AI Chat Not Responding Bug ✅ FIXED
+- [x] Debug why AI chat doesn't respond to messages (custom component state issue)
+- [x] Replaced custom AIChatTerminal with pre-built AIChatBox component
+- [x] Backend was working correctly, issue was frontend state management
+- [x] AI chat now working perfectly with instant responses
+- [x] Test AI chat end-to-end - fully functional
+
+
+### AI Chat as Primary Interface
+- [x] Enhance AI system prompt to handle job queries and actions
+- [x] Create separate prompts for onboarding vs assistant context
+- [x] Make chat accessible from all dashboard pages (floating button)
+- [x] Add FloatingChatButton component with modal interface
+- [ ] Wire up actual chat functionality to FloatingChatButton
+- [ ] Add function calling/tool use for checking new jobs
+- [ ] Add function calling for bulk apply actions
+- [ ] Add function calling for credit balance and top-up
+- [ ] Add function calling for viewing applications
+- [ ] Add function calling for profile updates
+- [ ] Add chat history persistence across sessions
+- [ ] Implement natural language understanding for job filters
+- [ ] Add quick action suggestions in chat
+- [ ] Test conversational flows for common user actions

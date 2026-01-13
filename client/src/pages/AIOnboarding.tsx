@@ -1,30 +1,67 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { AIChatTerminal } from "@/components/AIChatTerminal";
-import { Card } from "@/components/ui/card";
+import { AIChatBox, type Message } from "@/components/AIChatBox";
+import { trpc } from "@/lib/trpc";
 
 export default function AIOnboarding() {
   const [, setLocation] = useLocation();
-  const [isComplete, setIsComplete] = useState(false);
+  
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "\ud83d\udc4b Hey there! I'm your apply.fun AI assistant. I'll help you get set up in just a minute. First, tell me a bit about yourself - what kind of Web3 role are you looking for?"
+    }
+  ]);
 
-  const handleComplete = () => {
-    setIsComplete(true);
-    // Redirect to dashboard after a brief delay
-    setTimeout(() => {
-      setLocation("/dashboard");
-    }, 2000);
+  const chatMutation = trpc.ai.chat.useMutation();
+
+  const handleSendMessage = async (content: string) => {
+    const userMessage: Message = { role: "user", content };
+    setMessages(prev => [...prev, userMessage]);
+
+    try {
+      const response = await chatMutation.mutateAsync({
+        message: content,
+        context: "onboarding",
+        history: messages
+      });
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: response.message
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+      if (response.onboardingComplete) {
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 2000);
+      }
+    } catch (error) {
+      const errorMessage: Message = {
+        role: "assistant",
+        content: `Sorry, I encountered an error. Please try again.`
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl bg-slate-900/50 border-purple-500/30 p-6">
-        <AIChatTerminal mode="onboarding" onComplete={handleComplete} />
-        {isComplete && (
-          <div className="mt-4 text-center text-purple-300 animate-pulse">
-            Taking you to your dashboard...
-          </div>
-        )}
-      </Card>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        <div className="mb-4 text-center">
+          <h1 className="text-3xl font-bold text-white mb-2">apply.fun AI Assistant</h1>
+          <p className="text-purple-200">Let's get you set up \ud83d\udc4b</p>
+        </div>
+        <AIChatBox
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          isLoading={chatMutation.isPending}
+          placeholder="Type your message..."
+          height="600px"
+        />
+      </div>
     </div>
   );
 }
