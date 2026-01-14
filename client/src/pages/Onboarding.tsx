@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,14 @@ export default function Onboarding() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
+  const [editedData, setEditedData] = useState<any>(null);
+
+  // Initialize editedData when parsedData changes
+  useEffect(() => {
+    if (parsedData && !editedData) {
+      setEditedData({ ...parsedData });
+    }
+  }, [parsedData, editedData]);
 
   const parseResumeMutation = trpc.profile.parseResume.useMutation({
     onSuccess: (data) => {
@@ -70,8 +78,21 @@ export default function Onboarding() {
   });
 
   const handleConfirmParsedData = () => {
-    // Save parsed data to profile
-    updateProfileMutation.mutate(parsedData);
+    // Save edited data to profile with proper field mapping
+    updateProfileMutation.mutate({
+      name: editedData.name,
+      email: editedData.email,
+      phone: editedData.phone,
+      location: editedData.location,
+      skills: editedData.skills || [],
+      experience: editedData.experience || [],
+      education: editedData.education || [],
+      summary: editedData.summary,
+      github: editedData.links?.github || editedData.github,
+      linkedin: editedData.links?.linkedin || editedData.linkedin,
+      twitter: editedData.links?.twitter || editedData.twitter,
+      telegram: editedData.links?.telegram || editedData.telegram,
+    });
   };
 
   if (selectedMode === "easy" && !parsedData) {
@@ -158,19 +179,43 @@ export default function Onboarding() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Full Name</label>
-                <p className="text-muted-foreground">{parsedData.name || "Not found"}</p>
+                <input
+                  type="text"
+                  value={editedData?.name || ""}
+                  onChange={(e) => setEditedData({ ...editedData, name: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  placeholder="Your full name"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Email</label>
-                <p className="text-muted-foreground">{parsedData.email || "Not found"}</p>
+                <input
+                  type="email"
+                  value={editedData?.email || ""}
+                  onChange={(e) => setEditedData({ ...editedData, email: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  placeholder="your@email.com"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Phone</label>
-                <p className="text-muted-foreground">{parsedData.phone || "Not found"}</p>
+                <input
+                  type="tel"
+                  value={editedData?.phone || ""}
+                  onChange={(e) => setEditedData({ ...editedData, phone: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  placeholder="+1 (555) 123-4567"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Location</label>
-                <p className="text-muted-foreground">{parsedData.location || "Not found"}</p>
+                <input
+                  type="text"
+                  value={editedData?.location || ""}
+                  onChange={(e) => setEditedData({ ...editedData, location: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                  placeholder="City, State/Country"
+                />
               </div>
             </div>
 

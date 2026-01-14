@@ -127,6 +127,8 @@
 - [x] Implement persistent sessions - user should stay logged in forever unless they press logout (Cookie maxAge set to 10 years)
 - [x] Fix Jobs page crash (No crash detected - page working correctly)
 - [ ] Fix login form submission not triggering mutation
+- [x] Add edit functionality to resume review screen - users should be able to edit parsed data (Added editable input fields for name, email, phone, location)
+- [x] Fix API mutation error when clicking "Looks Good! Continue" after resume parsing (Fixed field mapping in updateProfileMutation call)
 - [x] Fix /dashboard/jobs route crash (Added error handling to BestMatches component to prevent crashes from missing profile data)
 - [x] Fix signup redirect - users being redirected to signup page instead of AI onboarding after successful registration (Increased delay to 500ms)
 - [x] Fix login redirect issue - successful login shows sign-in screen instead of dashboard content (Changed invalidate to refetch, increased delay to 300ms)
