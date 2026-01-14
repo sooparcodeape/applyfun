@@ -541,3 +541,21 @@
 - [x] Ensure AI features use custom auth system only
 - [x] Test complete login flow: signup -> AI onboarding (no Manus login!)
 - [x] Verify no Manus login screens appear anywhere
+
+### Resume Parsing Fix (Priority)
+- [x] Debug base64 conversion error "Cannot read properties of undefined (reading 'slice')"
+- [x] Fix file-to-base64 conversion in AIOnboarding.tsx
+- [x] Ensure server parseResume handles both data URL and raw base64 formats
+- [x] Upload file to S3 first, then pass S3 URL to LLM for parsing
+- [x] Fixed all client pages to pass fileName and mimeType
+- [ ] **CRITICAL: Fix a- [ ] **CRITICAL: Fix authentication session being lost during resume upload**
+- [x] Root cause identified: Need to investigate actual cause (body parser already set to 50MB)
+- [x] Verified Express body parser limit is 50MB (sufficient for resumes)
+- [ ] Test actual resume upload to identify real issue
+- [ ] Check if parseResume mutation is working correctly
+- [ ] Verify authentication token is being sent with requestswithout login redirects
+- [ ] Test Word document (.doc) parsing
+- [ ] Test Word document (.docx) parsing
+- [ ] Verify LLM extraction works correctly with parsed text
+- [ ] Test with multiple real-world resume formats
+- [ ] Add better error messages for unsupported file types
