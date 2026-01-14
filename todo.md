@@ -631,3 +631,8 @@
 - [x] Fix pdf-parse TypeScript import error (Property 'default' does not exist)
 - [x] Test complete signup flow: signup -> auto sign-in -> AI onboarding -> manual profile -> dashboard
 - [x] Implement job application submission functionality (Apply button) - MVP simulation ready
+
+### Enhancements - Current Session
+- [x] Add "Skip for now" button on AI onboarding page
+- [x] Test resume upload with real PDF file end-to-end - Successfully extracts phone, location, and all skills
+- [x] Implement real browser automation for job application submission (Puppeteer) - Detects forms, auto-fills data, submits applications

@@ -160,9 +160,9 @@ export default function AIOnboarding() {
         content: `✅ Perfect! I've extracted your information:\n\n` +
           `**Name:** ${parsed.name || "Not found"}\n` +
           `**Email:** ${parsed.email || "Not found"}\n` +
-          `**Skills:** ${parsed.skills.slice(0, 5).join(", ")}${parsed.skills.length > 5 ? " and more" : ""}\n` +
-          `**Experience:** ${parsed.experience.length} positions\n` +
-          `**Education:** ${parsed.education.length} entries\n\n` +
+          `**Skills:** ${parsed.skills?.slice(0, 5).join(", ") || "Not found"}${parsed.skills && parsed.skills.length > 5 ? " and more" : ""}\n` +
+          `**Experience:** ${parsed.experience?.length || 0} positions\n` +
+          `**Education:** ${parsed.education?.length || 0} entries\n\n` +
           `Your profile has been auto-filled! You're all set to start applying. Ready to see matching jobs?`
       };
       setMessages(prev => [...prev, successMessage]);
@@ -240,8 +240,8 @@ export default function AIOnboarding() {
             height="600px"
           />
           
-          {/* Resume Upload Button */}
-          <div className="mt-4 flex justify-center">
+          {/* Resume Upload Button and Skip */}
+          <div className="mt-4 flex justify-center gap-3">
             <input
               ref={fileInputRef}
               type="file"
@@ -267,6 +267,13 @@ export default function AIOnboarding() {
                   Upload Resume (PDF/Word)
                 </>
               )}
+            </Button>
+            <Button
+              onClick={() => setLocation("/dashboard")}
+              variant="ghost"
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              Skip for now
             </Button>
           </div>
         </div>

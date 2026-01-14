@@ -485,21 +485,54 @@ export const appRouter = router({
         throw new Error('Insufficient credits');
       }
 
-      // Apply to all jobs
+      // Get user profile for auto-fill data
+      const { getUserProfile } = await import('./db');
+      const userProfile = await getUserProfile(ctx.user.id);
+
+      // Apply to all jobs with browser automation
       const { addApplication } = await import('./db-jobs');
+      const { autoApplyToJob } = await import('./job-automation');
       let successful = 0;
       let failed = 0;
 
       for (const item of queueItems) {
         try {
+          // Attempt browser automation
+          const automationResult = await autoApplyToJob(item.job.applyUrl, {
+            fullName: ctx.user.name || '',
+            email: ctx.user.email,
+            phone: userProfile?.phone || '',
+            location: userProfile?.location || '',
+            resumeUrl: userProfile?.resumeUrl || undefined,
+            linkedinUrl: userProfile?.linkedinUrl || undefined,
+            githubUrl: userProfile?.githubUrl || undefined,
+            portfolioUrl: userProfile?.portfolioUrl || undefined,
+          });
+
+          // Record application in database
           await addApplication({
             userId: ctx.user.id,
             jobId: item.queueItem.jobId,
-            status: 'applied',
+            status: automationResult.success ? 'applied' : 'pending',
+            notes: automationResult.message,
           });
+          
           await deleteFromQueue(item.queueItem.id);
-          successful++;
+          
+          if (automationResult.success) {
+            successful++;
+          } else {
+            failed++;
+          }
         } catch (error) {
+          console.error(`[Apply All] Error applying to job ${item.job.id}:`, error);
+          // Still record the attempt
+          await addApplication({
+            userId: ctx.user.id,
+            jobId: item.queueItem.jobId,
+            status: 'rejected',
+            notes: error instanceof Error ? error.message : 'Unknown error',
+          });
           failed++;
         }
       }
