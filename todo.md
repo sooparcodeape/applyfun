@@ -661,3 +661,8 @@
 - [x] Make navigation responsive for mobile devices - DashboardLayout uses shadcn sidebar with built-in mobile support
 - [x] Ensure all pages scale properly on phones, tablets, and desktops - Fixed Home, Dashboard, Jobs pages
 - [x] Test responsive design across multiple breakpoints - Tested on desktop, buttons and text display correctly
+
+### Mobile Enhancements
+- [x] Add hamburger menu for mobile navigation with overlay - Already implemented via shadcn Sidebar with SidebarTrigger
+- [x] Optimize images with responsive loading (srcset) and compression - Reduced logo-icon from 5.1MB to 242KB (95%), created WebP versions
+- [x] Implement swipe gestures for job cards (left=queue, right=save) - Added react-swipeable with touch gestures

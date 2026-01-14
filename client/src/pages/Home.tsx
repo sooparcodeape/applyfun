@@ -28,7 +28,10 @@ export default function Home() {
       <header className="border-b border-purple-500/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src="/logo-icon.png" alt="apply.fun" className="h-10 w-10" />
+            <picture>
+              <source srcSet="/logo-icon.webp" type="image/webp" />
+              <img src="/logo-icon.png" alt="apply.fun" className="h-10 w-10" loading="eager" />
+            </picture>
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               apply.fun
             </span>
