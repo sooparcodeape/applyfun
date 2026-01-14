@@ -21,10 +21,10 @@ export default function Signup() {
         toast.success('Account created! Redirecting to onboarding...');
         // Refetch auth state to get updated user data
         await utils.auth.me.refetch();
-        // Wait a bit longer to ensure the refetch completes
+        // Wait longer to ensure the refetch completes and AIOnboarding can read the user
         setTimeout(() => {
           setLocation('/ai-onboarding');
-        }, 300);
+        }, 500);
       } else {
         toast.error(data.error || 'Registration failed');
       }

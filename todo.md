@@ -127,6 +127,7 @@
 - [x] Implement persistent sessions - user should stay logged in forever unless they press logout (Cookie maxAge set to 10 years)
 - [x] Fix Jobs page crash (No crash detected - page working correctly)
 - [ ] Fix login form submission not triggering mutation
+- [x] Fix signup redirect - users being redirected to signup page instead of AI onboarding after successful registration (Increased delay to 500ms)
 - [x] Fix login redirect issue - successful login shows sign-in screen instead of dashboard content (Changed invalidate to refetch, increased delay to 300ms)
 - [x] Improve resume parsing to extract skills, work experience, and education (Added education table and extraction logic)
 - [x] Test browser automation with real job applications (Chrome working, Puppeteer launching successfully)
