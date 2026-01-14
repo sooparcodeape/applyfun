@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` ADD `writing_sample` text;

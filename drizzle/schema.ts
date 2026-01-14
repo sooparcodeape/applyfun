@@ -136,6 +136,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   yearsOfExperience: int("years_of_experience"),
   currentSalary: int("current_salary"),
   expectedSalary: int("expected_salary"),
+  writingSample: text("writing_sample"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

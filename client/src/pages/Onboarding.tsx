@@ -13,6 +13,8 @@ export default function Onboarding() {
   const [isUploading, setIsUploading] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
   const [editedData, setEditedData] = useState<any>(null);
+  const [writingSample, setWritingSample] = useState<string>("");
+  const [showWritingSample, setShowWritingSample] = useState(false);
 
   // Initialize editedData when parsedData changes
   useEffect(() => {
@@ -78,6 +80,11 @@ export default function Onboarding() {
   });
 
   const handleConfirmParsedData = () => {
+    // After confirming parsed data, show writing sample step
+    setShowWritingSample(true);
+  };
+
+  const handleSubmitWithWritingSample = () => {
     // Save edited data to profile with proper field mapping
     updateProfileMutation.mutate({
       name: editedData.name,
@@ -92,6 +99,7 @@ export default function Onboarding() {
       linkedin: editedData.links?.linkedin || editedData.linkedin,
       twitter: editedData.links?.twitter || editedData.twitter,
       telegram: editedData.links?.telegram || editedData.telegram,
+      writingSample: writingSample || undefined,
     });
   };
 
@@ -168,6 +176,87 @@ export default function Onboarding() {
                 Skip for Now
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show writing sample step after review
+  if (showWritingSample) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
+        <Card className="max-w-2xl w-full">
+          <CardHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-purple-500/10 rounded-lg">
+                <FileText className="w-6 h-6 text-purple-500" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Share Your Writing Style</CardTitle>
+                <CardDescription className="mt-1">
+                  Help us personalize your applications with your unique voice
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Paste a sample of your professional writing (cover letter, email, or personal statement). 
+                We'll use this to match your writing style when generating personalized applications.
+              </p>
+              <textarea
+                value={writingSample}
+                onChange={(e) => setWritingSample(e.target.value)}
+                placeholder="Example: I am writing to express my strong interest in the Software Engineer position at your company. Throughout my career, I have developed a passion for building scalable applications...\n\n(Minimum 100 words recommended)"
+                className="w-full min-h-[300px] px-4 py-3 border rounded-lg bg-background resize-none"
+              />
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>{writingSample.split(/\s+/).filter(w => w).length} words</span>
+                <span>{writingSample.length} characters</span>
+              </div>
+            </div>
+
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-500" />
+                Why this helps:
+              </h4>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                <li>• AI learns your tone, vocabulary, and sentence structure</li>
+                <li>• Generated cover letters sound authentically like you</li>
+                <li>• Higher response rates from personalized applications</li>
+                <li>• Your writing sample is private and only used for your applications</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowWritingSample(false)}
+                className="flex-1"
+              >
+                Back to Review
+              </Button>
+              <Button
+                onClick={handleSubmitWithWritingSample}
+                disabled={updateProfileMutation.isPending}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600"
+              >
+                {updateProfileMutation.isPending ? "Saving..." : "Complete Setup"}
+              </Button>
+            </div>
+
+            <button
+              onClick={() => {
+                setWritingSample("");
+                handleSubmitWithWritingSample();
+              }}
+              className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip for now (you can add this later)
+            </button>
           </CardContent>
         </Card>
       </div>

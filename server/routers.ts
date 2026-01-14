@@ -304,6 +304,7 @@ ${extractedText}`,
         linkedin: z.string().optional(),
         twitter: z.string().optional(),
         telegram: z.string().optional(),
+        writingSample: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
@@ -318,6 +319,7 @@ ${extractedText}`,
           linkedinUrl: input.linkedin || null,
           twitterHandle: input.twitter || null,
           telegramHandle: input.telegram || null,
+          writingSample: input.writingSample || null,
         });
 
         // Add skills
