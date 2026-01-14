@@ -57,6 +57,13 @@
       "when": 1768404780941,
       "tag": "0007_careless_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1768410282080,
+      "tag": "0008_complete_thunderball",
+      "breakpoints": true
     }
   ]
 }

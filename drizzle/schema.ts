@@ -262,6 +262,9 @@ export const applications = mysqlTable("applications", {
   statusUpdatedAt: timestamp("status_updated_at").defaultNow().onUpdateNow().notNull(),
   applicationMethod: varchar("application_method", { length: 50 }), // auto, manual
   notes: text("notes"),
+  retryCount: int("retry_count").notNull().default(0),
+  lastRetryAt: timestamp("last_retry_at"),
+  nextRetryAt: timestamp("next_retry_at"),
 }, (table) => ({
   // Unique constraint: user can only apply to each job once
   userJobUnique: unique().on(table.userId, table.jobId),

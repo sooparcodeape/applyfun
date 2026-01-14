@@ -52,10 +52,14 @@ export async function autoApplyToJob(
     });
 
     // Wait a bit for dynamic content to load
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Detect and fill common form fields
-    const fieldsFound = await detectAndFillFormFields(page, applicantData);
+    // Detect ATS platform
+    const atsType = await detectATSPlatform(page);
+    console.log(`[Job Automation] Detected ATS: ${atsType}`);
+
+    // Detect and fill form fields based on ATS type
+    const fieldsFound = await detectAndFillFormFields(page, applicantData, atsType);
 
     if (fieldsFound === 0) {
       return {
@@ -117,15 +121,151 @@ export async function autoApplyToJob(
 }
 
 /**
- * Detect and fill form fields based on common patterns
+ * Detect which ATS platform is being used
+ */
+async function detectATSPlatform(page: Page): Promise<string> {
+  try {
+    const url = page.url().toLowerCase();
+    const bodyHtml = await page.evaluate(() => document.body.innerHTML.toLowerCase());
+    
+    // Greenhouse
+    if (url.includes('greenhouse.io') || url.includes('boards.greenhouse.io') || bodyHtml.includes('greenhouse')) {
+      return 'greenhouse';
+    }
+    
+    // Lever
+    if (url.includes('lever.co') || url.includes('jobs.lever.co') || bodyHtml.includes('lever-frame')) {
+      return 'lever';
+    }
+    
+    // Workable
+    if (url.includes('workable.com') || url.includes('apply.workable.com') || bodyHtml.includes('workable')) {
+      return 'workable';
+    }
+    
+    // Ashby
+    if (url.includes('ashbyhq.com') || url.includes('jobs.ashbyhq.com') || bodyHtml.includes('ashby')) {
+      return 'ashby';
+    }
+    
+    // BambooHR
+    if (url.includes('bamboohr.com') || bodyHtml.includes('bamboohr')) {
+      return 'bamboohr';
+    }
+    
+    // Jobvite
+    if (url.includes('jobvite.com') || bodyHtml.includes('jobvite')) {
+      return 'jobvite';
+    }
+    
+    // SmartRecruiters
+    if (url.includes('smartrecruiters.com') || bodyHtml.includes('smartrecruiters')) {
+      return 'smartrecruiters';
+    }
+    
+    return 'generic';
+  } catch (error) {
+    console.error('[Job Automation] Error detecting ATS:', error);
+    return 'generic';
+  }
+}
+
+/**
+ * Detect and fill form fields based on ATS platform and common patterns
  */
 async function detectAndFillFormFields(
   page: Page,
-  data: JobApplicationData
+  data: JobApplicationData,
+  atsType: string = 'generic'
 ): Promise<number> {
   let fieldsFilledCount = 0;
 
-  // Common field selectors and their data mappings
+  // ATS-specific selectors
+  const atsSelectors: Record<string, any> = {
+    greenhouse: {
+      firstName: ['#first_name', 'input[name="job_application[first_name]"]'],
+      lastName: ['#last_name', 'input[name="job_application[last_name]"]'],
+      email: ['#email', 'input[name="job_application[email]"]'],
+      phone: ['#phone', 'input[name="job_application[phone]"]'],
+      resume: ['input[name="job_application[resume]"]'],
+      coverLetter: ['#cover_letter_text', 'textarea[name="job_application[cover_letter]"]'],
+      linkedin: ['input[name="job_application[linkedin_url]"]'],
+      github: ['input[name="job_application[github_url]"]'],
+    },
+    lever: {
+      name: ['input[name="name"]', '.application-name input'],
+      email: ['input[name="email"]', '.application-email input'],
+      phone: ['input[name="phone"]', '.application-phone input'],
+      resume: ['input[name="resume"]', '.application-resume input'],
+      coverLetter: ['textarea[name="comments"]', '.application-comments textarea'],
+      linkedin: ['input[name="urls[LinkedIn]"]'],
+      github: ['input[name="urls[GitHub]"]'],
+    },
+    workable: {
+      firstName: ['input[name="candidate[firstname]"]'],
+      lastName: ['input[name="candidate[lastname]"]'],
+      email: ['input[name="candidate[email]"]'],
+      phone: ['input[name="candidate[phone]"]'],
+      resume: ['input[name="candidate[resume]"]'],
+      coverLetter: ['textarea[name="candidate[cover_letter]"]'],
+      linkedin: ['input[name="candidate[social_linkedin]"]'],
+      github: ['input[name="candidate[social_github]"]'],
+    },
+  };
+
+  // Try ATS-specific selectors first if available
+  if (atsType !== 'generic' && atsSelectors[atsType]) {
+    const atsMapping = atsSelectors[atsType];
+    
+    // Fill first name
+    if (atsMapping.firstName) {
+      fieldsFilledCount += await fillField(page, atsMapping.firstName, data.fullName.split(' ')[0]);
+    }
+    
+    // Fill last name
+    if (atsMapping.lastName) {
+      fieldsFilledCount += await fillField(page, atsMapping.lastName, data.fullName.split(' ').slice(1).join(' '));
+    }
+    
+    // Fill full name (for Lever)
+    if (atsMapping.name) {
+      fieldsFilledCount += await fillField(page, atsMapping.name, data.fullName);
+    }
+    
+    // Fill email
+    if (atsMapping.email) {
+      fieldsFilledCount += await fillField(page, atsMapping.email, data.email);
+    }
+    
+    // Fill phone
+    if (atsMapping.phone) {
+      fieldsFilledCount += await fillField(page, atsMapping.phone, data.phone);
+    }
+    
+    // Fill LinkedIn
+    if (atsMapping.linkedin && data.linkedinUrl) {
+      fieldsFilledCount += await fillField(page, atsMapping.linkedin, data.linkedinUrl);
+    }
+    
+    // Fill GitHub
+    if (atsMapping.github && data.githubUrl) {
+      fieldsFilledCount += await fillField(page, atsMapping.github, data.githubUrl);
+    }
+    
+    // Fill cover letter
+    if (atsMapping.coverLetter && data.coverLetter) {
+      fieldsFilledCount += await fillField(page, atsMapping.coverLetter, data.coverLetter);
+    }
+    
+    console.log(`[Job Automation] Filled ${fieldsFilledCount} fields using ${atsType} selectors`);
+    
+    // If we filled fields successfully, return early
+    if (fieldsFilledCount > 0) {
+      return fieldsFilledCount;
+    }
+  }
+
+  // Fallback to generic field selectors
   const fieldMappings = [
     // Name fields
     { selectors: ['input[name*="name"]', 'input[id*="name"]', 'input[placeholder*="name"]'], value: data.fullName },
@@ -223,6 +363,28 @@ async function findSubmitButton(page: Page) {
   }
 
   return null;
+}
+
+/**
+ * Helper function to fill a field with multiple selector options
+ */
+async function fillField(page: Page, selectors: string[], value: string): Promise<number> {
+  for (const selector of selectors) {
+    try {
+      const elements = await page.$$(selector);
+      for (const element of elements) {
+        const isVisible = await element.isVisible();
+        if (isVisible) {
+          await element.click();
+          await element.type(value, { delay: 50 });
+          return 1; // Successfully filled one field
+        }
+      }
+    } catch (error) {
+      // Field not found or not fillable, try next selector
+    }
+  }
+  return 0; // No fields filled
 }
 
 /**

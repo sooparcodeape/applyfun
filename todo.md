@@ -129,6 +129,9 @@
 - [ ] Fix login form submission not triggering mutation
 - [x] Improve resume parsing to extract skills, work experience, and education (Added education table and extraction logic)
 - [x] Test browser automation with real job applications (Chrome working, Puppeteer launching successfully)
+- [x] Improve form detection logic to support Greenhouse, Lever, Workable and dynamic forms (Added ATS detection + platform-specific selectors)
+- [x] Add application retry mechanism with exponential backoff (Added retry fields, processor with exponential backoff 30min->1hr->2hr)
+- [x] Enhance resume parser to extract detailed work experience dates and technical skills (Enhanced prompt + schema for dates, locations, descriptions, GPA)
 
 ### Onboarding Flow
 - [x] Onboarding selection page with Easy vs Manual options

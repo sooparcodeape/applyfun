@@ -181,7 +181,35 @@ export const appRouter = router({
             },
             {
               role: 'user',
-              content: `Parse this resume text and extract all information accurately. For education, extract each degree/institution as a separate entry. For experience, include all job positions. For skills, list all technical and professional skills mentioned.\n\nReturn only valid JSON.\n\nResume Text:\n${extractedText}`,
+              content: `Parse this resume text and extract ALL information with maximum detail and accuracy.
+
+**CRITICAL INSTRUCTIONS:**
+1. **Skills**: Extract EVERY technical skill, programming language, framework, tool, platform, and technology mentioned. Include both explicit skills sections and skills mentioned in job descriptions. Categorize if possible (e.g., "Python", "React", "AWS", "Machine Learning", "Agile").
+
+2. **Experience**: For EACH job position, extract:
+   - Exact job title
+   - Company name
+   - Start date and end date (or "Present") in format "Month Year - Month Year" (e.g., "Jan 2020 - Dec 2022")
+   - Location if mentioned
+   - Key responsibilities and achievements (2-3 bullet points)
+
+3. **Education**: For EACH degree/certification:
+   - Institution name
+   - Degree type and field of study
+   - Graduation year or duration
+   - GPA if mentioned
+   - Relevant coursework or honors
+
+4. **Contact & Links**: Extract email, phone, LinkedIn, GitHub, portfolio, Twitter, Telegram, personal website.
+
+5. **Summary**: Extract professional summary/objective if present.
+
+Be thorough and precise. If dates are ranges, preserve them. If information is missing, use empty strings.
+
+Return only valid JSON.
+
+Resume Text:
+${extractedText}`,
             },
           ],
           response_format: {
@@ -204,7 +232,10 @@ export const appRouter = router({
                       properties: {
                         title: { type: 'string' },
                         company: { type: 'string' },
-                        duration: { type: 'string' },
+                        startDate: { type: 'string' },
+                        endDate: { type: 'string' },
+                        location: { type: 'string' },
+                        description: { type: 'string' },
                       },
                       required: ['title', 'company'],
                       additionalProperties: false,
@@ -218,12 +249,16 @@ export const appRouter = router({
                         institution: { type: 'string' },
                         degree: { type: 'string' },
                         fieldOfStudy: { type: 'string' },
-                        duration: { type: 'string' },
+                        startDate: { type: 'string' },
+                        endDate: { type: 'string' },
+                        gpa: { type: 'string' },
                       },
                       required: ['institution'],
                       additionalProperties: false,
                     },
                   },
+                  summary: { type: 'string' },
+                  portfolio: { type: 'string' },
                   github: { type: 'string' },
                   linkedin: { type: 'string' },
                   twitter: { type: 'string' },
@@ -250,14 +285,21 @@ export const appRouter = router({
         experience: z.array(z.object({
           title: z.string(),
           company: z.string(),
-          duration: z.string().optional(),
+          startDate: z.string().optional(),
+          endDate: z.string().optional(),
+          location: z.string().optional(),
+          description: z.string().optional(),
         })).optional(),
         education: z.array(z.object({
           institution: z.string(),
           degree: z.string().optional(),
           fieldOfStudy: z.string().optional(),
-          duration: z.string().optional(),
+          startDate: z.string().optional(),
+          endDate: z.string().optional(),
+          gpa: z.string().optional(),
         })).optional(),
+        summary: z.string().optional(),
+        portfolio: z.string().optional(),
         github: z.string().optional(),
         linkedin: z.string().optional(),
         twitter: z.string().optional(),
@@ -292,14 +334,31 @@ export const appRouter = router({
         // Add work experiences
         if (input.experience && input.experience.length > 0) {
           for (const exp of input.experience) {
+            // Parse dates if provided
+            let startDate = null;
+            let endDate = null;
+            let isCurrent = 0;
+            
+            if (exp.startDate) {
+              startDate = new Date(exp.startDate);
+            }
+            if (exp.endDate) {
+              if (exp.endDate.toLowerCase().includes('present') || exp.endDate.toLowerCase().includes('current')) {
+                isCurrent = 1;
+              } else {
+                endDate = new Date(exp.endDate);
+              }
+            }
+            
             await addWorkExperience({
               userId: ctx.user.id,
               company: exp.company,
               position: exp.title,
-              description: exp.duration || '',
-              startDate: new Date(),
-              endDate: null,
-              isCurrent: 0,
+              description: exp.description || '',
+              location: exp.location || null,
+              startDate: startDate || new Date(),
+              endDate: endDate,
+              isCurrent: isCurrent,
             });
           }
         }
@@ -307,15 +366,31 @@ export const appRouter = router({
         // Add education
         if (input.education && input.education.length > 0) {
           for (const edu of input.education) {
+            // Parse dates if provided
+            let startDate = null;
+            let endDate = null;
+            let isCurrent = 0;
+            
+            if (edu.startDate) {
+              startDate = new Date(edu.startDate);
+            }
+            if (edu.endDate) {
+              if (edu.endDate.toLowerCase().includes('present') || edu.endDate.toLowerCase().includes('current')) {
+                isCurrent = 1;
+              } else {
+                endDate = new Date(edu.endDate);
+              }
+            }
+            
             await addEducation({
               userId: ctx.user.id,
               institution: edu.institution,
               degree: edu.degree || null,
               fieldOfStudy: edu.fieldOfStudy || null,
-              description: edu.duration || null,
-              startDate: null,
-              endDate: null,
-              isCurrent: 0,
+              description: edu.gpa ? `GPA: ${edu.gpa}` : null,
+              startDate: startDate,
+              endDate: endDate,
+              isCurrent: isCurrent,
             });
           }
         }
@@ -583,12 +658,21 @@ export const appRouter = router({
             portfolioUrl: userProfile?.portfolioUrl || undefined,
           });
 
+          // Calculate next retry time with exponential backoff (if failed)
+          let nextRetryAt = null;
+          if (!automationResult.success) {
+            const retryDelayMinutes = Math.min(30 * Math.pow(2, 0), 1440); // Start with 30min, max 24 hours
+            nextRetryAt = new Date(Date.now() + retryDelayMinutes * 60 * 1000);
+          }
+
           // Record application in database
           await addApplication({
             userId: ctx.user.id,
             jobId: item.queueItem.jobId,
             status: automationResult.success ? 'applied' : 'pending',
             notes: automationResult.message,
+            retryCount: 0,
+            nextRetryAt: nextRetryAt,
           });
           
           await deleteFromQueue(item.queueItem.id);
@@ -632,6 +716,13 @@ export const appRouter = router({
       }
 
       return { successful, failed };
+    }),
+  }),
+  
+  retryProcessor: router({
+    processRetries: protectedProcedure.mutation(async () => {
+      const { triggerRetryProcessor } = await import('./retry-processor');
+      return await triggerRetryProcessor();
     }),
   }),
   

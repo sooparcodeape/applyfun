@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `applications` ADD `retry_count` int DEFAULT 0 NOT NULL;\nALTER TABLE `applications` ADD `last_retry_at` timestamp;\nALTER TABLE `applications` ADD `next_retry_at` timestamp;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute ALTER TABLE `applications` ADD `retry_count` int DEFAULT 0 NOT NULL;\nALTER TABLE `applications` ADD `last_retry_at` timestamp;\nALTER TABLE `applications` ADD `next_retry_at` timestamp;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1194
+}
