@@ -130,8 +130,9 @@ export const appRouter = router({
         try {
           if (mimeType === 'application/pdf') {
             // Use pdf-parse for PDF files
-            const pdfParse = (await import('pdf-parse')).default;
-            const pdfData = await pdfParse(fileBuffer);
+            const { PDFParse } = await import('pdf-parse');
+            const parser = new PDFParse({ data: fileBuffer });
+            const pdfData = await parser.getText();
             extractedText = pdfData.text;
           } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
             // Use mammoth for Word documents

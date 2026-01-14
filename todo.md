@@ -628,3 +628,6 @@
 
 ### Bug Fixes - Current Session
 - [x] Fix Queue page tags.map() TypeError by parsing JSON string tags field
+- [x] Fix pdf-parse TypeScript import error (Property 'default' does not exist)
+- [x] Test complete signup flow: signup -> auto sign-in -> AI onboarding -> manual profile -> dashboard
+- [x] Implement job application submission functionality (Apply button) - MVP simulation ready
