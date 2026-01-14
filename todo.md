@@ -123,6 +123,8 @@
 
 ### Bug Fixes
 - [x] Fix React key duplication error for duplicate location names in Jobs page
+- [x] Fix endless sign in loop when attempting to log in (Session persistence working - users stay logged in)
+- [x] Implement persistent sessions - user should stay logged in forever unless they press logout (Cookie maxAge set to 10 years)
 
 ### Onboarding Flow
 - [x] Onboarding selection page with Easy vs Manual options

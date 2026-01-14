@@ -58,7 +58,7 @@ export const appRouter = router({
             httpOnly: true,
             secure: isSecure,
             sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            maxAge: 10 * 365 * 24 * 60 * 60 * 1000, // 10 years - persistent session
             path: '/',
           });
         }
@@ -87,7 +87,7 @@ export const appRouter = router({
             httpOnly: true,
             secure: false, // Temporarily disabled for debugging
             sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+            maxAge: 10 * 365 * 24 * 60 * 60 * 1000, // 10 years - persistent session
             path: '/',
           });
           console.log('[LOGIN] Cookie set successfully');

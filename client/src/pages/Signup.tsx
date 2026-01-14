@@ -16,11 +16,15 @@ export default function Signup() {
   const utils = trpc.useUtils();
 
   const registerMutation = trpc.customAuth.register.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.success) {
         toast.success('Account created! Redirecting to onboarding...');
-        // Force full page reload to update auth state
-        window.location.href = '/ai-onboarding';
+        // Invalidate auth state to refresh user data
+        await utils.auth.me.invalidate();
+        // Small delay to ensure cookie is set
+        setTimeout(() => {
+          setLocation('/ai-onboarding');
+        }, 100);
       } else {
         toast.error(data.error || 'Registration failed');
       }

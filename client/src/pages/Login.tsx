@@ -12,12 +12,18 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const utils = trpc.useUtils();
 
   const loginMutation = trpc.customAuth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.success) {
         toast.success('Login successful!');
-        window.location.href = '/dashboard'; // Force reload to update auth state
+        // Invalidate auth state to refresh user data
+        await utils.auth.me.invalidate();
+        // Small delay to ensure cookie is set
+        setTimeout(() => {
+          setLocation('/dashboard');
+        }, 100);
       } else {
         toast.error(data.error || 'Login failed');
       }
