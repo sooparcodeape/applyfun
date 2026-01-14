@@ -15,7 +15,7 @@ export async function createContext(
   let user: User | null = null;
 
   try {
-    // First try custom JWT auth
+    // Use custom JWT auth only (no Manus OAuth fallback)
     const authToken = opts.req.cookies?.auth_token;
     if (authToken) {
       const payload = await verifyToken(authToken);
@@ -26,11 +26,7 @@ export async function createContext(
         }
       }
     }
-
-    // Fall back to Manus OAuth if no custom auth
-    if (!user) {
-      user = await sdk.authenticateRequest(opts.req);
-    }
+    // No fallback to Manus OAuth - custom auth only
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;

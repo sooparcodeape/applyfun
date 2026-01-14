@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, unique } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -243,7 +243,10 @@ export const applications = mysqlTable("applications", {
   statusUpdatedAt: timestamp("status_updated_at").defaultNow().onUpdateNow().notNull(),
   applicationMethod: varchar("application_method", { length: 50 }), // auto, manual
   notes: text("notes"),
-});
+}, (table) => ({
+  // Unique constraint: user can only apply to each job once
+  userJobUnique: unique().on(table.userId, table.jobId),
+}));
 
 export type Application = typeof applications.$inferSelect;
 export type InsertApplication = typeof applications.$inferInsert;

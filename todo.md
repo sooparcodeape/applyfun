@@ -666,3 +666,35 @@
 - [x] Add hamburger menu for mobile navigation with overlay - Already implemented via shadcn Sidebar with SidebarTrigger
 - [x] Optimize images with responsive loading (srcset) and compression - Reduced logo-icon from 5.1MB to 242KB (95%), created WebP versions
 - [x] Implement swipe gestures for job cards (left=queue, right=save) - Added react-swipeable with touch gestures
+
+### MVP Critical Audit
+- [ ] Audit authentication flows (signup, login, logout, session persistence)
+- [ ] Test credits system (purchase, deduction, balance tracking)
+- [ ] Verify job application flow end-to-end
+- [ ] Check error handling and edge cases
+- [ ] Test data persistence across sessions
+
+### Deeper MVP Audit
+- [ ] Check duplicate application prevention
+- [ ] Verify job URL validation (what if applyUrl is invalid?)
+- [ ] Test concurrent application scenarios
+- [ ] Check rate limiting on API endpoints
+- [ ] Verify CSRF protection
+- [ ] Test what happens if browser automation fails for all jobs
+- [ ] Check if users can apply to same job multiple times
+
+### P0 Critical Fixes
+- [x] Add profile completeness validation before applying
+- [x] Add duplicate application prevention (unique constraint + check)
+- [ ] Integrate Stripe for credit card payments (DEFERRED - promo codes work for testing)
+
+### P1 High Priority Fixes
+- [x] Add rate limiting to API endpoints (100 requests per 15 min per IP)
+- [ ] Implement password reset flow (DEFERRED - can use signup with same email)
+- [ ] Add account deletion feature (DEFERRED - manual deletion via database for now)
+
+### End-to-End Testing
+- [ ] Test signup with Harsh's resume
+- [ ] Test job browsing for developer roles
+- [ ] Test automated job application
+- [ ] Debug and fix any issues

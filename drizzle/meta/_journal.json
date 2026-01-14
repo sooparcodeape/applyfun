@@ -43,6 +43,13 @@
       "when": 1768334442203,
       "tag": "0005_sudden_mesmero",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1768398988012,
+      "tag": "0006_military_revanche",
+      "breakpoints": true
     }
   ]
 }

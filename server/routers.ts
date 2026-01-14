@@ -75,13 +75,22 @@ export const appRouter = router({
           // Set JWT token as cookie
           // Detect HTTPS: check protocol or X-Forwarded-Proto header (for proxies)
           const isSecure = ctx.req.protocol === 'https' || ctx.req.get('x-forwarded-proto') === 'https';
+          console.log('[LOGIN] Setting cookie:', {
+            isSecure,
+            protocol: ctx.req.protocol,
+            forwardedProto: ctx.req.get('x-forwarded-proto'),
+            host: ctx.req.get('host'),
+            cookies: ctx.req.cookies
+          });
+          // Temporarily disable secure flag for debugging
           ctx.res.cookie('auth_token', result.token, {
             httpOnly: true,
-            secure: isSecure,
+            secure: false, // Temporarily disabled for debugging
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             path: '/',
           });
+          console.log('[LOGIN] Cookie set successfully');
         }
         return result;
       }),
@@ -451,11 +460,30 @@ export const appRouter = router({
         jobId: z.number(),
         matchScore: z.number().optional(),
       }))
-      .mutation(({ ctx, input }) => addToQueue({
-        userId: ctx.user.id,
-        jobId: input.jobId,
-        matchScore: input.matchScore,
-      })),
+      .mutation(async ({ ctx, input }) => {
+        // Check if user already applied to this job
+        const { getUserApplications } = await import('./db-jobs');
+        const applications = await getUserApplications(ctx.user.id);
+        const alreadyApplied = applications.some(app => app.job.id === input.jobId);
+        
+        if (alreadyApplied) {
+          throw new Error('You have already applied to this job');
+        }
+        
+        // Check if job is already in queue
+        const queueItems = await getApplicationQueue(ctx.user.id);
+        const alreadyInQueue = queueItems.some(item => item.job.id === input.jobId);
+        
+        if (alreadyInQueue) {
+          throw new Error('This job is already in your queue');
+        }
+        
+        return addToQueue({
+          userId: ctx.user.id,
+          jobId: input.jobId,
+          matchScore: input.matchScore,
+        });
+      }),
     
     updateStatus: protectedProcedure
       .input(z.object({
@@ -489,9 +517,13 @@ export const appRouter = router({
         throw new Error('Insufficient credits');
       }
 
-      // Get user profile for auto-fill data
+      // Get user profile for auto-fill data and validate completeness
       const { getUserProfile } = await import('./db');
       const userProfile = await getUserProfile(ctx.user.id);
+
+      if (!ctx.user.name || !userProfile?.phone) {
+        throw new Error('Please complete your profile before applying. Required: name and phone.');
+      }
 
       // Apply to all jobs with browser automation
       const { addApplication } = await import('./db-jobs');

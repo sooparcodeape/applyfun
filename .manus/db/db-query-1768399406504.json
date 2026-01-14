@@ -1,0 +1,45 @@
+{
+  "query": "SELECT id, name, email, role, createdAt FROM users ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, name, email, role, createdAt FROM users ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "390044",
+      "name": "Harsh",
+      "email": "harsh.test@apply.fun",
+      "role": "user",
+      "createdAt": "2026-01-14 14:01:05"
+    },
+    {
+      "id": "240054",
+      "name": "Test New User",
+      "email": "testnewuser@example.com",
+      "role": "user",
+      "createdAt": "2026-01-14 03:24:04"
+    },
+    {
+      "id": "210063",
+      "name": "Test User",
+      "email": "test-1768355278526@example.com",
+      "role": "user",
+      "createdAt": "2026-01-14 01:47:58"
+    },
+    {
+      "id": "210062",
+      "name": "Test User",
+      "email": "test-1768355266424@example.com",
+      "role": "user",
+      "createdAt": "2026-01-14 01:47:46"
+    },
+    {
+      "id": "210057",
+      "name": "Test User Flow",
+      "email": "testflow@example.com",
+      "role": "user",
+      "createdAt": "2026-01-14 01:45:51"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tcreatedAt\n390044\tHarsh\tharsh.test@apply.fun\tuser\t2026-01-14 14:01:05\n240054\tTest New User\ttestnewuser@example.com\tuser\t2026-01-14 03:24:04\n210063\tTest User\ttest-1768355278526@example.com\tuser\t2026-01-14 01:47:58\n210062\tTest User\ttest-1768355266424@example.com\tuser\t2026-01-14 01:47:46\n210057\tTest User Flow\ttestflow@example.com\tuser\t2026-01-14 01:45:51\n",
+  "stderr": "",
+  "execution_time_ms": 387
+}

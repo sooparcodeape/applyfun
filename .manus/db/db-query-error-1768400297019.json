@@ -1,0 +1,10 @@
+{
+  "query": "SELECT * FROM user_profiles WHERE user_id = 390044; SELECT * FROM user_skills WHERE user_id = 390044;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT * FROM user_profiles WHERE user_id = 390044; SELECT * FROM user_skills WHERE user_id = 390044;",
+  "returncode": 1,
+  "logs": [
+    "id\tuser_id\tphone\tlocation\tlinkedin_url\tgithub_url\ttelegram_handle\ttwitter_handle\tportfolio_url\tresume_url\tresume_file_key\tbio\tyears_of_experience\tcurrent_salary\texpected_salary\tcreated_at\tupdated_at",
+    "90001\t390044\t+91-7454917051\tNULL\tNULL\tNULL\tnull\tnull\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\t2026-01-14 14:13:33\t2026-01-14 14:13:33",
+    "ERROR 1146 (42S02) at line 1: Table 'g7bah27bb9yypz9eaubzuy.user_skills' doesn't exist"
+  ]
+}
