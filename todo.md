@@ -724,3 +724,6 @@
 - [x] Change login redirect from /dashboard to /onboarding
 - [x] Update welcome modal to show dynamic job count instead of static "67+ crypto jobs"
 - [x] Implement working job filters that update count and hide/show jobs based on criteria
+- [x] Add shopping cart style queue UI to header with badge count
+- [x] Fix auto-apply functionality - Puppeteer Chrome path issue resolved
+- [x] Test auto-apply with Harsh's resume (Fixed Puppeteer Chrome path)

@@ -15,6 +15,8 @@ import {
   ExternalLink,
   Bookmark,
   LogIn,
+  ShoppingCart,
+  Trash2,
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 import { JobListSkeleton } from "@/components/JobCardSkeleton";
@@ -36,6 +38,10 @@ export default function PublicJobs() {
     jobType: jobType === "all" ? undefined : jobType,
     location: location === "all" ? undefined : location,
     limit: 100,
+  });
+  
+  const { data: queueData } = trpc.queue.list.useQuery({}, {
+    enabled: !!user,
   });
 
   const saveJobMutation = trpc.jobs.save.useMutation();
@@ -90,8 +96,12 @@ export default function PublicJobs() {
       setLocationPath("/signup");
       return;
     }
-    addToQueueMutation.mutate({ jobId });
-    toast.success("Added to application queue!");
+    addToQueueMutation.mutate({ jobId }, {
+      onSuccess: () => {
+        utils.queue.list.invalidate();
+        toast.success("Added to application queue!");
+      },
+    });
   };
 
   const handleRefresh = async () => {
@@ -112,6 +122,18 @@ export default function PublicJobs() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            {user && queueData && queueData.length > 0 && (
+              <Button 
+                variant="outline" 
+                className="relative"
+                onClick={() => setLocationPath("/queue")}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {queueData.length}
+                </span>
+              </Button>
+            )}
             {user ? (
               <Button onClick={() => setLocationPath("/dashboard")}>
                 Dashboard

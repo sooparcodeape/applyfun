@@ -30,9 +30,10 @@ export async function autoApplyToJob(
   let page: Page | null = null;
 
   try {
-    // Launch headless browser
+    // Launch headless browser using system Chromium
     browser = await puppeteer.launch({
       headless: true,
+      executablePath: '/usr/bin/chromium-browser',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
