@@ -97,7 +97,11 @@ export const appRouter = router({
 
   profile: router({
     parseResume: protectedProcedure
-      .input(z.object({ resumeBase64: z.string() }))
+      .input(z.object({ 
+        resumeBase64: z.string(),
+        fileName: z.string().optional(),
+        mimeType: z.string().optional(),
+      }))
       .mutation(async ({ input, ctx }) => {
         // Extract base64 data - handle both data URL format and raw base64
         let base64Data: string;
@@ -116,30 +120,50 @@ export const appRouter = router({
           });
         }
         
-        // Use LLM to extract structured data from resume
+        // Convert base64 to buffer
+        const fileBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Extract text based on file type
+        let extractedText = '';
+        const mimeType = input.mimeType || 'application/pdf';
+        
+        try {
+          if (mimeType === 'application/pdf') {
+            // Use pdf-parse for PDF files
+            const pdfParse = (await import('pdf-parse')).default;
+            const pdfData = await pdfParse(fileBuffer);
+            extractedText = pdfData.text;
+          } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
+            // Use mammoth for Word documents
+            const mammoth = await import('mammoth');
+            const result = await mammoth.extractRawText({ buffer: fileBuffer });
+            extractedText = result.value;
+          } else {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Unsupported file type. Please upload PDF or Word document.',
+            });
+          }
+        } catch (error) {
+          console.error('Text extraction error:', error);
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to extract text from resume file',
+          });
+        }
+        
+        // Use LLM to parse extracted text into structured data
         const { invokeLLM } = await import('./_core/llm');
         
         const response = await invokeLLM({
           messages: [
             {
               role: 'system',
-              content: 'You are a resume parser. Extract structured information from resumes and return JSON.',
+              content: 'You are a resume parser. Extract structured information from resume text and return JSON.',
             },
             {
               role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Parse this resume and extract: name, email, phone, location, skills (array), experience (array with title, company, duration), education, and social links (github, linkedin, twitter, telegram). Return only valid JSON.',
-                },
-                {
-                  type: 'file_url',
-                  file_url: {
-                    url: input.resumeBase64,
-                    mime_type: 'application/pdf',
-                  },
-                },
-              ],
+              content: `Parse this resume text and extract: name, email, phone, location, skills (array), experience (array with title, company, duration), education, and social links (github, linkedin, twitter, telegram). Return only valid JSON.\n\nResume Text:\n${extractedText}`,
             },
           ],
           response_format: {

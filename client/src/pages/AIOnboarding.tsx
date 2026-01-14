@@ -95,6 +95,8 @@ export default function AIOnboarding() {
       const base64Data = btoa(binaryString);
       const parsed = await parseResumeMutation.mutateAsync({
         resumeBase64: `data:${file.type};base64,${base64Data}`,
+        fileName: file.name,
+        mimeType: file.type,
       }) as ParsedResume;
       
       // 1. Upload resume file to S3

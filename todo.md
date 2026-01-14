@@ -559,3 +559,55 @@
 - [ ] Verify LLM extraction works correctly with parsed text
 - [ ] Test with multiple real-world resume formats
 - [ ] Add better error messages for unsupported file types
+
+### Critical Features for Production (Priority)
+
+#### 1. Fix Resume Parsing
+- [x] Debug "Cannot read properties of undefined (reading 'slice')" error in parseResume
+- [x] Switched from LLM file_url to text extraction approach
+- [x] Installed pdf-parse and mammoth libraries
+- [x] Updated parseResume to extract text first, then parse with LLM
+- [x] Updated AIOnboarding to pass fileName and mimeType
+- [x] Add defensive error handling for text extraction
+- [ ] Test with real PDF and Word documents
+- [ ] Add better error messages for debugging
+
+#### 2. Manual Profile Completion
+- [ ] Add conversational AI flow to collect profile data step-by-step
+- [ ] Ask for name, email, phone, location
+- [ ] Collect skills one by one with AI suggestions
+- [ ] Collect work experience with guided questions
+- [ ] Collect education background
+- [ ] Save profile data progressively as user provides info
+
+#### 3. Job Application Flow
+- [ ] Add "Apply" button to job listings
+- [ ] Create application submission endpoint
+- [ ] Generate tailored cover letter using LLM + user profile
+- [ ] Submit application with user profile data
+- [ ] Show success confirmation after submission
+- [ ] Handle application errors gracefully
+
+#### 4. Application Tracking
+- [ ] Create "My Applications" page in dashboard
+- [ ] Show list of applied jobs with status
+- [ ] Add filters (pending, interview, rejected, offer)
+- [ ] Show application date and company info
+- [ ] Allow users to view application details
+- [ ] Add ability to withdraw applications
+
+#### 5. Skip Onboarding Option
+- [ ] Add "Skip for Now" button to AI onboarding
+- [ ] Allow users to browse jobs without completing profile
+- [ ] Show profile completion prompt when user tries to apply
+- [ ] Add profile completion progress bar in dashboard
+- [ ] Encourage profile completion with benefits messaging
+
+#### 6. Daily Email Digest
+- [ ] Create email template for daily digest
+- [ ] Include applications submitted in last 24 hours
+- [ ] Include new job opportunities matching user profile
+- [ ] Add unsubscribe link
+- [ ] Schedule daily email job (cron or scheduled task)
+- [ ] Send at optimal time (8am user's timezone)
+- [ ] Track email open rates and clicks
