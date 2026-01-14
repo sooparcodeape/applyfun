@@ -137,7 +137,7 @@ export default function PublicJobs() {
             Browse Crypto Jobs
           </h1>
           <p className="text-muted-foreground">
-            {jobsData?.total || 0} jobs available • <NextScrapeCountdown />
+            {filteredJobs.length} jobs available • <NextScrapeCountdown />
           </p>
           {!user && (
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 max-w-2xl mx-auto">
