@@ -718,3 +718,6 @@
 - [ ] Test job browsing for developer roles
 - [ ] Test automated job application
 - [ ] Debug and fix any issues
+
+### Current Issues
+- [x] Fix login redirect issue - users stuck on auth screen after successful login (Fixed with full page reload)

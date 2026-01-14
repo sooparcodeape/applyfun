@@ -18,12 +18,10 @@ export default function Login() {
     onSuccess: async (data) => {
       if (data.success) {
         toast.success('Login successful!');
-        // Refetch auth state to get updated user data
-        await utils.auth.me.refetch();
-        // Wait a bit longer to ensure the refetch completes
+        // Use full page reload to ensure cookie is processed
         setTimeout(() => {
-          setLocation('/dashboard');
-        }, 300);
+          window.location.href = '/dashboard';
+        }, 500);
       } else {
         toast.error(data.error || 'Login failed');
       }
