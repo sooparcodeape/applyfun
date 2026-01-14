@@ -13,15 +13,14 @@ export default function Signup() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const utils = trpc.useUtils();
 
   const registerMutation = trpc.customAuth.register.useMutation({
     onSuccess: (data) => {
       if (data.success) {
         toast.success('Account created! Redirecting to onboarding...');
-        // Small delay to ensure cookie is set, then navigate
-        setTimeout(() => {
-          setLocation('/ai-onboarding');
-        }, 500);
+        // Force full page reload to update auth state
+        window.location.href = '/ai-onboarding';
       } else {
         toast.error(data.error || 'Registration failed');
       }

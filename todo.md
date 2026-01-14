@@ -611,3 +611,17 @@
 - [ ] Schedule daily email job (cron or scheduled task)
 - [ ] Send at optimal time (8am user's timezone)
 - [ ] Track email open rates and clicks
+
+### Authentication Flow Bugs
+- [ ] Fix signup to auto sign-in user after account creation
+- [ ] Redirect to /ai-onboarding after successful signup
+- [ ] Fix dashboard showing login screen instead of content
+- [ ] Verify session/cookie is set correctly after signup
+- [ ] Test complete flow: signup -> auto login -> onboarding -> dashboard
+
+### Authentication Flow Bugs (Critical)
+- [x] Fix signup to auto sign-in user after account creation
+- [x] Changed Signup.tsx to use window.location.href for full page reload
+- [x] Redirect to /ai-onboarding after successful signup
+- [x] Fix dashboard showing login screen (fixed by forcing full page reload)
+- [ ] Test complete flow: signup -> auto login -> onboarding -> dashboard
