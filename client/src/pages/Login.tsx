@@ -18,12 +18,12 @@ export default function Login() {
     onSuccess: async (data) => {
       if (data.success) {
         toast.success('Login successful!');
-        // Invalidate auth state to refresh user data
-        await utils.auth.me.invalidate();
-        // Small delay to ensure cookie is set
+        // Refetch auth state to get updated user data
+        await utils.auth.me.refetch();
+        // Wait a bit longer to ensure the refetch completes
         setTimeout(() => {
           setLocation('/dashboard');
-        }, 100);
+        }, 300);
       } else {
         toast.error(data.error || 'Login failed');
       }
