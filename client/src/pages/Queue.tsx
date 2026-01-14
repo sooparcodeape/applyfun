@@ -142,16 +142,30 @@ export default function Queue() {
                       <strong>Salary:</strong> {item.job.salaryRange}
                     </p>
                   )}
-                  {item.job.tags && item.job.tags.length > 0 && (
+                  {item.job.tags && (() => {
+                    try {
+                      const tags = typeof item.job.tags === 'string' ? JSON.parse(item.job.tags) : item.job.tags;
+                      return tags && tags.length > 0;
+                    } catch {
+                      return false;
+                    }
+                  })() && (
                     <div className="flex flex-wrap gap-2">
-                      {item.job.tags.map((tag: string, idx: number) => (
+                      {(() => {
+                        try {
+                          const tags = typeof item.job.tags === 'string' ? JSON.parse(item.job.tags) : item.job.tags;
+                          return tags.map((tag: string, idx: number) => (
                         <span
                           key={`${item.id}-tag-${idx}`}
                           className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded"
                         >
                           {tag}
                         </span>
-                      ))}
+                          ));
+                        } catch {
+                          return null;
+                        }
+                      })()}
                     </div>
                   )}
                   {item.job.applyUrl && (

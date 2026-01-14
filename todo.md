@@ -625,3 +625,6 @@
 - [x] Redirect to /ai-onboarding after successful signup
 - [x] Fix dashboard showing login screen (fixed by forcing full page reload)
 - [ ] Test complete flow: signup -> auto login -> onboarding -> dashboard
+
+### Bug Fixes - Current Session
+- [x] Fix Queue page tags.map() TypeError by parsing JSON string tags field
