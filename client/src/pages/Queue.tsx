@@ -51,7 +51,8 @@ export default function Queue() {
       return;
     }
 
-    setShowAutoApply(true);
+    // Call the backend mutation to actually create applications
+    applyToJobs.mutate();
   };
 
   const handleAutoApplyComplete = () => {

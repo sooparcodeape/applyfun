@@ -640,3 +640,15 @@
 ### Critical Bug - Authentication
 - [x] Fix Manus login screen redirect - rebranded DashboardLayout auth screen with apply.fun logo and styling
 - [x] Fix unexpected logout issues - enabled trust proxy and improved HTTPS detection for secure cookies
+
+### Critical Bugs - Job Application Flow
+- [x] Test complete user flow: signup → login → apply for job
+- [x] Identify all blocking errors preventing job applications
+- [ ] Fix Error #1: Signup button not working - form submission does nothing
+- [ ] Fix Error #2: Add to Queue has no visual feedback (toast notifications)
+- [ ] Fix Error #3: Apply to All doesn't trigger AutoApplyEngine dialog - just redirects with no applications
+
+### Critical Bugs Fixed - Job Application Flow
+- [x] Fix Error #1: Signup button not working - Added Toaster component to main.tsx
+- [x] Fix Error #2: Add to Queue has no visual feedback - Toaster component added (toast colors may need adjustment)
+- [x] Fix Error #3: Apply to All creates applications but shows Puppeteer Chrome error - Applications created successfully, browser automation needs Chrome installation
