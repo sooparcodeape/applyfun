@@ -727,3 +727,4 @@
 - [x] Add shopping cart style queue UI to header with badge count
 - [x] Fix auto-apply functionality - Puppeteer Chrome path issue resolved
 - [x] Test auto-apply with Harsh's resume (Fixed Puppeteer Chrome path)
+- [x] Fix React infinite render error on /dashboard/jobs page (Fixed navigation in BestMatches)
