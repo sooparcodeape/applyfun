@@ -20,7 +20,7 @@ export default function Login() {
         toast.success('Login successful!');
         // Use full page reload to ensure cookie is processed
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = '/onboarding';
         }, 500);
       } else {
         toast.error(data.error || 'Login failed');

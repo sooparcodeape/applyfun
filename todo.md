@@ -721,3 +721,4 @@
 
 ### Current Issues
 - [x] Fix login redirect issue - users stuck on auth screen after successful login (Fixed with full page reload)
+- [x] Change login redirect from /dashboard to /onboarding
