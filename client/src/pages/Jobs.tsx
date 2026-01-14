@@ -81,9 +81,9 @@ export default function Jobs() {
       {/* Best Matches Section */}
       <BestMatches onSaveJob={handleSaveJob} onAddToQueue={handleAddToQueue} />
       <div>
-        <h1 className="text-3xl font-bold">Browse Crypto Jobs</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Browse Crypto Jobs</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {filteredJobs.length} jobs available • Select categories and companies to target
           </p>
           <NextScrapeCountdown />
@@ -223,21 +223,29 @@ export default function Jobs() {
           {filteredJobs.map((job) => (
             <Card key={job.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{job.title}</CardTitle>
-                    <CardDescription className="mt-2">
-                      <Building2 className="w-4 h-4 inline mr-1" />
-                      {job.company} • <MapPin className="w-4 h-4 inline mr-1" />
-                      {job.location}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg truncate">{job.title}</CardTitle>
+                    <CardDescription className="mt-2 text-xs sm:text-sm">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="flex items-center">
+                          <Building2 className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 flex-shrink-0" />
+                          <span className="truncate">{job.company}</span>
+                        </span>
+                        <span className="flex items-center">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 flex-shrink-0" />
+                          <span className="truncate">{job.location}</span>
+                        </span>
+                      </div>
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleSaveJob(job.id)}
                       disabled={saveJobMutation.isPending}
+                      className="whitespace-nowrap"
                     >
                       <Bookmark className="w-4 h-4" />
                     </Button>
@@ -245,6 +253,7 @@ export default function Jobs() {
                       size="sm"
                       onClick={() => handleAddToQueue(job.id)}
                       disabled={addToQueueMutation.isPending}
+                      className="whitespace-nowrap text-xs sm:text-sm"
                     >
                       Add to Queue
                     </Button>

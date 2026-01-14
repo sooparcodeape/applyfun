@@ -652,3 +652,12 @@
 - [x] Fix Error #1: Signup button not working - Added Toaster component to main.tsx
 - [x] Fix Error #2: Add to Queue has no visual feedback - Toaster component added (toast colors may need adjustment)
 - [x] Fix Error #3: Apply to All creates applications but shows Puppeteer Chrome error - Applications created successfully, browser automation needs Chrome installation
+
+### Critical Bug - Onboarding Page
+- [x] Fix tRPC API error: Client receiving HTML instead of JSON on /onboarding page - Unable to reproduce after sandbox reset, AI chat working correctly
+
+### Responsive Design Improvements
+- [x] Fix dashboard card button text overflow on small screens
+- [x] Make navigation responsive for mobile devices - DashboardLayout uses shadcn sidebar with built-in mobile support
+- [x] Ensure all pages scale properly on phones, tablets, and desktops - Fixed Home, Dashboard, Jobs pages
+- [x] Test responsive design across multiple breakpoints - Tested on desktop, buttons and text display correctly

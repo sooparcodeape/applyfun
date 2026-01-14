@@ -42,11 +42,11 @@ export default function Home() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-12 md:py-20">
         <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
-          <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-sm mb-4">
+          <div className="inline-block px-3 py-1.5 md:px-4 md:py-2 bg-purple-500/10 border border-purple-500/30 rounded-full text-purple-300 text-xs md:text-sm mb-4">
             🚀 Powered by Token Burns & Crypto Credits
           </div>
           
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight px-2">
             Apply to{" "}
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               100+ Web3 Jobs
@@ -54,21 +54,21 @@ export default function Home() {
             {" "}in 60 Seconds
           </h1>
           
-          <p className="text-base md:text-xl text-slate-300 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-xl text-slate-300 max-w-2xl mx-auto px-4">
             The average Web3 job seeker spends <strong className="text-white">20+ hours per week</strong> filling out applications. 
             We automate the entire process—from finding roles at top crypto companies to submitting tailored applications. 
             <strong className="text-purple-300"> Get $5 free credits</strong> (5 applications) when you sign up.
           </p>
           
-          <p className="text-xl md:text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">
+          <p className="text-base sm:text-xl md:text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text px-4">
             Enjoy your freedom while it lasts, because apply.fun is getting you employed!
           </p>
           
           {jobStats && jobStats.active > 0 && (
             <div className="flex flex-col items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-purple-500/20 border border-purple-500/30 rounded-full text-lg font-semibold">
-                <span className="text-4xl font-bold text-purple-300">{jobStats?.total || 0}</span>
-                <span className="text-purple-200">active crypto jobs ready to apply</span>
+              <div className="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-purple-500/20 border border-purple-500/30 rounded-full text-sm sm:text-lg font-semibold">
+                <span className="text-3xl sm:text-4xl font-bold text-purple-300">{jobStats?.total || 0}</span>
+                <span className="text-purple-200 text-center">active crypto jobs ready to apply</span>
               </div>
               <NextScrapeCountdown />
             </div>
@@ -78,12 +78,14 @@ export default function Home() {
             <Button 
               onClick={handleGetStarted} 
               size="lg" 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 sm:px-8 text-sm sm:text-base whitespace-nowrap"
             >
-              {jobStats && jobStats.active > 0 
-                ? `Apply to ${jobStats.active.toLocaleString()}+ Jobs Now` 
-                : "Start Applying"}
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <span className="truncate">
+                {jobStats && jobStats.active > 0 
+                  ? `Apply to ${jobStats.active.toLocaleString()}+ Jobs Now` 
+                  : "Start Applying"}
+              </span>
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             </Button>
           </div>
         </div>

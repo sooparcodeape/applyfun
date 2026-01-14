@@ -132,9 +132,9 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation("/jobs")} variant="outline" className="w-full">
-              View Jobs
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button onClick={() => setLocation("/jobs")} variant="outline" className="w-full flex items-center justify-center gap-2 whitespace-nowrap">
+              <span className="truncate">View Jobs</span>
+              <ArrowRight className="w-4 h-4 flex-shrink-0" />
             </Button>
           </CardContent>
         </Card>
@@ -150,9 +150,9 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation("/queue")} variant="outline" className="w-full">
-              View Queue
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button onClick={() => setLocation("/queue")} variant="outline" className="w-full flex items-center justify-center gap-2 whitespace-nowrap">
+              <span className="truncate">View Queue</span>
+              <ArrowRight className="w-4 h-4 flex-shrink-0" />
             </Button>
           </CardContent>
         </Card>
@@ -168,9 +168,9 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation("/credits")} variant="outline" className="w-full">
-              Manage Credits
-              <ArrowRight className="w-4 h-4 ml-2" />
+            <Button onClick={() => setLocation("/credits")} variant="outline" className="w-full flex items-center justify-center gap-2 whitespace-nowrap">
+              <span className="truncate">Manage Credits</span>
+              <ArrowRight className="w-4 h-4 flex-shrink-0" />
             </Button>
           </CardContent>
         </Card>
