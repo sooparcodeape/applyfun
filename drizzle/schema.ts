@@ -177,6 +177,25 @@ export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = typeof skills.$inferInsert;
 
 /**
+ * User education entries
+ */
+export const educations = mysqlTable("educations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  institution: varchar("institution", { length: 255 }).notNull(),
+  degree: varchar("degree", { length: 255 }),
+  fieldOfStudy: varchar("field_of_study", { length: 255 }),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  isCurrent: int("is_current").default(0).notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Education = typeof educations.$inferSelect;
+export type InsertEducation = typeof educations.$inferInsert;
+
+/**
  * Scraped job listings from various crypto job boards
  */
 export const jobs = mysqlTable("jobs", {

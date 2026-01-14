@@ -12,6 +12,10 @@ import {
   addWorkExperience, 
   updateWorkExperience, 
   deleteWorkExperience,
+  getUserEducations,
+  addEducation,
+  updateEducation,
+  deleteEducation,
   getUserSkills,
   addSkill,
   deleteSkill
@@ -177,7 +181,7 @@ export const appRouter = router({
             },
             {
               role: 'user',
-              content: `Parse this resume text and extract: name, email, phone, location, skills (array), experience (array with title, company, duration), education, and social links (github, linkedin, twitter, telegram). Return only valid JSON.\n\nResume Text:\n${extractedText}`,
+              content: `Parse this resume text and extract all information accurately. For education, extract each degree/institution as a separate entry. For experience, include all job positions. For skills, list all technical and professional skills mentioned.\n\nReturn only valid JSON.\n\nResume Text:\n${extractedText}`,
             },
           ],
           response_format: {
@@ -206,7 +210,20 @@ export const appRouter = router({
                       additionalProperties: false,
                     },
                   },
-                  education: { type: 'string' },
+                  education: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        institution: { type: 'string' },
+                        degree: { type: 'string' },
+                        fieldOfStudy: { type: 'string' },
+                        duration: { type: 'string' },
+                      },
+                      required: ['institution'],
+                      additionalProperties: false,
+                    },
+                  },
                   github: { type: 'string' },
                   linkedin: { type: 'string' },
                   twitter: { type: 'string' },
@@ -235,7 +252,12 @@ export const appRouter = router({
           company: z.string(),
           duration: z.string().optional(),
         })).optional(),
-        education: z.string().optional(),
+        education: z.array(z.object({
+          institution: z.string(),
+          degree: z.string().optional(),
+          fieldOfStudy: z.string().optional(),
+          duration: z.string().optional(),
+        })).optional(),
         github: z.string().optional(),
         linkedin: z.string().optional(),
         twitter: z.string().optional(),
@@ -276,6 +298,22 @@ export const appRouter = router({
               position: exp.title,
               description: exp.duration || '',
               startDate: new Date(),
+              endDate: null,
+              isCurrent: 0,
+            });
+          }
+        }
+
+        // Add education
+        if (input.education && input.education.length > 0) {
+          for (const edu of input.education) {
+            await addEducation({
+              userId: ctx.user.id,
+              institution: edu.institution,
+              degree: edu.degree || null,
+              fieldOfStudy: edu.fieldOfStudy || null,
+              description: edu.duration || null,
+              startDate: null,
               endDate: null,
               isCurrent: 0,
             });

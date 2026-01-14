@@ -7,6 +7,8 @@ import {
   InsertUserProfile,
   workExperiences,
   InsertWorkExperience,
+  educations,
+  InsertEducation,
   skills,
   InsertSkill
 } from "../drizzle/schema";
@@ -163,7 +165,33 @@ export async function deleteWorkExperience(id: number) {
   await db.delete(workExperiences).where(eq(workExperiences.id, id));
 }
 
-// Skills Queries
+// Education Queries
+export async function getUserEducations(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(educations).where(eq(educations.userId, userId)).orderBy(educations.startDate);
+}
+
+export async function addEducation(education: InsertEducation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(educations).values(education);
+  return result;
+}
+
+export async function updateEducation(id: number, education: Partial<InsertEducation>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(educations).set(education).where(eq(educations.id, id));
+}
+
+export async function deleteEducation(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(educations).where(eq(educations.id, id));
+}
+
+// Skill Queriess
 export async function getUserSkills(userId: number) {
   const db = await getDb();
   if (!db) return [];
