@@ -21,8 +21,31 @@ interface BestMatchesProps {
 }
 
 export function BestMatches({ onSaveJob, onAddToQueue }: BestMatchesProps) {
-  const { data: matches, isLoading } = trpc.matching.bestMatches.useQuery({ limit: 10 });
+  const { data: matches, isLoading, error } = trpc.matching.bestMatches.useQuery({ limit: 10 });
   const { data: jobsData } = trpc.jobs.list.useQuery({ limit: 100 });
+
+  // Handle errors gracefully
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Best Matches For You
+          </CardTitle>
+          <CardDescription>Complete your profile to see personalized job matches</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center py-8">
+          <p className="text-muted-foreground mb-4">
+            Add your skills and experience to get smart job recommendations
+          </p>
+          <Button onClick={() => window.location.href = '/profile'}>
+            Complete Profile
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (isLoading) {
     return (
