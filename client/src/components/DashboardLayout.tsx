@@ -64,25 +64,52 @@ export default function DashboardLayout({
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
+          <div className="flex items-center gap-3 mb-4">
+            <img src="/logo-icon.png" alt="apply.fun" className="h-12 w-12" />
+            <span className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              apply.fun
+            </span>
+          </div>
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
               Sign in to continue
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
+              Access your dashboard, browse jobs, and manage applications. Sign in to get started.
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setLocation("/login");
-            }}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign in
-          </Button>
+          <div className="flex flex-col gap-3 w-full">
+            <Button
+              onClick={() => {
+                setLocation("/login");
+              }}
+              size="lg"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all"
+            >
+              Sign in
+            </Button>
+            <Button
+              onClick={() => {
+                setLocation("/signup");
+              }}
+              size="lg"
+              variant="outline"
+              className="w-full border-purple-500/50 hover:bg-purple-500/10"
+            >
+              Create Account
+            </Button>
+            <Button
+              onClick={() => {
+                setLocation("/");
+              }}
+              variant="ghost"
+              className="w-full text-muted-foreground hover:text-foreground"
+            >
+              ← Back to Home
+            </Button>
+          </div>
         </div>
       </div>
     );

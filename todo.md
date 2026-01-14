@@ -636,3 +636,7 @@
 - [x] Add "Skip for now" button on AI onboarding page
 - [x] Test resume upload with real PDF file end-to-end - Successfully extracts phone, location, and all skills
 - [x] Implement real browser automation for job application submission (Puppeteer) - Detects forms, auto-fills data, submits applications
+
+### Critical Bug - Authentication
+- [x] Fix Manus login screen redirect - rebranded DashboardLayout auth screen with apply.fun logo and styling
+- [x] Fix unexpected logout issues - enabled trust proxy and improved HTTPS detection for secure cookies

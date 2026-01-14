@@ -52,9 +52,11 @@ export const appRouter = router({
         const result = await registerUser(input);
         if (result.success && result.token) {
           // Set JWT token as cookie
+          // Detect HTTPS: check protocol or X-Forwarded-Proto header (for proxies)
+          const isSecure = ctx.req.protocol === 'https' || ctx.req.get('x-forwarded-proto') === 'https';
           ctx.res.cookie('auth_token', result.token, {
             httpOnly: true,
-            secure: ctx.req.protocol === 'https',
+            secure: isSecure,
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             path: '/',
@@ -71,9 +73,11 @@ export const appRouter = router({
         const result = await loginUser(input);
         if (result.success && result.token) {
           // Set JWT token as cookie
+          // Detect HTTPS: check protocol or X-Forwarded-Proto header (for proxies)
+          const isSecure = ctx.req.protocol === 'https' || ctx.req.get('x-forwarded-proto') === 'https';
           ctx.res.cookie('auth_token', result.token, {
             httpOnly: true,
-            secure: ctx.req.protocol === 'https',
+            secure: isSecure,
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
             path: '/',
