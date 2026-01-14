@@ -152,13 +152,22 @@ export default function Onboarding() {
               </ul>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => setSelectedMode(null)}
-              className="w-full"
-            >
-              Back to Options
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedMode(null)}
+                className="flex-1"
+              >
+                Back to Options
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/profile")}
+                className="flex-1"
+              >
+                Skip for Now
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -219,34 +228,141 @@ export default function Onboarding() {
               </div>
             </div>
 
-            {parsedData.skills && parsedData.skills.length > 0 && (
+            {editedData?.skills && (
               <div>
                 <label className="text-sm font-medium">Skills</label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {parsedData.skills.map((skill: string, idx: number) => (
+                <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                  {editedData.skills.map((skill: string, idx: number) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-sm"
+                      className="px-3 py-1 bg-purple-500/10 text-purple-500 rounded-full text-sm flex items-center gap-2"
                     >
                       {skill}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSkills = editedData.skills.filter((_: string, i: number) => i !== idx);
+                          setEditedData({ ...editedData, skills: newSkills });
+                        }}
+                        className="hover:text-purple-300 transition-colors"
+                      >
+                        ×
+                      </button>
                     </span>
                   ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Add a skill and press Enter"
+                    className="flex-1 px-3 py-2 border rounded-md bg-background"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const input = e.currentTarget;
+                        const skill = input.value.trim();
+                        if (skill && !editedData.skills.includes(skill)) {
+                          setEditedData({ ...editedData, skills: [...editedData.skills, skill] });
+                          input.value = '';
+                        }
+                      }
+                    }}
+                  />
                 </div>
               </div>
             )}
 
-            {parsedData.experience && parsedData.experience.length > 0 && (
+            {editedData?.experience && editedData.experience.length > 0 && (
               <div>
                 <label className="text-sm font-medium">Work Experience</label>
-                <div className="space-y-3 mt-2">
-                  {parsedData.experience.map((exp: any, idx: number) => (
-                    <div key={idx} className="border-l-2 border-purple-500 pl-4">
-                      <h4 className="font-semibold">{exp.title}</h4>
-                      <p className="text-sm text-muted-foreground">{exp.company}</p>
-                      <p className="text-xs text-muted-foreground">{exp.duration}</p>
+                <div className="space-y-4 mt-2">
+                  {editedData.experience.map((exp: any, idx: number) => (
+                    <div key={idx} className="border border-border rounded-lg p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-semibold text-sm">Experience {idx + 1}</h4>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newExperience = editedData.experience.filter((_: any, i: number) => i !== idx);
+                            setEditedData({ ...editedData, experience: newExperience });
+                          }}
+                          className="text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          value={exp.title || ""}
+                          onChange={(e) => {
+                            const newExperience = [...editedData.experience];
+                            newExperience[idx] = { ...newExperience[idx], title: e.target.value };
+                            setEditedData({ ...editedData, experience: newExperience });
+                          }}
+                          placeholder="Job Title"
+                          className="px-3 py-2 border rounded-md bg-background text-sm"
+                        />
+                        <input
+                          type="text"
+                          value={exp.company || ""}
+                          onChange={(e) => {
+                            const newExperience = [...editedData.experience];
+                            newExperience[idx] = { ...newExperience[idx], company: e.target.value };
+                            setEditedData({ ...editedData, experience: newExperience });
+                          }}
+                          placeholder="Company Name"
+                          className="px-3 py-2 border rounded-md bg-background text-sm"
+                        />
+                        <input
+                          type="text"
+                          value={exp.startDate || ""}
+                          onChange={(e) => {
+                            const newExperience = [...editedData.experience];
+                            newExperience[idx] = { ...newExperience[idx], startDate: e.target.value };
+                            setEditedData({ ...editedData, experience: newExperience });
+                          }}
+                          placeholder="Start Date (e.g., Jan 2020)"
+                          className="px-3 py-2 border rounded-md bg-background text-sm"
+                        />
+                        <input
+                          type="text"
+                          value={exp.endDate || ""}
+                          onChange={(e) => {
+                            const newExperience = [...editedData.experience];
+                            newExperience[idx] = { ...newExperience[idx], endDate: e.target.value };
+                            setEditedData({ ...editedData, experience: newExperience });
+                          }}
+                          placeholder="End Date (e.g., Present)"
+                          className="px-3 py-2 border rounded-md bg-background text-sm"
+                        />
+                      </div>
+                      <textarea
+                        value={exp.description || ""}
+                        onChange={(e) => {
+                          const newExperience = [...editedData.experience];
+                          newExperience[idx] = { ...newExperience[idx], description: e.target.value };
+                          setEditedData({ ...editedData, experience: newExperience });
+                        }}
+                        placeholder="Job description (optional)"
+                        rows={2}
+                        className="w-full px-3 py-2 border rounded-md bg-background text-sm"
+                      />
                     </div>
                   ))}
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newExperience = [...(editedData.experience || []), { title: "", company: "", startDate: "", endDate: "", description: "" }];
+                    setEditedData({ ...editedData, experience: newExperience });
+                  }}
+                  className="mt-3"
+                >
+                  + Add Experience
+                </Button>
               </div>
             )}
 

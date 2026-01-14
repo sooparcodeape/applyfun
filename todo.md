@@ -129,6 +129,9 @@
 - [ ] Fix login form submission not triggering mutation
 - [x] Add edit functionality to resume review screen - users should be able to edit parsed data (Added editable input fields for name, email, phone, location)
 - [x] Fix API mutation error when clicking "Looks Good! Continue" after resume parsing (Fixed field mapping in updateProfileMutation call)
+- [x] Add skills editing with tag input component on review screen (Added removable skill tags with Enter-to-add input)
+- [x] Add experience editing with inline forms on review screen (Added inline editable forms for title, company, dates, description with add/remove buttons)
+- [x] Add skip option for manual profile filling in onboarding (Added "Skip for Now" button that redirects to profile page)
 - [x] Fix /dashboard/jobs route crash (Added error handling to BestMatches component to prevent crashes from missing profile data)
 - [x] Fix signup redirect - users being redirected to signup page instead of AI onboarding after successful registration (Increased delay to 500ms)
 - [x] Fix login redirect issue - successful login shows sign-in screen instead of dashboard content (Changed invalidate to refetch, increased delay to 300ms)
