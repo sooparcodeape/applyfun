@@ -1,4 +1,6 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 
 export interface JobApplicationData {
   fullName: string;
@@ -30,10 +32,30 @@ export async function autoApplyToJob(
   let page: Page | null = null;
 
   try {
+    // Find Chrome/Chromium executable
+    let executablePath: string | undefined;
+    const possiblePaths = [
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+    ];
+    
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        executablePath = path;
+        break;
+      }
+    }
+    
+    if (!executablePath) {
+      throw new Error('Chrome/Chromium not found. Please install chromium-browser.');
+    }
+    
     // Launch headless browser using system Chromium
     browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

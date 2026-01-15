@@ -728,3 +728,5 @@
 - [x] Fix auto-apply functionality - Puppeteer Chrome path issue resolved
 - [x] Test auto-apply with Harsh's resume (Fixed Puppeteer Chrome path)
 - [x] Fix React infinite render error on /dashboard/jobs page (Fixed navigation in BestMatches)
+- [x] Debug persistent React infinite render error on /dashboard/jobs (Fixed useSwipeable hooks violation)
+- [x] Fix Puppeteer Chrome path issue in production environment (Added path detection with fallbacks)
