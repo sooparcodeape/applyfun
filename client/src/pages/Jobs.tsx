@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 import { BestMatches } from "@/components/BestMatches";
-// import { useSwipeable } from "react-swipeable"; // Removed to fix hooks violation
+import { useSwipeable } from "react-swipeable";
 
 export default function Jobs() {
   const [search, setSearch] = useState("");
@@ -221,8 +221,16 @@ export default function Jobs() {
         </div>
       ) : filteredJobs.length > 0 ? (
         <div className="grid gap-4">
-          {filteredJobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-lg transition-shadow">
+          {filteredJobs.map((job) => {
+            const swipeHandlers = useSwipeable({
+              onSwipedLeft: () => handleAddToQueue(job.id),
+              onSwipedRight: () => handleSaveJob(job.id),
+              trackMouse: false,
+              preventScrollOnSwipe: true,
+            });
+            
+            return (
+            <Card key={job.id} {...swipeHandlers} className="hover:shadow-lg transition-shadow touch-pan-y">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                   <div className="flex-1 min-w-0">
@@ -296,7 +304,8 @@ export default function Jobs() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <Card>

@@ -14,7 +14,6 @@ import {
   XCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
 
 interface BestMatchesProps {
   onSaveJob: (jobId: number) => void;
@@ -22,7 +21,6 @@ interface BestMatchesProps {
 }
 
 export function BestMatches({ onSaveJob, onAddToQueue }: BestMatchesProps) {
-  const [, setLocation] = useLocation();
   const { data: matches, isLoading, error } = trpc.matching.bestMatches.useQuery({ limit: 10 });
   const { data: jobsData } = trpc.jobs.list.useQuery({ limit: 100 });
 
@@ -41,7 +39,7 @@ export function BestMatches({ onSaveJob, onAddToQueue }: BestMatchesProps) {
           <p className="text-muted-foreground mb-4">
             Add your skills and experience to get smart job recommendations
           </p>
-          <Button onClick={() => setLocation('/profile')}>
+          <Button onClick={() => window.location.href = '/profile'}>
             Complete Profile
           </Button>
         </CardContent>
@@ -80,7 +78,7 @@ export function BestMatches({ onSaveJob, onAddToQueue }: BestMatchesProps) {
           <p className="text-muted-foreground mb-4">
             Add your skills and experience to get smart job recommendations
           </p>
-          <Button onClick={() => setLocation('/profile')}>
+          <Button onClick={() => window.location.href = '/profile'}>
             Complete Profile
           </Button>
         </CardContent>

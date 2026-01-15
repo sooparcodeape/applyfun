@@ -11,9 +11,7 @@ export default function Dashboard() {
   
   const { data: profile } = trpc.profile.get.useQuery();
   const { data: credits } = trpc.credits.balance.useQuery();
-  const { data: jobStats } = trpc.jobs.stats.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
+  const { data: jobStats } = trpc.jobs.stats.useQuery();
   const { data: appStats } = trpc.applications.stats.useQuery();
 
   const hasCompletedProfile = profile?.profile !== undefined;

@@ -137,8 +137,6 @@ export const userProfiles = mysqlTable("user_profiles", {
   currentSalary: int("current_salary"),
   expectedSalary: int("expected_salary"),
   writingSample: text("writing_sample"),
-  skills: text("skills"), // JSON array of skills as text
-  experience: text("experience"), // Summary of work experience
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

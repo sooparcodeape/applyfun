@@ -2,36 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, FileText, ArrowRight, Upload, CheckCircle, Circle } from "lucide-react";
-
-const ProgressIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
-  return (
-    <div className="flex items-center justify-center gap-2 mb-6">
-      {Array.from({ length: totalSteps }).map((_, idx) => (
-        <div key={idx} className="flex items-center gap-2">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-            idx < currentStep
-              ? "bg-purple-500 border-purple-500"
-              : idx === currentStep
-              ? "border-purple-500 text-purple-500"
-              : "border-muted text-muted-foreground"
-          }`}>
-            {idx < currentStep ? (
-              <CheckCircle className="w-5 h-5 text-white" />
-            ) : (
-              <span className="text-sm font-semibold">{idx + 1}</span>
-            )}
-          </div>
-          {idx < totalSteps - 1 && (
-            <div className={`w-12 h-0.5 ${
-              idx < currentStep ? "bg-purple-500" : "bg-muted"
-            }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
+import { Sparkles, FileText, ArrowRight, Upload, CheckCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -44,40 +15,6 @@ export default function Onboarding() {
   const [editedData, setEditedData] = useState<any>(null);
   const [writingSample, setWritingSample] = useState<string>("");
   const [showWritingSample, setShowWritingSample] = useState(false);
-  
-  // Calculate current step for progress indicator
-  const getCurrentStep = () => {
-    if (!selectedMode) return 0;
-    if (selectedMode === "easy" && !parsedData) return 1;
-    if (parsedData && !showWritingSample) return 2;
-    if (showWritingSample) return 3;
-    return 0;
-  };
-  
-  // Check if user already completed onboarding
-  const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery();
-  
-  useEffect(() => {
-    if (!profileLoading && profile?.profile) {
-      // User already has a profile, redirect to dashboard
-      toast.info("You've already completed onboarding!");
-      setLocation("/dashboard");
-    }
-  }, [profile, profileLoading, setLocation]);
-  
-  // Add exit confirmation when onboarding is incomplete
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Only show warning if user has started but not completed onboarding
-      if (selectedMode && !profile?.profile) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [selectedMode, profile]);
 
   // Initialize editedData when parsedData changes
   useEffect(() => {
@@ -85,18 +22,6 @@ export default function Onboarding() {
       setEditedData({ ...parsedData });
     }
   }, [parsedData, editedData]);
-  
-  // Show loading while checking profile
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
-          <p className="text-muted-foreground mt-4">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   const parseResumeMutation = trpc.profile.parseResume.useMutation({
     onSuccess: (data) => {
@@ -183,7 +108,6 @@ export default function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
         <Card className="max-w-2xl w-full">
           <CardHeader>
-            <ProgressIndicator currentStep={getCurrentStep()} totalSteps={4} />
             <div className="flex items-center gap-3 mb-2">
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <Sparkles className="w-6 h-6 text-purple-500" />
@@ -264,7 +188,6 @@ export default function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
         <Card className="max-w-2xl w-full">
           <CardHeader>
-            <ProgressIndicator currentStep={getCurrentStep()} totalSteps={4} />
             <div className="flex items-center gap-3 mb-2">
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <FileText className="w-6 h-6 text-purple-500" />
@@ -345,7 +268,6 @@ export default function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
         <Card className="max-w-3xl w-full">
           <CardHeader>
-            <ProgressIndicator currentStep={getCurrentStep()} totalSteps={4} />
             <CardTitle className="text-2xl">Review Your Information</CardTitle>
             <CardDescription>
               We've extracted the following information from your resume. Review and edit if needed.

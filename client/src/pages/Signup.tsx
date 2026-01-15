@@ -19,9 +19,11 @@ export default function Signup() {
     onSuccess: async (data) => {
       if (data.success) {
         toast.success('Account created! Redirecting to onboarding...');
-        // Use full page reload to ensure cookie is processed
+        // Refetch auth state to get updated user data
+        await utils.auth.me.refetch();
+        // Wait longer to ensure the refetch completes and AIOnboarding can read the user
         setTimeout(() => {
-          window.location.href = '/ai-onboarding';
+          setLocation('/ai-onboarding');
         }, 500);
       } else {
         toast.error(data.error || 'Registration failed');

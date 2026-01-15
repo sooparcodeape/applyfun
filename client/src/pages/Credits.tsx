@@ -31,9 +31,6 @@ export default function Credits() {
   const { data: credits, isLoading: creditsLoading, refetch: refetchCredits } = trpc.credits.balance.useQuery();
   const { data: transactions, isLoading: txLoading } = trpc.credits.transactions.useQuery();
   const { data: burnHistory } = trpc.credits.burnHistory.useQuery();
-  const { data: jobStats } = trpc.jobs.stats.useQuery(undefined, {
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
 
   const applyPromoMutation = trpc.credits.applyPromo.useMutation({
     onSuccess: (data) => {
@@ -138,7 +135,7 @@ export default function Credits() {
               <ol className="space-y-2 text-sm text-muted-foreground ml-7">
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-foreground">1.</span>
-                  <span>Browse <strong>{jobStats?.total || 0}+ crypto jobs</strong> from top Web3 companies</span>
+                  <span>Browse <strong>67+ crypto jobs</strong> from top Web3 companies</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-foreground">2.</span>

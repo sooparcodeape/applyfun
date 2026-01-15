@@ -648,7 +648,7 @@ ${extractedText}`,
 
       for (const item of queueItems) {
         try {
-          // Attempt browser automation with personalized cover letter generation
+          // Attempt browser automation
           const automationResult = await autoApplyToJob(item.job.applyUrl, {
             fullName: ctx.user.name || '',
             email: ctx.user.email,
@@ -658,13 +658,6 @@ ${extractedText}`,
             linkedinUrl: userProfile?.linkedinUrl || undefined,
             githubUrl: userProfile?.githubUrl || undefined,
             portfolioUrl: userProfile?.portfolioUrl || undefined,
-            // Pass job context for personalized cover letter generation
-            jobTitle: item.job.title,
-            companyName: item.job.company,
-            jobDescription: item.job.description || '',
-            writingSample: userProfile?.writingSample || undefined,
-            skills: userProfile?.skills ? JSON.parse(userProfile.skills) : [],
-            experience: userProfile?.experience || '',
           });
 
           // Calculate next retry time with exponential backoff (if failed)
