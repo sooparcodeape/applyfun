@@ -718,3 +718,10 @@
 - [ ] Test job browsing for developer roles
 - [ ] Test automated job application
 - [ ] Debug and fix any issues
+
+### Bug Fixes - Hybrid Model Issues
+- [x] Remove Puppeteer dependency (not needed with Browserless.io)
+- [x] Rewrite job-automation.ts to use Browserless.io API instead of local Puppeteer
+- [x] Fix manual review flow - failed applications show Review button immediately
+- [x] Add requiresManualReview count to applyAll response and Queue page
+- [x] Auto-redirect to Applications page after applying to show manual review items

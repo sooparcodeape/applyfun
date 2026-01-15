@@ -26,10 +26,27 @@ export default function Queue() {
       utils.queue.list.invalidate();
       utils.applications.list.invalidate();
       utils.credits.balance.invalidate();
-      toast.success(`Applied to ${result.successful} jobs successfully!`);
+      
+      // Show success message
+      if (result.successful > 0) {
+        toast.success(`Applied to ${result.successful} jobs successfully!`);
+      }
+      
+      // Show manual review message
+      const manualReviewCount = (result as any).requiresManualReview || 0;
+      if (manualReviewCount > 0) {
+        toast.info(`${manualReviewCount} applications require manual review. Check your Applications page.`);
+      }
+      
+      // Show failed message
       if (result.failed > 0) {
         toast.error(`${result.failed} applications failed`);
       }
+      
+      // Redirect to Applications page to review
+      setTimeout(() => {
+        setLocation('/applications');
+      }, 2000);
     },
     onError: (error) => {
       toast.error(error.message);
