@@ -730,3 +730,9 @@
 - [x] Fix Docker build failure - corepack pnpm installation error during publish
 - [x] Simplified packageManager field from pnpm@10.4.1+sha512... to pnpm@10.4.1
 - [x] Verified build still works locally
+
+### Lockfile Sync Issue
+- [x] Regenerate pnpm-lock.yaml to match package.json after removing puppeteer
+- [x] Remove wouter patch reference that was causing version mismatch
+- [x] Clean install all dependencies to ensure lockfile is correct
+- [x] Verify dev server runs without errors
