@@ -753,3 +753,6 @@
 
 ### Environment Configuration
 - [x] Verify BROWSERLESS_API_KEY is properly set in production environment (Server restarted)
+
+### Production Environment Issue
+- [x] Add BROWSERLESS_API_KEY to server environment configuration file (Added to env.ts)
