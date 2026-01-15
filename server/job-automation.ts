@@ -38,9 +38,31 @@ let browserInstance: Browser | null = null;
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
+    // Try multiple Chrome paths for different environments
+    const chromePaths = [
+      '/root/.cache/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
+      '/home/ubuntu/.cache/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
+      '/usr/local/share/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
+    ];
+    
+    let executablePath: string | undefined;
+    const fs = await import('fs');
+    
+    for (const path of chromePaths) {
+      if (fs.existsSync(path)) {
+        executablePath = path;
+        console.log(`[AutoApply] Using Chrome at: ${path}`);
+        break;
+      }
+    }
+    
+    if (!executablePath) {
+      throw new Error('Chrome not found. Tried paths: ' + chromePaths.join(', '));
+    }
+    
     browserInstance = await puppeteer.launch({
       headless: true,
-      executablePath: '/home/ubuntu/.cache/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
+      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
