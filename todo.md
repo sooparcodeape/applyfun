@@ -779,3 +779,25 @@
 - [x] Removed useSwipeable from map loop (swipe gestures removed for now)
 - [x] Wrapped categories, companies, filteredJobs in useMemo for stability
 - [x] Fixed syntax error from map refactoring
+
+
+### Scraper URL Extraction - OVERNIGHT INVESTIGATION COMPLETE
+- [x] Investigated Solana job board (powered by Getro)
+- [x] Found: Apply button uses JavaScript, redirects to Lever/Ashby/Greenhouse
+- [x] Tested: Real URL is `https://jobs.lever.co/blox-route/25642581-...`
+- [x] Discovered: Final application URLs NOT in static HTML - requires Browserless
+- [x] Investigated Web3.career - same issue (SPA with JavaScript redirects)
+- [x] Cost analysis: 500 jobs × 1 Browserless call = 500 credits per scrape = EXPENSIVE
+- [x] Created comprehensive findings document with 4 solution options
+- [x] Recommendation: Remove broken scrapers, add new boards with direct links (Option D)
+- [ ] **AWAITING USER DECISION**: Which approach to implement?
+  - Option A: Use Browserless for all (expensive, 2000 credits/day)
+  - Option B: Manual company→ATS mapping (free, limited coverage)
+  - Option C: Hybrid (manual mapping + Browserless fallback)
+  - Option D: Replace with API-based job boards (free, fewer sources)
+- [ ] Implement chosen solution
+- [ ] Delete all existing jobs with broken URLs
+- [ ] Test and verify new scrapers work
+- [ ] Save checkpoint
+
+**See `/home/ubuntu/scraper-rewrite-findings.md` for full analysis and recommendations**

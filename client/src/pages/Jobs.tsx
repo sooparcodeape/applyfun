@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 import { BestMatches } from "@/components/BestMatches";
-import { useSwipeable } from "react-swipeable";
+
 
 export default function Jobs() {
   const [search, setSearch] = useState("");
