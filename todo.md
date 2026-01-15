@@ -772,3 +772,10 @@
 - [x] Solution: Moved early return BEFORE filteredApplications calculation
 - [x] This ensures hooks are called in the same order on every render
 - [x] Dev server restarted and error resolved
+
+### React Error #310 Still Occurring in Production
+- [x] Found root cause: useSwipeable hook called INSIDE .map() loop in Jobs.tsx
+- [x] This violated Rules of Hooks - hooks cannot be called in loops
+- [x] Removed useSwipeable from map loop (swipe gestures removed for now)
+- [x] Wrapped categories, companies, filteredJobs in useMemo for stability
+- [x] Fixed syntax error from map refactoring

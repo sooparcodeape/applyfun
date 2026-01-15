@@ -35,37 +35,43 @@ export default function Jobs() {
   const addToQueueMutation = trpc.queue.add.useMutation();
 
   // Extract unique categories and companies from jobs
-  const categories = Array.from(
-    new Set(
-      (jobsData?.jobs || []).flatMap((job) => {
-        try {
-          return JSON.parse(job.tags || "[]");
-        } catch {
-          return [];
-        }
-      })
-    )
-  ).slice(0, 20);
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(
+        (jobsData?.jobs || []).flatMap((job) => {
+          try {
+            return JSON.parse(job.tags || "[]");
+          } catch {
+            return [];
+          }
+        })
+      )
+    ).slice(0, 20);
+  }, [jobsData?.jobs]);
 
-  const companies = Array.from(
-    new Set((jobsData?.jobs || []).map((job) => job.company))
-  ).slice(0, 30);
+  const companies = useMemo(() => {
+    return Array.from(
+      new Set((jobsData?.jobs || []).map((job) => job.company))
+    ).slice(0, 30);
+  }, [jobsData?.jobs]);
 
   // Filter jobs based on selections
-  const filteredJobs = (jobsData?.jobs || []).filter((job) => {
-    if (selectedCategories.length > 0) {
-      const jobTags = JSON.parse(job.tags || "[]");
-      if (!selectedCategories.some((cat) => jobTags.includes(cat))) {
-        return false;
+  const filteredJobs = useMemo(() => {
+    return (jobsData?.jobs || []).filter((job) => {
+      if (selectedCategories.length > 0) {
+        const jobTags = JSON.parse(job.tags || "[]");
+        if (!selectedCategories.some((cat) => jobTags.includes(cat))) {
+          return false;
+        }
       }
-    }
-    if (selectedCompanies.length > 0) {
-      if (!selectedCompanies.includes(job.company)) {
-        return false;
+      if (selectedCompanies.length > 0) {
+        if (!selectedCompanies.includes(job.company)) {
+          return false;
+        }
       }
-    }
-    return true;
-  });
+      return true;
+    });
+  }, [jobsData?.jobs, selectedCategories, selectedCompanies]);
 
   const handleSaveJob = (jobId: number) => {
     saveJobMutation.mutate({ jobId });
@@ -221,16 +227,8 @@ export default function Jobs() {
         </div>
       ) : filteredJobs.length > 0 ? (
         <div className="grid gap-4">
-          {filteredJobs.map((job) => {
-            const swipeHandlers = useSwipeable({
-              onSwipedLeft: () => handleAddToQueue(job.id),
-              onSwipedRight: () => handleSaveJob(job.id),
-              trackMouse: false,
-              preventScrollOnSwipe: true,
-            });
-            
-            return (
-            <Card key={job.id} {...swipeHandlers} className="hover:shadow-lg transition-shadow touch-pan-y">
+          {filteredJobs.map((job) => (
+            <Card key={job.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                   <div className="flex-1 min-w-0">
@@ -304,8 +302,7 @@ export default function Jobs() {
                 </div>
               </CardContent>
             </Card>
-            );
-          })}
+          ))}
         </div>
       ) : (
         <Card>
