@@ -82,6 +82,7 @@ export async function autoApplyToJob(
 
     // Parse the response from Browserless
     const result = response.data;
+    console.log('[Job Automation] Browserless response:', JSON.stringify(result, null, 2));
 
     if (result.success) {
       return {
@@ -151,6 +152,29 @@ export default async function ({ page }) {
       
       // Wait for form to load
       await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // STEP 1.5: Check for additional "Continue", "Apply Now", "Next" buttons
+      // Many job boards have multi-step flows
+      let attempts = 0;
+      while (attempts < 3) {
+        const continueButton = await page.$(
+          'button:has-text("Continue"), button:has-text("Apply Now"), button:has-text("Next"), ' +
+          'a:has-text("Continue"), a:has-text("Apply Now"), a:has-text("Next"), ' +
+          '[class*="continue" i], [class*="apply-now" i], [class*="next" i]'
+        ).catch(() => null);
+        
+        if (continueButton) {
+          console.log('Found Continue/Next button, clicking...');
+          await continueButton.click();
+          await Promise.race([
+            page.waitForNavigation({ timeout: 10000 }).catch(() => null),
+            new Promise(resolve => setTimeout(resolve, 3000)),
+          ]);
+          attempts++;
+        } else {
+          break;
+        }
+      }
     }
 
     // STEP 2: Now we should be on the application form

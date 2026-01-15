@@ -1,0 +1,75 @@
+{
+  "query": "SELECT * FROM applications ORDER BY applied_at DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT * FROM applications ORDER BY applied_at DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "120030",
+      "user_id": "420001",
+      "job_id": "1230149",
+      "status": "pending",
+      "applied_at": "2026-01-15 03:12:39",
+      "status_updated_at": "2026-01-15 03:12:39",
+      "application_method": "NULL",
+      "notes": "Application failed",
+      "retry_count": "0",
+      "last_retry_at": "NULL",
+      "next_retry_at": "2026-01-15 03:42:40"
+    },
+    {
+      "id": "120029",
+      "user_id": "420001",
+      "job_id": "1230148",
+      "status": "pending",
+      "applied_at": "2026-01-15 03:12:28",
+      "status_updated_at": "2026-01-15 03:12:28",
+      "application_method": "NULL",
+      "notes": "Application failed",
+      "retry_count": "0",
+      "last_retry_at": "NULL",
+      "next_retry_at": "2026-01-15 03:42:28"
+    },
+    {
+      "id": "120028",
+      "user_id": "420001",
+      "job_id": "270558",
+      "status": "pending",
+      "applied_at": "2026-01-15 03:12:18",
+      "status_updated_at": "2026-01-15 03:12:18",
+      "application_method": "NULL",
+      "notes": "Application failed",
+      "retry_count": "0",
+      "last_retry_at": "NULL",
+      "next_retry_at": "2026-01-15 03:42:18"
+    },
+    {
+      "id": "120027",
+      "user_id": "420001",
+      "job_id": "270554",
+      "status": "pending",
+      "applied_at": "2026-01-15 03:12:08",
+      "status_updated_at": "2026-01-15 03:12:08",
+      "application_method": "NULL",
+      "notes": "Application failed",
+      "retry_count": "0",
+      "last_retry_at": "NULL",
+      "next_retry_at": "2026-01-15 03:42:09"
+    },
+    {
+      "id": "120026",
+      "user_id": "420001",
+      "job_id": "270548",
+      "status": "pending",
+      "applied_at": "2026-01-15 03:11:58",
+      "status_updated_at": "2026-01-15 03:11:58",
+      "application_method": "NULL",
+      "notes": "Application failed",
+      "retry_count": "0",
+      "last_retry_at": "NULL",
+      "next_retry_at": "2026-01-15 03:41:59"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuser_id\tjob_id\tstatus\tapplied_at\tstatus_updated_at\tapplication_method\tnotes\tretry_count\tlast_retry_at\tnext_retry_at\n120030\t420001\t1230149\tpending\t2026-01-15 03:12:39\t2026-01-15 03:12:39\tNULL\tApplication failed\t0\tNULL\t2026-01-15 03:42:40\n120029\t420001\t1230148\tpending\t2026-01-15 03:12:28\t2026-01-15 03:12:28\tNULL\tApplication failed\t0\tNULL\t2026-01-15 03:42:28\n120028\t420001\t270558\tpending\t2026-01-15 03:12:18\t2026-01-15 03:12:18\tNULL\tApplication failed\t0\tNULL\t2026-01-15 03:42:18\n120027\t420001\t270554\tpending\t2026-01-15 03:12:08\t2026-01-15 03:12:08\tNULL\tApplication failed\t0\tNULL\t2026-01-15 03:42:09\n120026\t420001\t270548\tpending\t2026-01-15 03:11:58\t2026-01-15 03:11:58\tNULL\tApplication failed\t0\tNULL\t2026-01-15 03:41:59\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
