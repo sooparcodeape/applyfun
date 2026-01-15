@@ -56,7 +56,6 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string, title:
         'button[data-testid*="apply"]',
         '.apply-button',
         '#apply-button',
-        'a.btn:has-text("Apply")',
       ];
       
       for (const selector of selectors) {
@@ -81,13 +80,15 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string, title:
       return null;
     });
     
-    await page.close();
-    
-    if (applyUrl) {
-      return applyUrl;
+    if (!applyUrl) {
+      await page.close();
+      return null;
     }
     
-    return null;
+    // Return the URL as-is - automation will handle clicking Apply button
+    
+    await page.close();
+    return applyUrl;
     
   } catch (error) {
     console.error(`[SolanaJobs] Error extracting URL from ${detailUrl}:`, error);

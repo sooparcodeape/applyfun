@@ -876,6 +876,8 @@
 - [x] Test automation with resume upload on real job
 - [x] Verify resume file was uploaded correctly to job form
 
-### Homepage Button Updates
-- [x] Change "Get Started" button to "Sign Up"
-- [x] Add "Sign In" button next to Sign Up button
+### Fix Chrome Persistence and URL Extraction
+- [x] Configure Puppeteer to use /home/ubuntu/.cache/puppeteer (accessible by all users)
+- [x] Simplify scrapers to extract job URLs (let automation handle Apply clicks)
+- [ ] Test end-to-end automation with real job URLs
+- [ ] Verify automation successfully applies to jobs

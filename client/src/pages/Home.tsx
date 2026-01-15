@@ -36,20 +36,9 @@ export default function Home() {
               apply.fun
             </span>
           </div>
-          {isAuthenticated ? (
-            <Button onClick={handleGetStarted} variant="outline" className="border-purple-500/50 hover:bg-purple-500/10">
-              Dashboard
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button onClick={() => setLocation("/login")} variant="ghost" className="text-purple-300 hover:text-purple-200 hover:bg-purple-500/10">
-                Sign In
-              </Button>
-              <Button onClick={handleGetStarted} variant="outline" className="border-purple-500/50 hover:bg-purple-500/10">
-                Sign Up
-              </Button>
-            </div>
-          )}
+          <Button onClick={handleGetStarted} variant="outline" className="border-purple-500/50 hover:bg-purple-500/10">
+            {isAuthenticated ? "Dashboard" : "Get Started"}
+          </Button>
         </div>
       </header>
 
@@ -89,41 +78,18 @@ export default function Home() {
           )}
           
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4">
-            {isAuthenticated ? (
-              <Button 
-                onClick={handleGetStarted} 
-                size="lg" 
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 sm:px-8 text-sm sm:text-base whitespace-nowrap"
-              >
-                <span className="truncate">
-                  {jobStats && jobStats.active > 0 
-                    ? `Apply to ${jobStats.active.toLocaleString()}+ Jobs Now` 
-                    : "Go to Dashboard"}
-                </span>
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-              </Button>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-3 items-center">
-                <Button 
-                  onClick={handleGetStarted} 
-                  size="lg" 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 sm:px-8 text-sm sm:text-base whitespace-nowrap"
-                >
-                  <span className="truncate">
-                    Sign Up Free
-                  </span>
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                </Button>
-                <Button 
-                  onClick={() => setLocation("/login")} 
-                  size="lg" 
-                  variant="outline"
-                  className="border-purple-500/50 hover:bg-purple-500/10 text-purple-300 px-6 sm:px-8 text-sm sm:text-base whitespace-nowrap"
-                >
-                  Sign In
-                </Button>
-              </div>
-            )}
+            <Button 
+              onClick={handleGetStarted} 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 sm:px-8 text-sm sm:text-base whitespace-nowrap"
+            >
+              <span className="truncate">
+                {jobStats && jobStats.active > 0 
+                  ? `Apply to ${jobStats.active.toLocaleString()}+ Jobs Now` 
+                  : "Start Applying"}
+              </span>
+              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            </Button>
           </div>
         </div>
 
@@ -174,7 +140,7 @@ export default function Home() {
               size="lg"
               className="bg-white text-purple-900 hover:bg-slate-100 px-8"
             >
-              {isAuthenticated ? "Go to Dashboard" : "Sign Up Free"}
+              Get Started Free
             </Button>
           </div>
         </div>

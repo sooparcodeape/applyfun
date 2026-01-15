@@ -101,17 +101,21 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string): Promi
       return null;
     });
     
-    await page.close();
-    
-    if (applyUrl) {
-      // Make relative URLs absolute
-      if (applyUrl.startsWith('/')) {
-        return `https://web3.career${applyUrl}`;
-      }
-      return applyUrl;
+    if (!applyUrl) {
+      await page.close();
+      return null;
     }
     
-    return null;
+    // Make relative URLs absolute
+    let finalUrl = applyUrl;
+    if (applyUrl.startsWith('/')) {
+      finalUrl = `https://web3.career${applyUrl}`;
+    }
+    
+    // Return the URL as-is - automation will handle clicking Apply button
+    
+    await page.close();
+    return finalUrl;
     
   } catch (error) {
     console.error(`[Web3Career] Error extracting URL from ${detailUrl}:`, error);

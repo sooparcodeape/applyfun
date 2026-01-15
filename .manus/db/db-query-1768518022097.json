@@ -1,0 +1,54 @@
+{
+  "query": "SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC;",
+  "rows": [
+    {
+      "source": "web3.career",
+      "count": "314"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "count": "157"
+    },
+    {
+      "source": "Chainlink",
+      "count": "39"
+    },
+    {
+      "source": "Solana",
+      "count": "20"
+    },
+    {
+      "source": "Polygon",
+      "count": "20"
+    },
+    {
+      "source": "Ripple",
+      "count": "6"
+    },
+    {
+      "source": "Avalanche",
+      "count": "6"
+    },
+    {
+      "source": "Arbitrum",
+      "count": "2"
+    },
+    {
+      "source": "Starknet",
+      "count": "2"
+    },
+    {
+      "source": "Polkadot",
+      "count": "1"
+    },
+    {
+      "source": "Ethereum",
+      "count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "source\tcount\nweb3.career\t314\ncryptojobslist.com\t157\nChainlink\t39\nSolana\t20\nPolygon\t20\nRipple\t6\nAvalanche\t6\nArbitrum\t2\nStarknet\t2\nPolkadot\t1\nEthereum\t1\n",
+  "stderr": "",
+  "execution_time_ms": 418
+}
