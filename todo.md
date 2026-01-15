@@ -761,3 +761,10 @@
 - [x] Debug why all applications fail despite Browserless API key working (Found: URLs point to job listings, not forms)
 - [x] Check Browserless response logs for error details (Confirmed: No form fields detected)
 - [x] Enhance automation to handle two-step process (click Apply button → fill form)
+
+### Personalized Cover Letter Generation
+- [x] Create LLM-based cover letter generator that matches user's writing style
+- [x] Extract writing style from user's writing sample during onboarding (Already collected)
+- [x] Generate job-specific cover letters using user's style + job description
+- [x] Add ATS-specific form filling strategies for Greenhouse, Lever, Workable (Already implemented)
+- [x] Integrate cover letter generation into automation workflow

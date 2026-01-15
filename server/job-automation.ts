@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { generatePersonalizedCoverLetter } from './cover-letter-generator';
 
 export interface JobApplicationData {
   fullName: string;
@@ -10,6 +11,13 @@ export interface JobApplicationData {
   githubUrl?: string;
   portfolioUrl?: string;
   coverLetter?: string;
+  // For personalized cover letter generation
+  jobTitle?: string;
+  companyName?: string;
+  jobDescription?: string;
+  writingSample?: string;
+  skills?: string[];
+  experience?: string;
 }
 
 export interface ApplicationResult {
@@ -31,6 +39,28 @@ export async function autoApplyToJob(
     
     if (!browserlessApiKey) {
       throw new Error('BROWSERLESS_API_KEY environment variable is not set');
+    }
+
+    // Generate personalized cover letter if we have the necessary data
+    if (!applicantData.coverLetter && applicantData.jobTitle && applicantData.companyName && applicantData.writingSample) {
+      try {
+        console.log(`[Automation] Generating personalized cover letter for ${applicantData.companyName}...`);
+        applicantData.coverLetter = await generatePersonalizedCoverLetter({
+          jobTitle: applicantData.jobTitle,
+          companyName: applicantData.companyName,
+          jobDescription: applicantData.jobDescription || '',
+          userProfile: {
+            fullName: applicantData.fullName,
+            skills: applicantData.skills || [],
+            experience: applicantData.experience || '',
+            writingSample: applicantData.writingSample,
+          },
+        });
+        console.log(`[Automation] Cover letter generated successfully`);
+      } catch (error: any) {
+        console.error('[Automation] Failed to generate cover letter:', error.message);
+        // Continue without cover letter rather than failing the entire application
+      }
     }
 
     // Build the Puppeteer script that will run on Browserless
