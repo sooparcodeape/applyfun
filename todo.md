@@ -870,3 +870,8 @@
 - [x] Add URL validation to scrapers to skip 404 errors
 - [x] Update job-automation.ts to handle missing Chrome gracefully
 - [x] Test automation with real job URLs after fixes
+
+### Test Resume Upload with Real PDF
+- [x] Upload test resume to S3 storage
+- [x] Test automation with resume upload on real job
+- [x] Verify resume file was uploaded correctly to job form
