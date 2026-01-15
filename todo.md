@@ -736,3 +736,9 @@
 - [x] Remove wouter patch reference that was causing version mismatch
 - [x] Clean install all dependencies to ensure lockfile is correct
 - [x] Verify dev server runs without errors
+
+### Review Button Not Showing
+- [x] Added requires_manual_review to statusConfig in Applications page
+- [x] Added Review & Apply button that appears for requires_manual_review status
+- [x] Updated database schema to include requires_manual_review in status enum
+- [x] Applied migration to database successfully

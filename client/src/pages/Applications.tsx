@@ -42,6 +42,7 @@ const statusConfig = {
   interview: { label: "Interview", icon: MessageSquare, color: "bg-green-500/10 text-green-500 border-green-500/30" },
   offer: { label: "Offer", icon: Award, color: "bg-pink-500/10 text-pink-500 border-pink-500/30" },
   accepted: { label: "Accepted", icon: TrendingUp, color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30" },
+  requires_manual_review: { label: "Manual Review", icon: Clock, color: "bg-orange-500/10 text-orange-500 border-orange-500/30" },
 };
 
 export default function Applications() {
@@ -214,6 +215,19 @@ export default function Applications() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
+                      {app.application.status === "requires_manual_review" && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            // Open job URL in new tab
+                            window.open(app.job.applyUrl, '_blank');
+                            toast.info("Opening application page. Your resume and cover letter are ready in your profile.");
+                          }}
+                        >
+                          Review & Apply
+                        </Button>
+                      )}
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button

@@ -258,7 +258,7 @@ export const applications = mysqlTable("applications", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   jobId: int("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
-  status: mysqlEnum("status", ["pending", "applied", "viewed", "rejected", "interview", "offer", "accepted"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "applied", "viewed", "rejected", "interview", "offer", "accepted", "requires_manual_review"]).default("pending").notNull(),
   appliedAt: timestamp("applied_at").defaultNow().notNull(),
   statusUpdatedAt: timestamp("status_updated_at").defaultNow().onUpdateNow().notNull(),
   applicationMethod: varchar("application_method", { length: 50 }), // auto, manual
