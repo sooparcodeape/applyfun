@@ -765,3 +765,10 @@
 - [x] Review button now appears for applications with requires_manual_review status
 - [x] Added safety checks in Applications page to prevent config lookup errors
 - [x] Added fallback icon (Clock) if statusConfig lookup fails
+
+### Critical React Error #310
+- [x] Fixed "Rendered more hooks than during the previous render" error
+- [x] Root cause: filteredApplications calculation happened after early return for isLoading
+- [x] Solution: Moved early return BEFORE filteredApplications calculation
+- [x] This ensures hooks are called in the same order on every render
+- [x] Dev server restarted and error resolved

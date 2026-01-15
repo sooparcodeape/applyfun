@@ -77,11 +77,6 @@ export default function Applications() {
     });
   };
 
-  const filteredApplications = applications?.filter((app) => {
-    if (filterStatus === "all") return true;
-    return app.application.status === filterStatus;
-  });
-
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -89,6 +84,11 @@ export default function Applications() {
       </div>
     );
   }
+
+  const filteredApplications = applications?.filter((app) => {
+    if (filterStatus === "all") return true;
+    return app.application.status === filterStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -148,10 +148,11 @@ export default function Applications() {
             </Button>
             {Object.entries(statusConfig).map(([status, config]) => {
               const count = applications?.filter((app) => app.application.status === status).length || 0;
+              const isActive = filterStatus === status;
               return (
                 <Button
                   key={status}
-                  variant={filterStatus === status ? "default" : "outline"}
+                  variant={isActive ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterStatus(status)}
                 >
