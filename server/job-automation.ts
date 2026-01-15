@@ -105,6 +105,25 @@ export default async function ({ page }) {
     // Wait for dynamic content to load
     await new Promise(resolve => setTimeout(resolve, 3000));
 
+    // STEP 1: Check if we're on a job listing page (not application form)
+    // Look for "Apply" button and click it to get to the actual application form
+    const applyButton = await findApplyButton(page);
+    
+    if (applyButton) {
+      console.log('Found Apply button on job listing page, clicking...');
+      await applyButton.click();
+      
+      // Wait for navigation to application form
+      await Promise.race([
+        page.waitForNavigation({ timeout: 15000 }).catch(() => null),
+        new Promise(resolve => setTimeout(resolve, 5000)),
+      ]);
+      
+      // Wait for form to load
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+
+    // STEP 2: Now we should be on the application form
     // Detect ATS platform
     const atsType = await detectATSPlatform(page);
     console.log(\`Detected ATS: \${atsType}\`);
@@ -313,6 +332,48 @@ async function fillField(page, selectors, value) {
     }
   }
   return 0;
+}
+
+async function findApplyButton(page) {
+  // Common selectors for "Apply" buttons on job listing pages
+  const applyButtonSelectors = [
+    'a[href*="apply"]',
+    'button:contains("Apply")',
+    'a:contains("Apply")',
+    'button:contains("Apply Now")',
+    'a:contains("Apply Now")',
+    'button[class*="apply"]',
+    'a[class*="apply"]',
+    'button[id*="apply"]',
+    'a[id*="apply"]',
+  ];
+
+  for (const selector of applyButtonSelectors) {
+    try {
+      // Use page.evaluate to find buttons with text content
+      if (selector.includes(':contains')) {
+        const text = selector.match(/:contains\("(.+?)"\)/)[1];
+        const button = await page.evaluateHandle((searchText) => {
+          const buttons = Array.from(document.querySelectorAll('button, a'));
+          return buttons.find(btn => 
+            btn.textContent.trim().toLowerCase().includes(searchText.toLowerCase())
+          );
+        }, text);
+        
+        if (button && await button.asElement()) {
+          return button.asElement();
+        }
+      } else {
+        const button = await page.$(selector);
+        if (button) {
+          return button;
+        }
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  return null;
 }
 
 async function findSubmitButton(page) {

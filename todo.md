@@ -756,3 +756,8 @@
 
 ### Production Environment Issue
 - [x] Add BROWSERLESS_API_KEY to server environment configuration file (Added to env.ts)
+
+### Application Failures
+- [x] Debug why all applications fail despite Browserless API key working (Found: URLs point to job listings, not forms)
+- [x] Check Browserless response logs for error details (Confirmed: No form fields detected)
+- [x] Enhance automation to handle two-step process (click Apply button → fill form)
