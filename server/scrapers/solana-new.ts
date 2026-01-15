@@ -1,5 +1,11 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import type { Browser } from 'puppeteer';
+
+// Add stealth plugin
+puppeteer.use(StealthPlugin());
 
 interface ScrapedJob {
   externalId: string;
@@ -20,20 +26,94 @@ interface ScrapedJob {
 }
 
 /**
+ * Extract real application URL by navigating to job detail page and clicking Apply
+ */
+async function extractApplicationUrl(browser: Browser, detailUrl: string, title: string): Promise<string | null> {
+  let page = null;
+  
+  try {
+    page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
+    
+    // Navigate to job detail page
+    await page.goto(detailUrl, {
+      waitUntil: 'networkidle2',
+      timeout: 15000,
+    });
+    
+    // Wait for page to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Look for Apply button and extract href or click to get redirect URL
+    const applyUrl = await page.evaluate(() => {
+      // Try multiple selectors for Apply button
+      const selectors = [
+        'a[href*="apply"]',
+        'a[href*="greenhouse"]',
+        'a[href*="lever.co"]',
+        'a[href*="ashbyhq"]',
+        'a[href*="workable"]',
+        'button[data-testid*="apply"]',
+        '.apply-button',
+        '#apply-button',
+        'a.btn:has-text("Apply")',
+      ];
+      
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          const href = element.getAttribute('href');
+          if (href && href.includes('http')) {
+            return href;
+          }
+        }
+      }
+      
+      // Fallback: look for any link with "apply" text
+      const links = Array.from(document.querySelectorAll('a'));
+      for (const link of links) {
+        const text = link.textContent?.toLowerCase() || '';
+        if (text.includes('apply') && link.href && link.href.includes('http')) {
+          return link.href;
+        }
+      }
+      
+      return null;
+    });
+    
+    await page.close();
+    
+    if (applyUrl) {
+      return applyUrl;
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error(`[SolanaJobs] Error extracting URL from ${detailUrl}:`, error);
+    if (page) {
+      await page.close().catch(() => {});
+    }
+    return null;
+  }
+}
+
+/**
  * Scrape jobs from Solana Jobs board
  * 
  * Strategy:
  * 1. Fetch job listing pages to get job detail URLs
- * 2. For each job, fetch the detail page
- * 3. Use Browserless to click Apply button and capture redirect URL
- * 4. Save the final application URL (Ashby/Greenhouse/Lever)
+ * 2. Use self-hosted Puppeteer to navigate to each job detail page
+ * 3. Extract the real application URL (Ashby/Greenhouse/Lever)
+ * 4. Save jobs with working application URLs
  */
 export async function scrapeSolanaJobs(): Promise<ScrapedJob[]> {
   const scrapedJobs: ScrapedJob[] = [];
-  const maxPages = 3; // Limit to 3 pages to minimize API calls
+  const maxPages = 3; // Limit to 3 pages
+  let browser: Browser | null = null;
   
   try {
-    console.log("[SolanaJobs] Starting scrape...");
+    console.log("[SolanaJobs] Starting scrape with real URL extraction...");
     
     // Step 1: Get job detail URLs from listing pages
     const jobDetailUrls: Array<{url: string, title: string, company: string}> = [];
@@ -89,96 +169,52 @@ export async function scrapeSolanaJobs(): Promise<ScrapedJob[]> {
     
     console.log(`[SolanaJobs] Total job detail URLs found: ${jobDetailUrls.length}`);
     
-    // Step 2: For each job detail URL, extract the application URL
-    // We'll use Browserless to click the Apply button and capture the redirect
-    const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY;
+    // Step 2: Launch browser and extract real application URLs
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
+    });
     
-    if (!BROWSERLESS_API_KEY) {
-      console.error("[SolanaJobs] BROWSERLESS_API_KEY not found, cannot extract application URLs");
-      return scrapedJobs;
-    }
+    // Process jobs in batches
+    const batchSize = 5;
+    const maxJobs = Math.min(jobDetailUrls.length, 50); // Limit to 50 jobs
     
-    // Process jobs in batches to avoid overwhelming Browserless
-    const batchSize = 10;
-    for (let i = 0; i < Math.min(jobDetailUrls.length, 50); i += batchSize) {
+    for (let i = 0; i < maxJobs; i += batchSize) {
       const batch = jobDetailUrls.slice(i, i + batchSize);
       
-      console.log(`[SolanaJobs] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(Math.min(jobDetailUrls.length, 50) / batchSize)}...`);
+      console.log(`[SolanaJobs] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(maxJobs / batchSize)}...`);
       
       for (const job of batch) {
         try {
-          // Use Browserless to extract the application URL
-          const script = `
-            const puppeteer = require('puppeteer');
-            
-            module.exports = async ({ page, context }) => {
-              try {
-                await page.goto('${job.url}', { waitUntil: 'networkidle2', timeout: 15000 });
-                
-                // Wait for Apply button
-                await page.waitForSelector('button:has-text("Apply now")', { timeout: 5000 }).catch(() => {});
-                
-                // Click Apply button and wait for navigation
-                const [response] = await Promise.all([
-                  page.waitForNavigation({ timeout: 10000 }).catch(() => null),
-                  page.click('button').catch(() => {})
-                ]);
-                
-                // Get the final URL after redirect
-                const finalUrl = page.url();
-                
-                // Extract job details from the page
-                const title = await page.$eval('h1, h2', el => el.textContent.trim()).catch(() => '${job.title}');
-                const company = await page.$eval('[class*="company"]', el => el.textContent.trim()).catch(() => '${job.company}');
-                
-                return {
-                  success: true,
-                  applyUrl: finalUrl,
-                  title,
-                  company
-                };
-              } catch (error) {
-                return {
-                  success: false,
-                  error: error.message,
-                  applyUrl: '${job.url}' // Fallback to detail page URL
-                };
-              }
-            };
-          `;
+          const applyUrl = await extractApplicationUrl(browser, job.url, job.title);
           
-          const browserlessResponse = await axios.post(
-            `https://chrome.browserless.io/function?token=${BROWSERLESS_API_KEY}&stealth`,
-            { code: script },
-            {
-              headers: { "Content-Type": "application/json" },
-              timeout: 30000,
-            }
-          );
-          
-          const result = browserlessResponse.data;
-          
-          if (result.success) {
+          if (applyUrl) {
             scrapedJobs.push({
               externalId: `solana-${job.company.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
               source: "jobs.solana.com",
-              title: result.title || job.title,
-              company: result.company || job.company,
+              title: job.title,
+              company: job.company,
               location: "Remote", // Default, can be extracted from detail page
               jobType: "Full-time",
               tags: JSON.stringify(["solana", "blockchain", "crypto"]),
-              applyUrl: result.applyUrl,
+              applyUrl,
               postedDate: new Date(),
               isActive: 1,
             });
             
-            console.log(`[SolanaJobs] ✓ ${job.title} -> ${result.applyUrl}`);
+            console.log(`[SolanaJobs] ✓ ${job.title} -> ${applyUrl}`);
           } else {
-            console.error(`[SolanaJobs] ✗ ${job.title}: ${result.error}`);
+            console.log(`[SolanaJobs] ✗ ${job.title} - No apply URL found`);
           }
           
-          // Small delay between Browserless calls
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Small delay between requests
+          await new Promise(resolve => setTimeout(resolve, 1500));
           
         } catch (error) {
           console.error(`[SolanaJobs] Error processing ${job.title}:`, error);
@@ -192,5 +228,9 @@ export async function scrapeSolanaJobs(): Promise<ScrapedJob[]> {
   } catch (error) {
     console.error("[SolanaJobs] Scraping error:", error);
     return scrapedJobs;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }

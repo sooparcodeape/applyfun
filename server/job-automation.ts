@@ -1,4 +1,9 @@
-import axios from 'axios';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import type { Browser, Page } from 'puppeteer';
+
+// Add stealth plugin
+puppeteer.use(StealthPlugin());
 
 export interface JobApplicationData {
   fullName: string;
@@ -25,94 +30,42 @@ export interface ApplicationResult {
   screenshotUrl?: string;
 }
 
-// Get Browserless API key from environment
-const BROWSERLESS_API_KEY = process.env.BROWSERLESS_API_KEY || '';
-const BROWSERLESS_API_URL = 'https://production-sfo.browserless.io';
+// Shared browser instance for better performance
+let browserInstance: Browser | null = null;
 
 /**
- * Attempts to automatically fill and submit a job application form using Browserless.io
+ * Get or create browser instance
+ */
+async function getBrowser(): Promise<Browser> {
+  if (!browserInstance || !browserInstance.isConnected()) {
+    browserInstance = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920,1080',
+      ],
+    });
+  }
+  return browserInstance;
+}
+
+/**
+ * Attempts to automatically fill and submit a job application form using self-hosted Puppeteer
  */
 export async function autoApplyToJob(
   jobUrl: string,
   applicantData: JobApplicationData
 ): Promise<ApplicationResult> {
-  if (!BROWSERLESS_API_KEY) {
-    return {
-      success: false,
-      message: 'Browserless API key not configured. Please add BROWSERLESS_API_KEY to environment variables.',
-    };
-  }
-
-  try {
-    // Use provided cover letter
-    const coverLetter = applicantData.coverLetter || '';
-
-    // Build Puppeteer script for Browserless
-    const puppeteerScript = buildPuppeteerScript(jobUrl, applicantData);
-
-    // Execute script via Browserless Function API
-    const response = await axios.post(
-      `${BROWSERLESS_API_URL}/function?token=${BROWSERLESS_API_KEY}&stealth`,
-      {
-        code: puppeteerScript,
-        context: {
-          jobUrl,
-          applicantData: {
-            ...applicantData,
-            coverLetter,
-          },
-        },
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 120000, // 2 minute timeout
-      }
-    );
-
-    const result = response.data;
-
-    if (result.success) {
-      return {
-        success: true,
-        message: result.message || 'Application submitted successfully!',
-        screenshotUrl: result.screenshotUrl,
-      };
-    } else {
-      return {
-        success: false,
-        message: result.message || 'Application automation failed. Manual review required.',
-        screenshotUrl: result.screenshotUrl,
-      };
-    }
-  } catch (error: any) {
-    console.error('[Job Automation] Browserless API error:', error.response?.data || error.message);
-    
-    // Return a more helpful error message
-    if (error.code === 'ECONNABORTED') {
-      return {
-        success: false,
-        message: 'Application timed out. The form may be too complex for automation. Manual review required.',
-      };
-    }
-    
-    return {
-      success: false,
-      message: `Automation failed: ${error.response?.data?.message || error.message}. Manual review required.`,
-    };
-  }
-}
-
-/**
- * Build Puppeteer script to be executed by Browserless
- */
-function buildPuppeteerScript(jobUrl: string, data: JobApplicationData): string {
-  return `
-module.exports = async ({ page, context }) => {
-  const { jobUrl, applicantData } = context;
+  let page: Page | null = null;
   
   try {
+    const browser = await getBrowser();
+    page = await browser.newPage();
+
     // Set stealth mode - mimic real browser
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     await page.setViewport({ width: 1920, height: 1080 });
@@ -128,11 +81,11 @@ module.exports = async ({ page, context }) => {
     });
 
     // Wait for dynamic content with human-like delay
-    await page.waitForTimeout(2000 + Math.random() * 1000);
+    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
 
     // Helper: Check if element is visible
-    async function isElementVisible(element) {
-      return await page.evaluate(el => {
+    const isElementVisible = async (element: any): Promise<boolean> => {
+      return await page!.evaluate(el => {
         if (!el) return false;
         const style = window.getComputedStyle(el);
         return style.display !== 'none' && 
@@ -140,24 +93,24 @@ module.exports = async ({ page, context }) => {
                style.opacity !== '0' &&
                el.offsetParent !== null;
       }, element);
-    }
+    };
 
     // Helper: Type with human-like delays
-    async function humanType(element, text) {
+    const humanType = async (element: any, text: string) => {
       await element.click({ delay: 100 });
-      await page.waitForTimeout(200 + Math.random() * 300);
+      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
       for (const char of text) {
         await element.type(char, { delay: 50 + Math.random() * 100 });
       }
-    }
+    };
 
     // Helper: Fill field by selectors
-    async function fillField(selectors, value) {
+    const fillField = async (selectors: string[], value: string): Promise<number> => {
       if (!value) return 0;
       
       for (const selector of selectors) {
         try {
-          const element = await page.$(selector);
+          const element = await page!.$(selector);
           if (element && await isElementVisible(element)) {
             await humanType(element, value);
             return 1;
@@ -167,7 +120,7 @@ module.exports = async ({ page, context }) => {
         }
       }
       return 0;
-    }
+    };
 
     // Step 1: Look for "Apply" button and click it
     const applyButtonSelectors = [
@@ -183,21 +136,22 @@ module.exports = async ({ page, context }) => {
     const applyButton = await page.evaluateHandle(() => {
       const buttons = Array.from(document.querySelectorAll('button, a'));
       return buttons.find(btn => {
-        const text = btn.textContent.toLowerCase();
+        const text = btn.textContent?.toLowerCase() || '';
         return text.includes('apply') && !text.includes('easy apply');
       });
     });
 
-    if (applyButton && await isElementVisible(applyButton.asElement())) {
-      await applyButton.asElement().click();
-      await page.waitForTimeout(2000 + Math.random() * 1000);
+    const applyElement = await applyButton.asElement();
+    if (applyElement && await isElementVisible(applyElement)) {
+      await (applyElement as any).click();
+      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
     }
 
     // Step 2: Detect ATS platform
     const url = page.url().toLowerCase();
     const bodyHtml = await page.evaluate(() => document.body.innerHTML.toLowerCase());
     
-    let atsType = 'generic';
+    let atsType: string = 'generic';
     if (url.includes('greenhouse.io') || bodyHtml.includes('greenhouse')) {
       atsType = 'greenhouse';
     } else if (url.includes('lever.co') || bodyHtml.includes('lever-frame')) {
@@ -206,13 +160,15 @@ module.exports = async ({ page, context }) => {
       atsType = 'workable';
     } else if (url.includes('linkedin.com/jobs')) {
       atsType = 'linkedin';
+    } else if (url.includes('ashbyhq.com')) {
+      atsType = 'ashby';
     }
 
     // Step 3: Fill form fields
     let fieldsFilledCount = 0;
 
     // ATS-specific selectors
-    const atsSelectors = {
+    const atsSelectors: Record<string, Record<string, string[]>> = {
       greenhouse: {
         firstName: ['#first_name', 'input[name="job_application[first_name]"]'],
         lastName: ['#last_name', 'input[name="job_application[last_name]"]'],
@@ -226,7 +182,7 @@ module.exports = async ({ page, context }) => {
         name: ['input[name="name"]', '.application-name input'],
         email: ['input[name="email"]', '.application-email input'],
         phone: ['input[name="phone"]', '.application-phone input'],
-        coverLetter: ['textarea[name="comments"]', '.application-comments textarea'],
+        coverLetter: ['textarea[name="comments"]', '.application-comments textarea', '#additional-information'],
         linkedin: ['input[name="urls[LinkedIn]"]'],
         github: ['input[name="urls[GitHub]"]'],
       },
@@ -238,6 +194,13 @@ module.exports = async ({ page, context }) => {
         coverLetter: ['textarea[name="candidate[cover_letter]"]'],
         linkedin: ['input[name="candidate[social_linkedin]"]'],
         github: ['input[name="candidate[social_github]"]'],
+      },
+      ashby: {
+        name: ['input[name="name"]'],
+        email: ['input[name="email"]'],
+        phone: ['input[name="phone"]'],
+        linkedin: ['input[name="linkedInUrl"]'],
+        github: ['input[name="githubUrl"]'],
       },
       linkedin: {
         // LinkedIn Easy Apply is detected but we don't auto-submit
@@ -312,34 +275,50 @@ module.exports = async ({ page, context }) => {
 
     // Check if any fields were filled
     if (fieldsFilledCount === 0) {
-      const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
+      await page.close();
       return {
         success: false,
         message: 'No application form fields detected. This may require manual application.',
-        screenshot,
       };
     }
 
-    // Take screenshot before submission
-    const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
-
     // Don't actually submit - too risky with anti-bot protection
     // Just return success with fields filled
+    await page.close();
+    
     return {
       success: false, // Mark as false to trigger manual review
-      message: \`Filled \${fieldsFilledCount} fields but did not submit due to anti-bot protection. Manual review required.\`,
-      screenshot,
-      fieldsFilledCount,
+      message: `Filled ${fieldsFilledCount} fields but did not submit due to anti-bot protection. Manual review required.`,
     };
 
-  } catch (error) {
-    const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true }).catch(() => null);
+  } catch (error: any) {
+    console.error('[Job Automation] Self-hosted Puppeteer error:', error.message);
+    
+    if (page) {
+      await page.close().catch(() => {});
+    }
+    
+    // Return a more helpful error message
+    if (error.name === 'TimeoutError') {
+      return {
+        success: false,
+        message: 'Application timed out. The form may be too complex for automation. Manual review required.',
+      };
+    }
+    
     return {
       success: false,
-      message: \`Error: \${error.message}\`,
-      screenshot,
+      message: `Automation failed: ${error.message}. Manual review required.`,
     };
   }
-};
-`;
+}
+
+/**
+ * Close browser instance when shutting down
+ */
+export async function closeBrowser() {
+  if (browserInstance) {
+    await browserInstance.close();
+    browserInstance = null;
+  }
 }

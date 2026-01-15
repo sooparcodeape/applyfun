@@ -1,7 +1,13 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import type { Browser } from 'puppeteer';
 import { getDb } from "../db";
 import { jobs } from "../../drizzle/schema";
+
+// Add stealth plugin
+puppeteer.use(StealthPlugin());
 
 interface ScrapedJob {
   externalId: string;
@@ -21,12 +27,104 @@ interface ScrapedJob {
   isActive: number;
 }
 
+interface JobListing {
+  title: string;
+  company: string;
+  location: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  tags: string[];
+  detailUrl: string;
+}
+
+/**
+ * Extract real application URL by navigating to job detail page
+ */
+async function extractApplicationUrl(browser: Browser, detailUrl: string): Promise<string | null> {
+  let page = null;
+  
+  try {
+    page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
+    
+    // Navigate to job detail page
+    await page.goto(detailUrl, {
+      waitUntil: 'networkidle2',
+      timeout: 15000,
+    });
+    
+    // Wait for page to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Look for Apply button and extract href
+    const applyUrl = await page.evaluate(() => {
+      // Try multiple selectors for Apply button
+      const selectors = [
+        'a[href*="apply"]',
+        'a[href*="greenhouse"]',
+        'a[href*="lever.co"]',
+        'a[href*="ashbyhq"]',
+        'a[href*="workable"]',
+        'button[onclick*="apply"]',
+        '.apply-button',
+        '#apply-button',
+      ];
+      
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          const href = element.getAttribute('href') || element.getAttribute('onclick');
+          if (href && (href.includes('http') || href.startsWith('/'))) {
+            // Extract URL from onclick if needed
+            const urlMatch = href.match(/https?:\/\/[^\s'"]+/);
+            return urlMatch ? urlMatch[0] : href;
+          }
+        }
+      }
+      
+      // Fallback: look for any link with "apply" text
+      const links = Array.from(document.querySelectorAll('a'));
+      for (const link of links) {
+        const text = link.textContent?.toLowerCase() || '';
+        if (text.includes('apply') && link.href) {
+          return link.href;
+        }
+      }
+      
+      return null;
+    });
+    
+    await page.close();
+    
+    if (applyUrl) {
+      // Make relative URLs absolute
+      if (applyUrl.startsWith('/')) {
+        return `https://web3.career${applyUrl}`;
+      }
+      return applyUrl;
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error(`[Web3Career] Error extracting URL from ${detailUrl}:`, error);
+    if (page) {
+      await page.close().catch(() => {});
+    }
+    return null;
+  }
+}
+
 export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
   const scrapedJobs: ScrapedJob[] = [];
   const maxPages = 10;
+  let browser: Browser | null = null;
   
   try {
-    console.log("[Web3Career] Starting scrape with pagination...");
+    console.log("[Web3Career] Starting scrape with real URL extraction...");
+    
+    // Step 1: Scrape job listings to get detail URLs
+    const jobListings: JobListing[] = [];
     
     for (let page = 1; page <= maxPages; page++) {
       try {
@@ -58,10 +156,17 @@ export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
             const links = $row.find("a");
             if (links.length < 2) return;
             
-            const title = links.eq(0).text().trim();
+            const titleLink = links.eq(0);
+            const title = titleLink.text().trim();
+            const detailUrl = titleLink.attr('href');
             const company = links.eq(1).text().trim();
             
-            if (!title || !company || title.includes("Bootcamp")) return;
+            if (!title || !company || !detailUrl || title.includes("Bootcamp")) return;
+            
+            // Make URL absolute
+            const fullDetailUrl = detailUrl.startsWith('http') 
+              ? detailUrl 
+              : `https://web3.career${detailUrl}`;
             
             // Extract location
             const rowText = $row.text();
@@ -86,24 +191,14 @@ export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
               }
             });
             
-            const jobSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            const applyUrl = `https://web3.career/${jobSlug}`;
-            const externalId = `web3career-${company.toLowerCase().replace(/\s+/g, "-")}-${jobSlug}`;
-            
-            scrapedJobs.push({
-              externalId,
-              source: "web3.career",
+            jobListings.push({
               title,
               company,
               location,
-              jobType: "Full-time",
               salaryMin,
               salaryMax,
-              salaryCurrency: "USD",
-              tags: JSON.stringify(tags),
-              applyUrl,
-              postedDate: new Date(),
-              isActive: 1,
+              tags,
+              detailUrl: fullDetailUrl,
             });
             
             jobsOnPage++;
@@ -127,12 +222,74 @@ export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
       }
     }
     
-    console.log(`[Web3Career] Total found: ${scrapedJobs.length} jobs`);
+    console.log(`[Web3Career] Found ${jobListings.length} job listings, extracting application URLs...`);
+    
+    // Step 2: Launch browser and extract real application URLs
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
+    });
+    
+    // Process jobs in batches to avoid overwhelming the browser
+    const batchSize = 5;
+    for (let i = 0; i < jobListings.length; i += batchSize) {
+      const batch = jobListings.slice(i, i + batchSize);
+      
+      console.log(`[Web3Career] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(jobListings.length / batchSize)}...`);
+      
+      for (const listing of batch) {
+        try {
+          const applyUrl = await extractApplicationUrl(browser, listing.detailUrl);
+          
+          if (applyUrl) {
+            const externalId = `web3career-${listing.company.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
+            
+            scrapedJobs.push({
+              externalId,
+              source: "web3.career",
+              title: listing.title,
+              company: listing.company,
+              location: listing.location,
+              jobType: "Full-time",
+              salaryMin: listing.salaryMin,
+              salaryMax: listing.salaryMax,
+              salaryCurrency: "USD",
+              tags: JSON.stringify(listing.tags),
+              applyUrl,
+              postedDate: new Date(),
+              isActive: 1,
+            });
+            
+            console.log(`[Web3Career] ✓ ${listing.title} -> ${applyUrl}`);
+          } else {
+            console.log(`[Web3Career] ✗ ${listing.title} - No apply URL found`);
+          }
+          
+          // Small delay between requests
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+        } catch (error) {
+          console.error(`[Web3Career] Error processing ${listing.title}:`, error);
+        }
+      }
+    }
+    
+    console.log(`[Web3Career] Total scraped: ${scrapedJobs.length} jobs with valid application URLs`);
     return scrapedJobs;
     
   } catch (error) {
     console.error("[Web3Career] Scraping error:", error);
-    return [];
+    return scrapedJobs;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
@@ -155,6 +312,7 @@ export async function saveWeb3CareerJobs() {
           salaryMin: job.salaryMin,
           salaryMax: job.salaryMax,
           tags: job.tags,
+          applyUrl: job.applyUrl, // Update apply URL
           isActive: job.isActive,
         },
       });

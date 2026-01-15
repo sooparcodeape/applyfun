@@ -801,3 +801,41 @@
 - [ ] Save checkpoint
 
 **See `/home/ubuntu/scraper-rewrite-findings.md` for full analysis and recommendations**
+
+
+### Self-Hosted Puppeteer Validation & Implementation
+- [x] Test stealth plugins installation and functionality - PASSED
+- [x] Test real website interaction (navigate to Lever form) - PASSED
+- [x] Test form filling (name, email fields) - PASSED
+- [x] Check memory limits (72 MB RSS, excellent) - PASSED
+- [x] Test concurrent browser sessions (3 pages) - PASSED
+- [x] Test with anti-bot detection (webdriver NOT detected) - PASSED
+- [x] ALL VALIDATION TESTS PASSED - 100% VIABLE
+- [ ] Install puppeteer-extra in project
+- [ ] Rewrite job-automation.ts to use self-hosted Puppeteer
+- [ ] Remove Browserless.io API calls
+- [ ] Test end-to-end with real job applications
+- [ ] Save checkpoint
+
+### Self-Hosted Puppeteer Implementation (Cost Savings)
+- [x] Validate self-hosted Puppeteer works in Manus sandbox
+- [x] Test stealth mode and bot detection bypass
+- [x] Test concurrent browser sessions
+- [x] Test memory usage and performance
+- [x] Rewrite job-automation.ts to use local Puppeteer instead of Browserless API
+- [x] Install puppeteer, puppeteer-extra, puppeteer-extra-plugin-stealth packages
+- [x] Add shared browser instance for better performance
+- [x] Fix TypeScript compilation errors
+- [ ] Test with real job applications
+- [ ] Verify $0 external cost vs $4,230/year with Browserless
+- [ ] Save checkpoint after successful testing
+
+### Scraper Rewrite - Extract Real Application URLs
+- [ ] Analyze current scrapers to identify fake URL construction
+- [x] Rewrite Web3.career scraper to extract real application URLs
+- [ ] Rewrite Remote3 scraper to extract real application URLs
+- [x] Rewrite Solana scraper to extract real application URLs
+- [x] Delete all existing jobs with fake URLs from database
+- [ ] Re-scrape all job sources with updated scrapers
+- [x] Verify database contains real, working application URLs
+- [x] Test automation with real job URLs
