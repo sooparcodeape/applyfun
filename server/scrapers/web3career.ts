@@ -47,11 +47,18 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string): Promi
     page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
     
-    // Navigate to job detail page
-    await page.goto(detailUrl, {
+    // Navigate to job detail page and check for 404
+    const response = await page.goto(detailUrl, {
       waitUntil: 'networkidle2',
       timeout: 15000,
     });
+    
+    // Skip if page returned 404 or server error
+    if (!response || response.status() === 404 || response.status() >= 500) {
+      console.log(`[Web3Career] Skipping ${detailUrl} - HTTP ${response?.status() || 'no response'}`);
+      await page.close();
+      return null;
+    }
     
     // Wait for page to load
     await new Promise(resolve => setTimeout(resolve, 2000));

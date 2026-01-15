@@ -864,3 +864,9 @@
 - [x] Test Greenhouse fix with real job posting
 - [x] Test resume upload end-to-end
 - [x] Test admin dashboard with sample data
+
+### Fix Chrome Installation and Scraper URL Validation
+- [x] Install Chrome browser for Puppeteer in production
+- [x] Add URL validation to scrapers to skip 404 errors
+- [x] Update job-automation.ts to handle missing Chrome gracefully
+- [x] Test automation with real job URLs after fixes

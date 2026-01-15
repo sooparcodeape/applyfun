@@ -354,6 +354,11 @@ export async function autoApplyToJob(
   } catch (error: any) {
     console.error('[Job Automation] Self-hosted Puppeteer error:', error.message);
     
+    // Check if error is due to missing Chrome
+    if (error.message && error.message.includes('Could not find Chrome')) {
+      console.error('[Job Automation] Chrome not installed. Run: npx puppeteer browsers install chrome');
+    }
+    
     if (page) {
       await page.close().catch(() => {});
     }
