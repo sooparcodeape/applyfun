@@ -875,3 +875,7 @@
 - [x] Upload test resume to S3 storage
 - [x] Test automation with resume upload on real job
 - [x] Verify resume file was uploaded correctly to job form
+
+### Homepage Button Updates
+- [x] Change "Get Started" button to "Sign Up"
+- [x] Add "Sign In" button next to Sign Up button
