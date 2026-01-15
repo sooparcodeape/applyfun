@@ -742,3 +742,12 @@
 - [x] Added Review & Apply button that appears for requires_manual_review status
 - [x] Updated database schema to include requires_manual_review in status enum
 - [x] Applied migration to database successfully
+
+### Browserless.io 400 Errors
+- [x] Fixed Puppeteer script - removed invalid Playwright syntax (:has-text)
+- [x] Fixed element interaction methods (isVisible, type) to use proper Puppeteer API
+- [x] Added stealth techniques: realistic user agent, viewport, HTTP headers
+- [x] Implemented human-like typing with random delays (50-150ms per character)
+- [x] Added random delays between actions to mimic human behavior
+- [x] Script now fills forms but doesn't auto-submit to avoid Greenhouse detection
+- [x] Applications marked as requires_manual_review for user to complete submission

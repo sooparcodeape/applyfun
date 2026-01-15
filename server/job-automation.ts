@@ -113,74 +113,87 @@ module.exports = async ({ page, context }) => {
   const { jobUrl, applicantData } = context;
   
   try {
+    // Set stealth mode - mimic real browser
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    });
+
     // Navigate to job application URL
     await page.goto(jobUrl, {
       waitUntil: 'networkidle2',
       timeout: 30000,
     });
 
-    // Wait for dynamic content
-    await page.waitForTimeout(3000);
+    // Wait for dynamic content with human-like delay
+    await page.waitForTimeout(2000 + Math.random() * 1000);
+
+    // Helper: Check if element is visible
+    async function isElementVisible(element) {
+      return await page.evaluate(el => {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && 
+               style.visibility !== 'hidden' && 
+               style.opacity !== '0' &&
+               el.offsetParent !== null;
+      }, element);
+    }
+
+    // Helper: Type with human-like delays
+    async function humanType(element, text) {
+      await element.click({ delay: 100 });
+      await page.waitForTimeout(200 + Math.random() * 300);
+      for (const char of text) {
+        await element.type(char, { delay: 50 + Math.random() * 100 });
+      }
+    }
+
+    // Helper: Fill field by selectors
+    async function fillField(selectors, value) {
+      if (!value) return 0;
+      
+      for (const selector of selectors) {
+        try {
+          const element = await page.$(selector);
+          if (element && await isElementVisible(element)) {
+            await humanType(element, value);
+            return 1;
+          }
+        } catch (e) {
+          // Try next selector
+        }
+      }
+      return 0;
+    }
 
     // Step 1: Look for "Apply" button and click it
     const applyButtonSelectors = [
-      'button:has-text("Apply")',
-      'a:has-text("Apply")',
-      'button:has-text("Apply Now")',
-      'a:has-text("Apply Now")',
-      '[data-testid="apply-button"]',
-      '.apply-button',
+      'button[id*="apply"]',
+      'a[id*="apply"]',
+      'button.apply-button',
+      'a.apply-button',
       '#apply-button',
+      'button[data-testid*="apply"]',
     ];
 
-    let applyButtonFound = false;
-    for (const selector of applyButtonSelectors) {
-      try {
-        const button = await page.$(selector);
-        if (button) {
-          const isVisible = await button.isVisible();
-          if (isVisible) {
-            await button.click();
-            await page.waitForTimeout(2000);
-            applyButtonFound = true;
-            break;
-          }
-        }
-      } catch (e) {
-        // Continue to next selector
-      }
+    // Find apply button by text content
+    const applyButton = await page.evaluateHandle(() => {
+      const buttons = Array.from(document.querySelectorAll('button, a'));
+      return buttons.find(btn => {
+        const text = btn.textContent.toLowerCase();
+        return text.includes('apply') && !text.includes('easy apply');
+      });
+    });
+
+    if (applyButton && await isElementVisible(applyButton.asElement())) {
+      await applyButton.asElement().click();
+      await page.waitForTimeout(2000 + Math.random() * 1000);
     }
 
-    // Step 2: Handle multi-step flows (Continue/Next buttons)
-    const continueButtonSelectors = [
-      'button:has-text("Continue")',
-      'button:has-text("Next")',
-      'button:has-text("Apply Now")',
-      '[data-testid="continue-button"]',
-    ];
-
-    for (let i = 0; i < 3; i++) {
-      let continueButtonFound = false;
-      for (const selector of continueButtonSelectors) {
-        try {
-          const button = await page.$(selector);
-          if (button) {
-            const isVisible = await button.isVisible();
-            if (isVisible) {
-              await button.click();
-              await page.waitForTimeout(2000);
-              continueButtonFound = true;
-              break;
-            }
-          }
-        } catch (e) {
-          // Continue to next selector
-        }
-      }
-      if (!continueButtonFound) break;
-    }
-
-    // Step 3: Detect ATS platform
+    // Step 2: Detect ATS platform
     const url = page.url().toLowerCase();
     const bodyHtml = await page.evaluate(() => document.body.innerHTML.toLowerCase());
     
@@ -191,9 +204,11 @@ module.exports = async ({ page, context }) => {
       atsType = 'lever';
     } else if (url.includes('workable.com') || bodyHtml.includes('workable')) {
       atsType = 'workable';
+    } else if (url.includes('linkedin.com/jobs')) {
+      atsType = 'linkedin';
     }
 
-    // Step 4: Fill form fields
+    // Step 3: Fill form fields
     let fieldsFilledCount = 0;
 
     // ATS-specific selectors
@@ -224,97 +239,75 @@ module.exports = async ({ page, context }) => {
         linkedin: ['input[name="candidate[social_linkedin]"]'],
         github: ['input[name="candidate[social_github]"]'],
       },
+      linkedin: {
+        // LinkedIn Easy Apply is detected but we don't auto-submit
+        phone: ['input[id*="phoneNumber"]', 'input[name*="phoneNumber"]'],
+      },
     };
 
     // Try ATS-specific selectors
     if (atsType !== 'generic' && atsSelectors[atsType]) {
       const mapping = atsSelectors[atsType];
       
+      // Split name
+      const nameParts = applicantData.fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+      
       // Fill name fields
       if (mapping.firstName) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.firstName, applicantData.fullName.split(' ')[0]);
+        fieldsFilledCount += await fillField(mapping.firstName, firstName);
       }
       if (mapping.lastName) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.lastName, applicantData.fullName.split(' ').slice(1).join(' '));
+        fieldsFilledCount += await fillField(mapping.lastName, lastName);
       }
       if (mapping.name) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.name, applicantData.fullName);
+        fieldsFilledCount += await fillField(mapping.name, applicantData.fullName);
       }
       
       // Fill contact fields
       if (mapping.email) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.email, applicantData.email);
+        fieldsFilledCount += await fillField(mapping.email, applicantData.email);
       }
       if (mapping.phone) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.phone, applicantData.phone);
+        fieldsFilledCount += await fillField(mapping.phone, applicantData.phone);
       }
       
       // Fill social links
       if (mapping.linkedin && applicantData.linkedinUrl) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.linkedin, applicantData.linkedinUrl);
+        fieldsFilledCount += await fillField(mapping.linkedin, applicantData.linkedinUrl);
       }
       if (mapping.github && applicantData.githubUrl) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.github, applicantData.githubUrl);
+        fieldsFilledCount += await fillField(mapping.github, applicantData.githubUrl);
       }
       
       // Fill cover letter
       if (mapping.coverLetter && applicantData.coverLetter) {
-        fieldsFilledCount += await fillFieldHelper(page, mapping.coverLetter, applicantData.coverLetter);
+        fieldsFilledCount += await fillField(mapping.coverLetter, applicantData.coverLetter);
       }
     }
 
     // Fallback to generic selectors if no fields filled
     if (fieldsFilledCount === 0) {
+      const nameParts = applicantData.fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ');
+
       const fieldMappings = [
-        { selectors: ['input[name*="name"]', 'input[id*="name"]'], value: applicantData.fullName },
-        { selectors: ['input[name*="first"]', 'input[id*="first"]'], value: applicantData.fullName.split(' ')[0] },
-        { selectors: ['input[name*="last"]', 'input[id*="last"]'], value: applicantData.fullName.split(' ').slice(1).join(' ') },
-        { selectors: ['input[type="email"]', 'input[name*="email"]'], value: applicantData.email },
-        { selectors: ['input[type="tel"]', 'input[name*="phone"]'], value: applicantData.phone },
-        { selectors: ['input[name*="linkedin"]'], value: applicantData.linkedinUrl || '' },
-        { selectors: ['input[name*="github"]'], value: applicantData.githubUrl || '' },
-        { selectors: ['textarea[name*="cover"]', 'textarea[name*="message"]'], value: applicantData.coverLetter || '' },
+        { selectors: ['input[name*="first"]', 'input[id*="first"]', 'input[placeholder*="First"]'], value: firstName },
+        { selectors: ['input[name*="last"]', 'input[id*="last"]', 'input[placeholder*="Last"]'], value: lastName },
+        { selectors: ['input[type="email"]', 'input[name*="email"]', 'input[id*="email"]'], value: applicantData.email },
+        { selectors: ['input[type="tel"]', 'input[name*="phone"]', 'input[id*="phone"]'], value: applicantData.phone },
+        { selectors: ['input[name*="linkedin"]', 'input[id*="linkedin"]'], value: applicantData.linkedinUrl || '' },
+        { selectors: ['input[name*="github"]', 'input[id*="github"]'], value: applicantData.githubUrl || '' },
+        { selectors: ['textarea[name*="cover"]', 'textarea[name*="message"]', 'textarea[id*="cover"]'], value: applicantData.coverLetter || '' },
       ];
 
       for (const mapping of fieldMappings) {
-        if (!mapping.value) continue;
-        for (const selector of mapping.selectors) {
-          try {
-            const elements = await page.$$(selector);
-            for (const element of elements) {
-              const isVisible = await element.isVisible();
-              if (isVisible) {
-                await element.click();
-                await element.type(mapping.value, { delay: 50 });
-                fieldsFilledCount++;
-                break;
-              }
-            }
-          } catch (e) {
-            // Continue
-          }
+        if (mapping.value) {
+          fieldsFilledCount += await fillField(mapping.selectors, mapping.value);
         }
       }
-    }
-
-    // Helper function to fill fields
-    async function fillFieldHelper(page, selectors, value) {
-      for (const selector of selectors) {
-        try {
-          const elements = await page.$$(selector);
-          for (const element of elements) {
-            const isVisible = await element.isVisible();
-            if (isVisible) {
-              await element.click();
-              await element.type(value, { delay: 50 });
-              return 1;
-            }
-          }
-        } catch (e) {
-          // Continue
-        }
-      }
-      return 0;
     }
 
     // Check if any fields were filled
