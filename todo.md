@@ -730,3 +730,4 @@
 - [x] Fix React infinite render error on /dashboard/jobs page (Fixed navigation in BestMatches)
 - [x] Debug persistent React infinite render error on /dashboard/jobs (Fixed useSwipeable hooks violation)
 - [x] Fix Puppeteer Chrome path issue in production environment (Added path detection with fallbacks)
+- [x] Fix Puppeteer to use bundled Chrome for production environment (Added postinstall script and bundled Chrome detection)

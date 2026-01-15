@@ -1,6 +1,6 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
-import { execSync } from 'child_process';
 import { existsSync } from 'fs';
+import path from 'path';
 
 export interface JobApplicationData {
   fullName: string;
@@ -32,27 +32,37 @@ export async function autoApplyToJob(
   let page: Page | null = null;
 
   try {
-    // Find Chrome/Chromium executable
+    // Find Chrome executable - try bundled Chrome first, then system
     let executablePath: string | undefined;
-    const possiblePaths = [
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome',
-    ];
     
-    for (const path of possiblePaths) {
-      if (existsSync(path)) {
-        executablePath = path;
-        break;
+    // Try bundled Chrome (downloaded via @puppeteer/browsers)
+    const bundledChromePath = path.join(process.cwd(), 'chrome/linux-143.0.7499.192/chrome-linux64/chrome');
+    if (existsSync(bundledChromePath)) {
+      executablePath = bundledChromePath;
+    } else {
+      // Fall back to system Chrome/Chromium
+      const systemPaths = [
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+      ];
+      
+      for (const systemPath of systemPaths) {
+        if (existsSync(systemPath)) {
+          executablePath = systemPath;
+          break;
+        }
       }
     }
     
     if (!executablePath) {
-      throw new Error('Chrome/Chromium not found. Please install chromium-browser.');
+      throw new Error('Chrome/Chromium not found. Please run: npx @puppeteer/browsers install chrome@stable');
     }
     
-    // Launch headless browser using system Chromium
+    console.log(`[Automation] Using Chrome at: ${executablePath}`);
+    
+    // Launch headless browser
     browser = await puppeteer.launch({
       headless: true,
       executablePath,
