@@ -731,3 +731,11 @@
 - [x] Debug persistent React infinite render error on /dashboard/jobs (Fixed useSwipeable hooks violation)
 - [x] Fix Puppeteer Chrome path issue in production environment (Added path detection with fallbacks)
 - [x] Fix Puppeteer to use bundled Chrome for production environment (Added postinstall script and bundled Chrome detection)
+
+### New Features
+- [x] Add "Clear All Filters" button to job browsing pages
+- [x] Cache job stats query with staleTime to reduce API calls
+- [x] Add onboarding skip logic - redirect to dashboard if already completed
+- [x] Add progress indicator for multi-step onboarding
+- [x] Add exit confirmation when leaving incomplete onboarding
+- [x] Add application status tracking with manual updates and notes (Already implemented)

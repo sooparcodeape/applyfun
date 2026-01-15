@@ -17,6 +17,7 @@ import {
   LogIn,
   ShoppingCart,
   Trash2,
+  X,
 } from "lucide-react";
 import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 import { JobListSkeleton } from "@/components/JobCardSkeleton";
@@ -109,6 +110,22 @@ export default function PublicJobs() {
     toast.success("Jobs refreshed!");
   };
 
+  const handleClearFilters = () => {
+    setSearch("");
+    setSelectedCategories([]);
+    setSelectedCompanies([]);
+    setJobType("all");
+    setLocation("all");
+    toast.success("All filters cleared!");
+  };
+
+  const hasActiveFilters = 
+    search !== "" || 
+    selectedCategories.length > 0 || 
+    selectedCompanies.length > 0 || 
+    jobType !== "all" || 
+    location !== "all";
+
   return (
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
@@ -158,9 +175,22 @@ export default function PublicJobs() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Browse Crypto Jobs
           </h1>
-          <p className="text-muted-foreground">
-            {filteredJobs.length} jobs available • <NextScrapeCountdown />
-          </p>
+          <div className="flex items-center justify-center gap-4">
+            <p className="text-muted-foreground">
+              {filteredJobs.length} jobs available • <NextScrapeCountdown />
+            </p>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Clear All Filters
+              </Button>
+            )}
+          </div>
           {!user && (
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 max-w-2xl mx-auto">
               <p className="text-sm text-blue-300">

@@ -10,7 +10,9 @@ import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: jobStats } = trpc.jobs.stats.useQuery();
+  const { data: jobStats } = trpc.jobs.stats.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
   const { triggerHaptic } = useHaptic();
 
   const handleGetStarted = () => {

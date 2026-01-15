@@ -31,7 +31,9 @@ export default function Credits() {
   const { data: credits, isLoading: creditsLoading, refetch: refetchCredits } = trpc.credits.balance.useQuery();
   const { data: transactions, isLoading: txLoading } = trpc.credits.transactions.useQuery();
   const { data: burnHistory } = trpc.credits.burnHistory.useQuery();
-  const { data: jobStats } = trpc.jobs.stats.useQuery();
+  const { data: jobStats } = trpc.jobs.stats.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   const applyPromoMutation = trpc.credits.applyPromo.useMutation({
     onSuccess: (data) => {
