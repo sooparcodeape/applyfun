@@ -725,3 +725,8 @@
 - [x] Fix manual review flow - failed applications show Review button immediately
 - [x] Add requiresManualReview count to applyAll response and Queue page
 - [x] Auto-redirect to Applications page after applying to show manual review items
+
+### Deployment Issues
+- [x] Fix Docker build failure - corepack pnpm installation error during publish
+- [x] Simplified packageManager field from pnpm@10.4.1+sha512... to pnpm@10.4.1
+- [x] Verified build still works locally
