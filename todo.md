@@ -759,3 +759,9 @@
 - [x] Researched residential proxies (Smartproxy $75/mo, Bright Data $500/mo) - not needed yet
 - [x] Researched CAPTCHA solving (2Captcha $3/1000 solves) - can add if needed
 - [x] Created comprehensive anti-bot research document with cost analysis
+
+### Production Bugs
+- [x] Fixed status setting - changed from 'pending' to 'requires_manual_review' when automation fails
+- [x] Review button now appears for applications with requires_manual_review status
+- [x] Added safety checks in Applications page to prevent config lookup errors
+- [x] Added fallback icon (Clock) if statusConfig lookup fails

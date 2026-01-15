@@ -182,8 +182,8 @@ export default function Applications() {
       ) : (
         <div className="space-y-4">
           {filteredApplications.map((app) => {
-            const config = statusConfig[app.application.status as keyof typeof statusConfig];
-            const Icon = config.icon;
+            const config = statusConfig[app.application.status as keyof typeof statusConfig] || statusConfig.pending;
+            const Icon = config?.icon || Clock;
 
             return (
               <Card key={app.application.id}>

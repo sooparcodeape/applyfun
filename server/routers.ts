@@ -671,7 +671,7 @@ ${extractedText}`,
           await addApplication({
             userId: ctx.user.id,
             jobId: item.queueItem.jobId,
-            status: automationResult.success ? 'applied' : 'pending',
+            status: automationResult.success ? 'applied' : 'requires_manual_review',
             notes: automationResult.message,
             retryCount: 0,
             nextRetryAt: nextRetryAt,
