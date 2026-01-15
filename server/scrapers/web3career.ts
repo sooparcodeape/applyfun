@@ -5,6 +5,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser } from 'puppeteer';
 import { getDb } from "../db";
 import { jobs } from "../../drizzle/schema";
+import { findChromePath } from '../chrome-utils';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -63,59 +64,72 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string): Promi
     // Wait for page to load
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Look for Apply button and extract href
-    const applyUrl = await page.evaluate(() => {
-      // Try multiple selectors for Apply button
+    // Look for Apply button
+    const applyButtonFound = await page.evaluate(() => {
       const selectors = [
         'a[href*="apply"]',
-        'a[href*="greenhouse"]',
-        'a[href*="lever.co"]',
-        'a[href*="ashbyhq"]',
-        'a[href*="workable"]',
-        'button[onclick*="apply"]',
+        'a:has-text("Apply")',
+        'button:has-text("Apply")',
         '.apply-button',
-        '#apply-button',
       ];
       
       for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (element) {
-          const href = element.getAttribute('href') || element.getAttribute('onclick');
-          if (href && (href.includes('http') || href.startsWith('/'))) {
-            // Extract URL from onclick if needed
-            const urlMatch = href.match(/https?:\/\/[^\s'"]+/);
-            return urlMatch ? urlMatch[0] : href;
+        try {
+          const elements = document.querySelectorAll('a');
+          for (const el of Array.from(elements)) {
+            if (el.textContent?.toLowerCase().includes('apply')) {
+              return true;
+            }
           }
+        } catch (e) {
+          continue;
         }
       }
-      
-      // Fallback: look for any link with "apply" text
-      const links = Array.from(document.querySelectorAll('a'));
-      for (const link of links) {
-        const text = link.textContent?.toLowerCase() || '';
-        if (text.includes('apply') && link.href) {
-          return link.href;
-        }
-      }
-      
-      return null;
+      return false;
     });
     
-    if (!applyUrl) {
+    if (!applyButtonFound) {
       await page.close();
       return null;
     }
     
-    // Make relative URLs absolute
-    let finalUrl = applyUrl;
-    if (applyUrl.startsWith('/')) {
-      finalUrl = `https://web3.career${applyUrl}`;
+    // Click Apply button and wait for navigation
+    try {
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 }),
+        page.evaluate(() => {
+          const links = Array.from(document.querySelectorAll('a'));
+          for (const link of links) {
+            if (link.textContent?.toLowerCase().includes('apply')) {
+              link.click();
+              return;
+            }
+          }
+        }),
+      ]);
+      
+      // Wait for any additional redirects
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Get final URL after all redirects
+      const finalUrl = page.url();
+      
+      await page.close();
+      
+      // Only return if we ended up on an ATS page
+      if (finalUrl.includes('lever.co') || finalUrl.includes('greenhouse') || 
+          finalUrl.includes('ashbyhq') || finalUrl.includes('workable')) {
+        return finalUrl;
+      }
+      
+      // Otherwise return the detail page URL - automation will handle it
+      return detailUrl;
+      
+    } catch (navError) {
+      // If navigation fails, return detail page URL
+      await page.close();
+      return detailUrl;
     }
-    
-    // Return the URL as-is - automation will handle clicking Apply button
-    
-    await page.close();
-    return finalUrl;
     
   } catch (error) {
     console.error(`[Web3Career] Error extracting URL from ${detailUrl}:`, error);
@@ -236,8 +250,10 @@ export async function scrapeWeb3Career(): Promise<ScrapedJob[]> {
     console.log(`[Web3Career] Found ${jobListings.length} job listings, extracting application URLs...`);
     
     // Step 2: Launch browser and extract real application URLs
+    const executablePath = findChromePath();
     browser = await puppeteer.launch({
       headless: true,
+      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

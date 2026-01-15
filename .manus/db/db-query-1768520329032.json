@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, title, apply_url FROM jobs WHERE source = 'web3.career' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, apply_url FROM jobs WHERE source = 'web3.career' LIMIT 5;",
+  "rows": [
+    {
+      "id": "1770001",
+      "title": "Senior Smart Contract & Backend Developer (Solidity, TypeScript)",
+      "apply_url": "https://web3.career/i/xITOyQTM"
+    },
+    {
+      "id": "1770002",
+      "title": "Senior Software Engineer - Hedging & Pricing Systems",
+      "apply_url": "https://web3.career/i/wIzNyQTM"
+    },
+    {
+      "id": "1770003",
+      "title": "Chief Executive Officer (CEO)",
+      "apply_url": "https://web3.career/i/0ITNyQTM"
+    },
+    {
+      "id": "1770004",
+      "title": "VP Engineering",
+      "apply_url": "https://web3.career/i/xIDMwQTM"
+    },
+    {
+      "id": "1770005",
+      "title": "Full-Stack Engineer - AI Security Products (Full time, Europe/Asia)",
+      "apply_url": "https://web3.career/i/zcDNyQTM"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tapply_url\n1770001\tSenior Smart Contract & Backend Developer (Solidity, TypeScript)\thttps://web3.career/i/xITOyQTM\n1770002\tSenior Software Engineer - Hedging & Pricing Systems\thttps://web3.career/i/wIzNyQTM\n1770003\tChief Executive Officer (CEO)\thttps://web3.career/i/0ITNyQTM\n1770004\tVP Engineering\thttps://web3.career/i/xIDMwQTM\n1770005\tFull-Stack Engineer - AI Security Products (Full time, Europe/Asia)\thttps://web3.career/i/zcDNyQTM\n",
+  "stderr": "",
+  "execution_time_ms": 420
+}
