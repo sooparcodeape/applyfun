@@ -739,3 +739,14 @@
 - [x] Add progress indicator for multi-step onboarding
 - [x] Add exit confirmation when leaving incomplete onboarding
 - [x] Add application status tracking with manual updates and notes (Already implemented)
+
+### Critical Issues
+- [ ] Research and implement lightweight browser automation alternative (no local Chrome)
+- [ ] Replace Puppeteer with cloud-based or API-driven automation solution
+
+### Browserless.io Integration
+- [x] Install axios for HTTP requests to Browserless API
+- [x] Add BROWSERLESS_API_KEY environment variable configuration
+- [x] Refactor job-automation.ts to use Browserless Function API
+- [x] Update autoApplyToJob function to send Puppeteer script via HTTP
+- [ ] Test automation with sample job application
