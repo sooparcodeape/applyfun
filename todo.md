@@ -751,3 +751,11 @@
 - [x] Added random delays between actions to mimic human behavior
 - [x] Script now fills forms but doesn't auto-submit to avoid Greenhouse detection
 - [x] Applications marked as requires_manual_review for user to complete submission
+
+### Advanced Anti-Bot Bypass Research
+- [x] Research puppeteer-extra-plugin-stealth for Browserless
+- [x] Discovered Browserless has built-in stealth mode (just add &stealth parameter)
+- [x] Enabled stealth mode in job-automation.ts
+- [x] Researched residential proxies (Smartproxy $75/mo, Bright Data $500/mo) - not needed yet
+- [x] Researched CAPTCHA solving (2Captcha $3/1000 solves) - can add if needed
+- [x] Created comprehensive anti-bot research document with cost analysis

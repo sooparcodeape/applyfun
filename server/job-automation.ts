@@ -52,7 +52,7 @@ export async function autoApplyToJob(
 
     // Execute script via Browserless Function API
     const response = await axios.post(
-      `${BROWSERLESS_API_URL}/function?token=${BROWSERLESS_API_KEY}`,
+      `${BROWSERLESS_API_URL}/function?token=${BROWSERLESS_API_KEY}&stealth`,
       {
         code: puppeteerScript,
         context: {
