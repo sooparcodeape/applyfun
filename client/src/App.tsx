@@ -19,6 +19,7 @@ import Queue from "./pages/Queue";
 import Applications from "./pages/Applications";
 import Credits from "./pages/Credits";
 import PublicJobs from "./pages/PublicJobs";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   return (
@@ -41,6 +42,13 @@ function Router() {
         </DashboardLayout>
       </Route>
       <Route path="/jobs" component={PublicJobs} />
+      <Route path="/admin">
+        <DashboardLayout>
+          <PageTransition>
+            <AdminDashboard />
+          </PageTransition>
+        </DashboardLayout>
+      </Route>
       <Route path="/dashboard/jobs">
         <DashboardLayout>
           <PageTransition>

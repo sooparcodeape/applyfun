@@ -847,3 +847,20 @@
 - [x] Test automation with Ashby ATS platform
 - [x] Analyze success rates across different platforms
 - [x] Document findings and recommendations
+
+### Implementation: Greenhouse Fix, Admin Dashboard, Resume Upload
+- [ ] Update database schema to add resume_url field to users table
+- [x] Create admin user (Employee1 / NachaJello2!) with admin role
+- [x] Fix Greenhouse Apply button detection in job-automation.ts
+- [x] Implement resume upload API endpoint with S3 storage
+- [x] Add resume upload UI to user profile page (already exists)
+- [x] Update job automation to handle resume file uploads
+- [x] Create admin dashboard layout with sidebar navigation
+- [x] Add success rate monitoring charts (by ATS platform)
+- [x] Add user signups metrics to admin dashboard
+- [x] Add token purchase analytics to admin dashboard
+- [x] Add application statistics (total, success rate, by platform)
+- [x] Add customer support investigation tools
+- [x] Test Greenhouse fix with real job posting
+- [x] Test resume upload end-to-end
+- [x] Test admin dashboard with sample data

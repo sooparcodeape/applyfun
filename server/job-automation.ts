@@ -122,7 +122,7 @@ export async function autoApplyToJob(
       return 0;
     };
 
-    // Step 1: Look for "Apply" button and click it
+    // Step 1: Look for "Apply" button and click it (especially for Greenhouse)
     const applyButtonSelectors = [
       'button[id*="apply"]',
       'a[id*="apply"]',
@@ -130,6 +130,8 @@ export async function autoApplyToJob(
       'a.apply-button',
       '#apply-button',
       'button[data-testid*="apply"]',
+      '.app-btn', // Greenhouse specific
+      'a.app-link', // Greenhouse specific
     ];
 
     // Find apply button by text content
@@ -143,7 +145,21 @@ export async function autoApplyToJob(
 
     const applyElement = await applyButton.asElement();
     if (applyElement && await isElementVisible(applyElement)) {
+      console.log('[AutoApply] Clicking Apply button...');
       await (applyElement as any).click();
+      
+      // Wait for navigation or form to appear (especially for Greenhouse)
+      try {
+        await Promise.race([
+          page.waitForNavigation({ timeout: 5000, waitUntil: 'networkidle2' }),
+          page.waitForSelector('input[type="text"], input[type="email"], textarea', { timeout: 5000 }),
+        ]);
+        console.log('[AutoApply] Form appeared after clicking Apply');
+      } catch (e) {
+        console.log('[AutoApply] No navigation/form detected, continuing...');
+      }
+      
+      // Additional wait for dynamic content
       await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
     }
 
@@ -247,6 +263,50 @@ export async function autoApplyToJob(
       // Fill cover letter
       if (mapping.coverLetter && applicantData.coverLetter) {
         fieldsFilledCount += await fillField(mapping.coverLetter, applicantData.coverLetter);
+      }
+    }
+
+    // Step 4: Handle resume file upload
+    if (applicantData.resumeUrl) {
+      try {
+        // Find file input for resume
+        const fileInputSelectors = [
+          'input[type="file"][name*="resume"]',
+          'input[type="file"][name*="cv"]',
+          'input[type="file"][id*="resume"]',
+          'input[type="file"][id*="cv"]',
+          'input[type="file"]', // Fallback to any file input
+        ];
+
+        let fileInput = null;
+        for (const selector of fileInputSelectors) {
+          fileInput = await page.$(selector);
+          if (fileInput) break;
+        }
+
+        if (fileInput) {
+          // Download resume from S3 to temp file
+          const axios = await import('axios');
+          const fs = await import('fs');
+          const path = await import('path');
+          const os = await import('os');
+          
+          const response = await axios.default.get(applicantData.resumeUrl, { responseType: 'arraybuffer' });
+          const tempFilePath = path.join(os.tmpdir(), `resume-${Date.now()}.pdf`);
+          fs.writeFileSync(tempFilePath, response.data);
+          
+          // Upload file
+          await (fileInput as any).uploadFile(tempFilePath);
+          fieldsFilledCount++;
+          
+          // Clean up temp file
+          fs.unlinkSync(tempFilePath);
+          
+          console.log('[AutoApply] Resume uploaded successfully');
+        }
+      } catch (error) {
+        console.error('[AutoApply] Resume upload failed:', error);
+        // Continue even if resume upload fails
       }
     }
 
