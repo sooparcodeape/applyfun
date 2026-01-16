@@ -63,6 +63,28 @@ class ProxyManager {
   }
 
   /**
+   * Get current proxy info for logging
+   */
+  async getCurrentProxyInfo(): Promise<{ ip: string; country: string; used: boolean } | null> {
+    await this.initialize();
+
+    if (!this.currentProxyId || this.proxies.size === 0) {
+      return null;
+    }
+
+    const proxyStats = this.proxies.get(this.currentProxyId);
+    if (!proxyStats) {
+      return null;
+    }
+
+    return {
+      ip: proxyStats.proxy.proxy,
+      country: proxyStats.proxy.countryCode,
+      used: true,
+    };
+  }
+
+  /**
    * Get current proxy URL for Puppeteer
    * Returns null if no proxy is configured
    */

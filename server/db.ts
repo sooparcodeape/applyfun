@@ -210,3 +210,155 @@ export async function deleteSkill(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(skills).where(eq(skills.id, id));
 }
+
+/**
+ * Create application log entry
+ * Note: Using raw SQL since application_logs table is not in Drizzle schema yet
+ */
+export async function createApplicationLog(log: {
+  applicationId: number;
+  userId: number;
+  jobId: number;
+  atsType: string;
+  applyUrl: string;
+  availableFields: string; // JSON string
+  filledFields: string; // JSON string
+  missedFields: string; // JSON string
+  resumeUploaded: boolean;
+  resumeSelector?: string;
+  resumeFileSize?: number;
+  fieldsFilledCount: number;
+  submitClicked: boolean;
+  submitSelector?: string;
+  proxyUsed: boolean;
+  proxyIp?: string;
+  proxyCountry?: string;
+  success: boolean;
+  errorMessage?: string;
+  executionTimeMs: number;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create application log: database not available");
+    return;
+  }
+
+  try {
+    const mysql2 = await import('mysql2/promise');
+    const connection = await mysql2.createConnection(ENV.databaseUrl);
+    
+    await connection.execute(
+      `INSERT INTO application_logs (
+        application_id, user_id, job_id, ats_type, apply_url,
+        available_fields, filled_fields, missed_fields,
+        resume_uploaded, resume_selector, resume_file_size,
+        fields_filled_count, submit_clicked, submit_selector,
+        proxy_used, proxy_ip, proxy_country,
+        success, error_message, execution_time_ms
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        log.applicationId,
+        log.userId,
+        log.jobId,
+        log.atsType,
+        log.applyUrl,
+        log.availableFields,
+        log.filledFields,
+        log.missedFields,
+        log.resumeUploaded ? 1 : 0,
+        log.resumeSelector || null,
+        log.resumeFileSize || null,
+        log.fieldsFilledCount,
+        log.submitClicked ? 1 : 0,
+        log.submitSelector || null,
+        log.proxyUsed ? 1 : 0,
+        log.proxyIp || null,
+        log.proxyCountry || null,
+        log.success ? 1 : 0,
+        log.errorMessage || null,
+        log.executionTimeMs
+      ]
+    );
+    
+    await connection.end();
+    console.log(`[Database] Created application log for application ${log.applicationId}`);
+  } catch (error) {
+    console.error("[Database] Failed to create application log:", error);
+  }
+}
+
+/**
+ * Get application logs for a user
+ */
+export async function getApplicationLogs(userId: number, limit: number = 50): Promise<any[]> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get application logs: database not available");
+    return [];
+  }
+
+  try {
+    const mysql2 = await import('mysql2/promise');
+    const connection = await mysql2.createConnection(ENV.databaseUrl);
+    
+    const [rows] = await connection.execute(
+      `SELECT 
+        al.*,
+        j.title as job_title,
+        j.company as job_company,
+        a.status as application_status,
+        a.applied_at
+      FROM application_logs al
+      LEFT JOIN applications a ON al.application_id = a.id
+      LEFT JOIN jobs j ON al.job_id = j.id
+      WHERE al.user_id = ?
+      ORDER BY al.created_at DESC
+      LIMIT ?`,
+      [userId, limit]
+    );
+    
+    await connection.end();
+    return rows as any[];
+  } catch (error) {
+    console.error("[Database] Failed to get application logs:", error);
+    return [];
+  }
+}
+
+/**
+ * Get application log by application ID
+ */
+export async function getApplicationLogByApplicationId(applicationId: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get application log: database not available");
+    return null;
+  }
+
+  try {
+    const mysql2 = await import('mysql2/promise');
+    const connection = await mysql2.createConnection(ENV.databaseUrl);
+    
+    const [rows] = await connection.execute(
+      `SELECT 
+        al.*,
+        j.title as job_title,
+        j.company as job_company,
+        j.apply_url as job_url,
+        a.status as application_status,
+        a.applied_at
+      FROM application_logs al
+      LEFT JOIN applications a ON al.application_id = a.id
+      LEFT JOIN jobs j ON al.job_id = j.id
+      WHERE al.application_id = ?
+      LIMIT 1`,
+      [applicationId]
+    );
+    
+    await connection.end();
+    return (rows as any[])[0] || null;
+  } catch (error) {
+    console.error("[Database] Failed to get application log:", error);
+    return null;
+  }
+}

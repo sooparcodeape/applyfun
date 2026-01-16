@@ -273,3 +273,48 @@ export const applications = mysqlTable("applications", {
 
 export type Application = typeof applications.$inferSelect;
 export type InsertApplication = typeof applications.$inferInsert;
+
+/**
+ * Application logs - detailed tracking of form fields and automation results
+ */
+export const applicationLogs = mysqlTable("application_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  applicationId: int("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  jobId: int("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
+  
+  // ATS Platform info
+  atsType: varchar("ats_type", { length: 50 }).notNull(), // ashby, greenhouse, lever, etc.
+  applyUrl: varchar("apply_url", { length: 1024 }).notNull(),
+  
+  // Form fields detected
+  availableFields: text("available_fields"), // JSON array of all fields found on form
+  filledFields: text("filled_fields"), // JSON array of fields we filled with values
+  missedFields: text("missed_fields"), // JSON array of fields we detected but didn't fill
+  
+  // Resume upload tracking
+  resumeUploaded: int("resume_uploaded").default(0).notNull(),
+  resumeSelector: varchar("resume_selector", { length: 255 }),
+  resumeFileSize: int("resume_file_size"), // in bytes
+  
+  // Automation results
+  fieldsFilledCount: int("fields_filled_count").notNull().default(0),
+  submitClicked: int("submit_clicked").default(0).notNull(),
+  submitSelector: varchar("submit_selector", { length: 255 }),
+  
+  // Proxy info
+  proxyUsed: int("proxy_used").default(0).notNull(),
+  proxyIp: varchar("proxy_ip", { length: 50 }),
+  proxyCountry: varchar("proxy_country", { length: 10 }),
+  
+  // Success indicators
+  success: int("success").default(0).notNull(),
+  errorMessage: text("error_message"),
+  
+  // Timing
+  executionTimeMs: int("execution_time_ms"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type ApplicationLog = typeof applicationLogs.$inferSelect;
+export type InsertApplicationLog = typeof applicationLogs.$inferInsert;

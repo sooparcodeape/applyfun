@@ -3,6 +3,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser, Page } from 'puppeteer';
 import { proxyManager } from './proxy-manager';
 import { getATSFieldMappings, getAllFieldSelectors, type ATSFieldMappings } from './ats-field-mappings';
+import { createApplicationLog } from './db';
+import { detectAllFormFields, analyzeFormFields, getFormAnalysisSummary } from './field-detector';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -96,9 +98,25 @@ async function getBrowser(useProxy = true): Promise<Browser> {
  */
 async function autoApplyToJobInternal(
   jobUrl: string,
-  applicantData: JobApplicationData
+  applicantData: JobApplicationData,
+  userId?: number,
+  jobId?: number
 ): Promise<ApplicationResult> {
   let page: Page | null = null;
+  
+  // Import field detection utilities
+  const { detectAllFormFields, analyzeFormFields, getFormAnalysisSummary } = await import('./field-detector');
+  
+  // Tracking variables for logging
+  const startTime = Date.now();
+  const filledSelectors = new Set<string>();
+  let atsType = 'generic';
+  let resumeUploadSuccess = false;
+  let resumeSelector = 'none';
+  let resumeFileSize = 0;
+  let submitClicked = false;
+  let submitSelector = 'none';
+  let proxyInfo = await proxyManager.getCurrentProxyInfo();
   
   try {
     const browser = await getBrowser();
@@ -403,7 +421,7 @@ async function autoApplyToJobInternal(
         );
         await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
       }
-    };   // Helper: Fill field by selectors with anti-bot delays
+    }    // Helper: Fill field by selectors with anti-bot delays
     const fillField = async (selectors: string[], value: string): Promise<number> => {
       if (!value) return 0;
       
@@ -425,6 +443,9 @@ async function autoApplyToJobInternal(
             
             // ENHANCED: Review delay after filling
             await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+            
+            // Track filled selector for logging
+            filledSelectors.add(selector);
             
             return 1;
           }
@@ -480,7 +501,7 @@ async function autoApplyToJobInternal(
     const url = page.url().toLowerCase();
     const bodyHtml = await page.evaluate(() => document.body.innerHTML.toLowerCase());
     
-    let atsType: string = 'generic';
+    atsType = 'generic'; // Update tracking variable
     if (url.includes('greenhouse.io') || bodyHtml.includes('greenhouse')) {
       atsType = 'greenhouse';
     } else if (url.includes('lever.co') || bodyHtml.includes('lever-frame')) {
@@ -544,9 +565,6 @@ async function autoApplyToJobInternal(
     }
 
     // Step 4: Handle resume file upload with detailed tracking
-    let resumeUploadSuccess = false;
-    let resumeSelector = 'none';
-    let resumeFileSize = 0;
     
     if (applicantData.resumeUrl && fieldMappings.resume) {
       try {
@@ -688,6 +706,7 @@ async function autoApplyToJobInternal(
         const element = await page.$(selector);
         if (element && await isElementVisible(element)) {
           submitButton = element;
+          submitSelector = selector;
           console.log(`[AutoApply] Found Submit button with selector: ${selector}`);
           break;
         }
@@ -707,6 +726,7 @@ async function autoApplyToJobInternal(
       }).then(handle => handle.asElement());
       
       if (submitButton) {
+        submitSelector = 'text-content-match';
         console.log('[AutoApply] Found Submit button by text content');
       }
     }
@@ -746,6 +766,7 @@ async function autoApplyToJobInternal(
     try {
       console.log('[AutoApply] Clicking Submit button...');
       await (submitButton as any).click();
+      submitClicked = true;
       
       // Wait for submission to complete
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -763,6 +784,40 @@ async function autoApplyToJobInternal(
                                pageText.includes('application submitted') ||
                                pageText.includes('we received your application') ||
                                pageText.includes('successfully submitted');
+      
+      // Detect all form fields before closing page
+      const allFields = await detectAllFormFields(page);
+      const formAnalysis = analyzeFormFields(allFields, filledSelectors);
+      const executionTime = Date.now() - startTime;
+      
+      console.log(`[AutoApply] Form Analysis: ${getFormAnalysisSummary(formAnalysis)}`);
+      console.log(`[AutoApply] Execution time: ${executionTime}ms`);
+      
+      // Save application log to database (if userId and jobId provided)
+      if (userId && jobId) {
+        const proxyInfo = await proxyManager.getCurrentProxyInfo();
+        await createApplicationLog({
+          applicationId: 0, // Will be updated when we have application ID
+          userId,
+          jobId,
+          atsType,
+          applyUrl: jobUrl,
+        availableFields: JSON.stringify(formAnalysis.availableFields),
+        filledFields: JSON.stringify(formAnalysis.filledFields),
+        missedFields: JSON.stringify(formAnalysis.missedFields),
+        resumeUploaded: resumeUploadSuccess,
+        resumeSelector: resumeSelector || undefined,
+        resumeFileSize: resumeFileSize || undefined,
+        fieldsFilledCount,
+        submitClicked,
+        submitSelector: submitSelector || undefined,
+        proxyUsed: !!proxyInfo,
+        proxyIp: proxyInfo?.ip,
+        proxyCountry: proxyInfo?.country,
+        success: true,
+        executionTimeMs: executionTime,
+        }).catch((err: any) => console.error('[AutoApply] Failed to save application log:', err));
+      }
       
       await page.close();
       
@@ -824,7 +879,9 @@ async function autoApplyToJobInternal(
 export async function autoApplyToJob(
   jobUrl: string,
   applicantData: JobApplicationData,
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  userId?: number,
+  jobId?: number
 ): Promise<ApplicationResult> {
   let lastError: any;
   
@@ -839,7 +896,7 @@ export async function autoApplyToJob(
         browserInstance = null;
       }
       
-      const result = await autoApplyToJobInternal(jobUrl, applicantData);
+      const result = await autoApplyToJobInternal(jobUrl, applicantData, userId, jobId);
       
       // If successful, report to proxy manager and return
       if (result.success) {
