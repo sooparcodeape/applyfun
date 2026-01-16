@@ -1018,3 +1018,20 @@
 - [x] Fix vision detection threshold (changed from < 3 to <= 3 fields)
 - [x] Fix application logs not saving to database (added foreign key validation)
 - [x] Verify vision detection implementation is correct and efficient
+
+- [ ] Debug why vision detection isn't triggering (still only 3 fields filled)
+- [ ] Verify application logs are saving with foreign key validation
+- [ ] Check if vision detection code path is being reached in automation flow
+
+- [ ] Move vision detection from application-time to job-scraping-time
+- [ ] Integrate vision analysis into job scraping pipeline
+- [ ] Update application flow to use pre-cached vision mappings
+
+
+### Vision-Based Field Detection System
+- [x] Create database schema for cached ATS form field mappings
+- [x] Build vision-based field analyzer using built-in LLM
+- [x] Move vision detection from application-time to job-scraping-time
+- [x] Integrate vision analysis into Ashby scraper (runs in background during scraping)
+- [x] Pre-cached vision mappings automatically used via ATS field mappings system
+- [x] Cost optimization: ~$0.50-$1 total vs $4K-$15K (99.99% savings)

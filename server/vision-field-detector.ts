@@ -282,6 +282,44 @@ export async function detectFieldsFromForm(
 /**
  * Update success rate for a cached mapping
  */
+/**
+ * Pre-analyze form during scraping (runs in background, doesn't block)
+ * Takes a URL, opens it in browser, captures screenshot, and analyzes
+ */
+export async function preAnalyzeFormDuringScraping(
+  formUrl: string,
+  atsPlatform: string
+): Promise<void> {
+  try {
+    // Import puppeteer dynamically
+    const puppeteer = await import('puppeteer');
+    const { findChromePath } = await import('./chrome-utils');
+    
+    const executablePath = findChromePath();
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    
+    const page = await browser.newPage();
+    await page.goto(formUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    
+    // Get form HTML and screenshot
+    const formHtml = await page.content();
+    const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
+    
+    await browser.close();
+    
+    // Analyze and cache
+    const result = await detectFieldsFromForm(screenshot as string, formHtml, formUrl);
+    console.log(`[Vision Detector] Pre-analyzed ${atsPlatform} form: ${result.fields.length} fields detected`);
+    
+  } catch (error: any) {
+    console.error(`[Vision Detector] Pre-analysis failed for ${formUrl}:`, error.message);
+  }
+}
+
 export async function updateMappingSuccessRate(
   atsPlatform: string,
   formHash: string,
