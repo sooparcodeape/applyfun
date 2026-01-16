@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser, Page } from 'puppeteer';
+import proxy from 'puppeteer-page-proxy';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -33,21 +34,66 @@ export interface ApplicationResult {
 // Shared browser instance for better performance
 let browserInstance: Browser | null = null;
 
+// Random user agents for rotation
+const USER_AGENTS = [
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+];
+
+/**
+ * Get ASOCKS proxy URL from environment variables
+ */
+function getProxyUrl(): string | null {
+  const proxyHost = process.env.ASOCKS_PROXY_HOST;
+  const proxyPort = process.env.ASOCKS_PROXY_PORT || '8080';
+  const proxyUser = process.env.ASOCKS_PROXY_USER;
+  const proxyPass = process.env.ASOCKS_PROXY_PASS;
+  
+  if (!proxyHost || !proxyUser || !proxyPass) {
+    console.log('[AutoApply] No proxy configured - running without proxy');
+    return null;
+  }
+  
+  return `http://${proxyUser}:${proxyPass}@${proxyHost}:${proxyPort}`;
+}
+
+/**
+ * Get random user agent
+ */
+function getRandomUserAgent(): string {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
 /**
  * Get or create browser instance
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
+    const proxyUrl = getProxyUrl();
+    const launchArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920,1080',
+    ];
+    
+    // Add proxy to browser args if configured
+    if (proxyUrl) {
+      const proxyArg = `--proxy-server=${proxyUrl}`;
+      launchArgs.push(proxyArg);
+      console.log(`[AutoApply] Launching Chrome with ASOCKS residential proxy`);
+    } else {
+      console.log(`[AutoApply] Launching Chrome without proxy`);
+    }
+    
     browserInstance = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--window-size=1920,1080',
-      ],
+      args: launchArgs,
     });
     console.log(`[AutoApply] Chrome launched successfully`);
   }
@@ -67,8 +113,10 @@ async function autoApplyToJobInternal(
     const browser = await getBrowser();
     page = await browser.newPage();
 
-    // Set stealth mode - mimic real browser
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    // Set stealth mode - mimic real browser with random user agent
+    const userAgent = getRandomUserAgent();
+    await page.setUserAgent(userAgent);
+    console.log(`[AutoApply] Using user agent: ${userAgent.substring(0, 50)}...`);
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'en-US,en;q=0.9',

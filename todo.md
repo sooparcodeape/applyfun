@@ -975,3 +975,7 @@
 - [x] Create Railway deployment guide (RAILWAY_DEPLOY.md)
 - [ ] Test Docker build locally
 - [ ] Export code to GitHub
+
+- [x] Integrate residential proxy service (ASOCKS or similar) for automation
+- [x] Add proxy rotation between applications
+- [x] Add user-agent rotation for extra stealth
