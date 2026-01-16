@@ -925,3 +925,6 @@
 - [x] Delete old Rain jobs from database (Solana URLs)
 - [x] Use Puppeteer's auto-detection instead of manual Chrome path
 - [ ] Run Rain scraper to populate fresh Ashby URLs (requires testing)
+- [x] Run Rain scraper manually to populate Ashby jobs (running in background)
+- [x] Create cron job for daily scraping at 3 AM UTC
+- [x] Add tRPC endpoint to trigger scraper manually from admin panel (admin.runScrapers)

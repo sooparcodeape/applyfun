@@ -195,4 +195,24 @@ export const adminRouter = router({
 
     return statsWithRate;
   }),
+
+  runScrapers: adminProcedure.mutation(async () => {
+    const { runAllScrapers } = await import('./scrapers/all-scrapers');
+    
+    try {
+      const results = await runAllScrapers();
+      return {
+        success: true,
+        message: 'Scrapers completed successfully',
+        results,
+      };
+    } catch (error) {
+      console.error('[Admin] Scraper error:', error);
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to run scrapers',
+        cause: error,
+      });
+    }
+  }),
 });
