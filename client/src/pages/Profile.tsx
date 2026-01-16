@@ -232,17 +232,18 @@ export default function Profile() {
   const calculateCompletion = () => {
     if (!profileData?.profile) return { percentage: 0, missing: [] };
     
+    // Essential fields based on actual AshbyHQ form requirements (Rain, etc.)
     const essentialFields = [
-      { key: 'phone', label: 'Phone number' },
-      { key: 'location', label: 'Location' },
-      { key: 'resumeUrl', label: 'Resume' },
-      { key: 'linkedinUrl', label: 'LinkedIn URL' },
-      { key: 'yearsOfExperience', label: 'Years of experience' },
-      { key: 'currentCompany', label: 'Current company' },
-      { key: 'currentTitle', label: 'Current title' },
-      { key: 'workAuthorization', label: 'Work authorization' },
-      { key: 'howDidYouHear', label: 'Referral source' },
-      { key: 'availableStartDate', label: 'Available start date' },
+      { key: 'phone', label: 'Phone number', required: true },
+      { key: 'resumeUrl', label: 'Resume', required: true },
+      { key: 'location', label: 'Location', required: false },
+      { key: 'linkedinUrl', label: 'LinkedIn URL', required: false },
+      { key: 'githubUrl', label: 'GitHub URL', required: false },
+      { key: 'portfolioUrl', label: 'Portfolio/Website', required: false },
+      { key: 'currentCompany', label: 'Current Company', required: false },
+      { key: 'currentTitle', label: 'Current Title', required: false },
+      { key: 'yearsOfExperience', label: 'Years of Experience', required: false },
+      { key: 'workAuthorization', label: 'Work Authorization', required: false },
     ];
     
     const profile = profileData.profile as any;
@@ -258,8 +259,18 @@ export default function Profile() {
       })
       .map(f => f.label);
     
+    // Calculate weighted percentage - required fields count more
+    const requiredFields = essentialFields.filter(f => f.required);
+    const optionalFields = essentialFields.filter(f => !f.required);
+    const filledRequired = filledFields.filter(f => requiredFields.some(r => r.key === f.key)).length;
+    const filledOptional = filledFields.filter(f => optionalFields.some(o => o.key === f.key)).length;
+    
+    // Weight: Required = 60%, Optional = 40%
+    const requiredScore = requiredFields.length > 0 ? (filledRequired / requiredFields.length) * 60 : 60;
+    const optionalScore = optionalFields.length > 0 ? (filledOptional / optionalFields.length) * 40 : 0;
+    
     return {
-      percentage: Math.round((filledFields.length / essentialFields.length) * 100),
+      percentage: Math.round(requiredScore + optionalScore),
       missing,
       filled: filledFields.length,
       total: essentialFields.length

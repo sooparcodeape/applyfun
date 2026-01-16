@@ -647,6 +647,7 @@ ${extractedText}`,
       const { autoApplyToJob } = await import('./job-automation');
       let successful = 0;
       let failed = 0;
+      let totalFieldsFilled = 0;
 
       for (const item of queueItems) {
         let applicationId: number | undefined;
@@ -706,6 +707,10 @@ ${extractedText}`,
           
           if (automationResult.success) {
             successful++;
+            // Track fields filled for success message
+            if (automationResult.fieldsFilledCount) {
+              totalFieldsFilled += automationResult.fieldsFilledCount;
+            }
           } else {
             failed++;
           }
@@ -751,7 +756,7 @@ ${extractedText}`,
         });
       }
 
-      return { successful, failed };
+      return { successful, failed, totalFieldsFilled };
     }),
   }),
   

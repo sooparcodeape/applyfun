@@ -27,9 +27,11 @@ export default function Queue() {
       utils.applications.list.invalidate();
       utils.credits.balance.invalidate();
       
-      // Show success message
+      // Show success message with field count details
       if (result.successful > 0) {
-        toast.success(`Applied to ${result.successful} jobs successfully!`);
+        const avgFields = result.totalFieldsFilled ? Math.round(result.totalFieldsFilled / result.successful) : 0;
+        const profileReminder = avgFields < 5 ? ' Complete your profile to fill more fields!' : '';
+        toast.success(`Applied to ${result.successful} jobs successfully! (Avg ${avgFields} fields filled)${profileReminder}`);
       }
       
       // Show manual review message

@@ -39,6 +39,7 @@ export interface ApplicationResult {
   success: boolean;
   message: string;
   screenshotUrl?: string;
+  fieldsFilledCount?: number;
 }
 
 // Shared browser instance for better performance
@@ -898,12 +899,14 @@ async function autoApplyToJobInternal(
         return {
           success: true,
           message: `Successfully submitted application! Filled ${fieldsFilledCount} fields and clicked Submit.${profileCompletionHint}`,
+          fieldsFilledCount,
         };
       } else {
         // Submitted but can't confirm success
         return {
           success: true,
           message: `Submitted application (filled ${fieldsFilledCount} fields). Please verify submission manually.`,
+          fieldsFilledCount,
         };
       }
     } catch (clickError: any) {
@@ -912,6 +915,7 @@ async function autoApplyToJobInternal(
       return {
         success: false,
         message: `Filled ${fieldsFilledCount} fields but failed to click Submit button: ${clickError.message}. Manual review required.`,
+        fieldsFilledCount,
       };
     }
 
