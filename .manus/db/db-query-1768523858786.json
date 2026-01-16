@@ -1,0 +1,22 @@
+{
+  "query": "SELECT title, apply_url FROM jobs WHERE source = 'Solana' LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT title, apply_url FROM jobs WHERE source = 'Solana' LIMIT 3;",
+  "rows": [
+    {
+      "title": "Finance Analyst (Spain)",
+      "apply_url": "https://jobs.solana.com/companies/crossmint-2#content"
+    },
+    {
+      "title": "Product Designer (Wallet Platform)",
+      "apply_url": "https://jobs.solana.com/companies/phantom#content"
+    },
+    {
+      "title": "Talent Lead",
+      "apply_url": "https://jobs.solana.com/companies/li-fi-2#content"
+    }
+  ],
+  "messages": [],
+  "stdout": "title\tapply_url\nFinance Analyst (Spain)\thttps://jobs.solana.com/companies/crossmint-2#content\nProduct Designer (Wallet Platform)\thttps://jobs.solana.com/companies/phantom#content\nTalent Lead\thttps://jobs.solana.com/companies/li-fi-2#content\n",
+  "stderr": "",
+  "execution_time_ms": 98
+}

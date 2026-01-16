@@ -1,0 +1,26 @@
+{
+  "query": "SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT source, COUNT(*) as count FROM jobs GROUP BY source ORDER BY count DESC",
+  "rows": [
+    {
+      "source": "cryptojobslist.com",
+      "count": "305"
+    },
+    {
+      "source": "Solana",
+      "count": "18"
+    },
+    {
+      "source": "Ripple",
+      "count": "1"
+    },
+    {
+      "source": "Polygon",
+      "count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "source\tcount\ncryptojobslist.com\t305\nSolana\t18\nRipple\t1\nPolygon\t1\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

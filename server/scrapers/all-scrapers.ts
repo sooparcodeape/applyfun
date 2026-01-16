@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { extractFinalATSUrl } from "./extract-ats-url";
 import { getDb } from "../db";
 import { jobs } from "../../drizzle/schema";
 

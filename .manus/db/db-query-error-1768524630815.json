@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO jobs (externalId, source, title, company, location, jobType, tags, applyUrl, postedDate, isActive, scrapedAt) VALUES ('solana-test-65260579', 'jobs.solana.com', 'Finance Analyst (Spain)', 'Crossmint', 'Remote', 'Full-time', '[\"solana\",\"blockchain\",\"crypto\"]', 'https://jobs.solana.com/companies/crossmint-2/jobs/65260579-finance-analyst-spain', NOW(), 1, NOW())",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute INSERT INTO jobs (externalId, source, title, company, location, jobType, tags, applyUrl, postedDate, isActive, scrapedAt) VALUES ('solana-test-65260579', 'jobs.solana.com', 'Finance Analyst (Spain)', 'Crossmint', 'Remote', 'Full-time', '[\"solana\",\"blockchain\",\"crypto\"]', 'https://jobs.solana.com/companies/crossmint-2/jobs/65260579-finance-analyst-spain', NOW(), 1, NOW())",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'externalId' in 'field list'"
+  ]
+}

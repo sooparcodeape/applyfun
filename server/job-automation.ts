@@ -87,6 +87,57 @@ export async function autoApplyToJob(
     // Wait for dynamic content with human-like delay
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
 
+    // Step 0: Handle Solana jobs popup flow
+    if (jobUrl.includes('jobs.solana.com')) {
+      console.log('[AutoApply] Detected Solana job - handling popup flow...');
+      
+      try {
+        // Click "Apply now" button on job detail page
+        const applyNowButton = await page.evaluateHandle(() => {
+          const buttons = Array.from(document.querySelectorAll('button, a'));
+          return buttons.find(btn => {
+            const text = btn.textContent?.toLowerCase() || '';
+            return text.includes('apply now') || text.includes('apply for this job');
+          });
+        });
+        
+        const applyNowElement = await applyNowButton.asElement();
+        if (applyNowElement) {
+          console.log('[AutoApply] Clicking "Apply now" button...');
+          await (applyNowElement as any).click();
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Handle popup: Click "No thanks, take me to the application form"
+          const noThanksButton = await page.evaluateHandle(() => {
+            const buttons = Array.from(document.querySelectorAll('button, a'));
+            return buttons.find(btn => {
+              const text = btn.textContent?.toLowerCase() || '';
+              return text.includes('no thanks') || text.includes('take me to the application');
+            });
+          });
+          
+          const noThanksElement = await noThanksButton.asElement();
+          if (noThanksElement) {
+            console.log('[AutoApply] Clicking "No thanks" to skip to application form...');
+            await (noThanksElement as any).click();
+            
+            // Wait for navigation to final ATS page
+            await Promise.race([
+              page.waitForNavigation({ timeout: 10000, waitUntil: 'networkidle2' }),
+              new Promise(resolve => setTimeout(resolve, 5000)),
+            ]);
+            
+            console.log('[AutoApply] Navigated to final ATS page:', page.url());
+          }
+        }
+      } catch (error) {
+        console.log('[AutoApply] Solana popup handling failed, continuing with current page:', error);
+      }
+      
+      // Additional wait for form to load
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
     // Helper: Check if element is visible
     const isElementVisible = async (element: any): Promise<boolean> => {
       return await page!.evaluate(el => {

@@ -170,56 +170,31 @@ export async function scrapeSolanaJobs(): Promise<ScrapedJob[]> {
     
     console.log(`[SolanaJobs] Total job detail URLs found: ${jobDetailUrls.length}`);
     
-    // Step 2: Launch browser and extract real application URLs
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-      ],
-    });
+    // Save all job detail URLs - automation will handle clicking through
+    const maxJobs = Math.min(jobDetailUrls.length, 100);
     
-    // Process jobs in batches
-    const batchSize = 5;
-    const maxJobs = Math.min(jobDetailUrls.length, 50); // Limit to 50 jobs
-    
-    for (let i = 0; i < maxJobs; i += batchSize) {
-      const batch = jobDetailUrls.slice(i, i + batchSize);
+    for (let i = 0; i < maxJobs; i++) {
+      const job = jobDetailUrls[i];
       
-      console.log(`[SolanaJobs] Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(maxJobs / batchSize)}...`);
-      
-      for (const job of batch) {
-        try {
-          const applyUrl = await extractApplicationUrl(browser, job.url, job.title);
-          
-          if (applyUrl) {
-            scrapedJobs.push({
-              externalId: `solana-${job.company.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-              source: "jobs.solana.com",
-              title: job.title,
-              company: job.company,
-              location: "Remote", // Default, can be extracted from detail page
-              jobType: "Full-time",
-              tags: JSON.stringify(["solana", "blockchain", "crypto"]),
-              applyUrl,
-              postedDate: new Date(),
-              isActive: 1,
-            });
-            
-            console.log(`[SolanaJobs] ✓ ${job.title} -> ${applyUrl}`);
-          } else {
-            console.log(`[SolanaJobs] ✗ ${job.title} - No apply URL found`);
-          }
-          
-          // Small delay between requests
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-        } catch (error) {
-          console.error(`[SolanaJobs] Error processing ${job.title}:`, error);
-        }
+      try {
+        // Save job detail URL directly - automation will handle clicking through
+        scrapedJobs.push({
+          externalId: `solana-${job.url.split('/').pop() || Date.now()}`,
+          source: "jobs.solana.com",
+          title: job.title,
+          company: job.company,
+          location: "Remote",
+          jobType: "Full-time",
+          tags: JSON.stringify(["solana", "blockchain", "crypto"]),
+          applyUrl: job.url,
+          postedDate: new Date(),
+          isActive: 1,
+        });
+        
+        console.log(`[SolanaJobs] ✓ ${job.title} -> ${job.url}`);
+        
+      } catch (error) {
+        console.error(`[SolanaJobs] Error processing ${job.title}:`, error);
       }
     }
     

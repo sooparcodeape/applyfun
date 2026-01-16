@@ -890,3 +890,12 @@
 - [x] Add validation: reject URLs containing "blog", "news", "about", "why-"
 - [x] Test each scraper individually with 5 jobs max
 - [x] Verify all saved URLs are actual job application pages
+
+### Fix ALL Scrapers - Get Final ATS URLs
+- [ ] Update Solana scraper to click through company pages to final ATS
+- [ ] Update CryptoJobsList scraper to click "Apply" and get Greenhouse/Lever URL
+- [ ] Update Web3Career scraper to follow all redirects to final ATS
+- [ ] Update blockchain-careers scraper to extract final application URLs
+- [ ] Test each scraper - verify URLs are lever.co, greenhouse.io, ashbyhq.com, etc.
+- [ ] Delete all intermediate URLs from database
+- [ ] Re-scrape with fixed scrapers

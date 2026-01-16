@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO jobs (external_id, source, title, company, location, job_type, tags, apply_url, posted_date, is_active, scraped_at) VALUES ('solana-test-65260579', 'jobs.solana.com', 'Finance Analyst (Spain)', 'Crossmint', 'Remote', 'Full-time', '[\"solana\",\"blockchain\",\"crypto\"]', 'https://jobs.solana.com/companies/crossmint-2/jobs/65260579-finance-analyst-spain', NOW(), 1, NOW())",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute INSERT INTO jobs (external_id, source, title, company, location, job_type, tags, apply_url, posted_date, is_active, scraped_at) VALUES ('solana-test-65260579', 'jobs.solana.com', 'Finance Analyst (Spain)', 'Crossmint', 'Remote', 'Full-time', '[\"solana\",\"blockchain\",\"crypto\"]', 'https://jobs.solana.com/companies/crossmint-2/jobs/65260579-finance-analyst-spain', NOW(), 1, NOW())",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 57
+}
