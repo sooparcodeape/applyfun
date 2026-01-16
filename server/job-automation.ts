@@ -39,20 +39,42 @@ let browserInstance: Browser | null = null;
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    const executablePath = findChromePath();
+    // Try to use Puppeteer's built-in Chrome first, fallback to manual detection
+    let executablePath: string | undefined;
     
-    browserInstance = await puppeteer.launch({
-      headless: true,
-      executablePath,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--window-size=1920,1080',
-      ],
-    });
+    try {
+      // Let Puppeteer find Chrome automatically
+      browserInstance = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--window-size=1920,1080',
+        ],
+      });
+      console.log('[AutoApply] Chrome launched successfully using Puppeteer auto-detection');
+    } catch (error) {
+      // Fallback to manual path detection
+      console.log('[AutoApply] Puppeteer auto-detection failed, trying manual paths...');
+      executablePath = findChromePath();
+      
+      browserInstance = await puppeteer.launch({
+        headless: true,
+        executablePath,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--window-size=1920,1080',
+        ],
+      });
+      console.log(`[AutoApply] Chrome launched successfully using manual path: ${executablePath}`);
+    }
   }
   return browserInstance;
 }
@@ -87,12 +109,12 @@ export async function autoApplyToJob(
     // Wait for dynamic content with human-like delay
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
 
-    // Step 0: Handle Solana jobs popup flow
+    // Step 0: Handle Solana jobs multi-step redirect flow
     if (jobUrl.includes('jobs.solana.com')) {
-      console.log('[AutoApply] Detected Solana job - handling popup flow...');
+      console.log('[AutoApply] Detected Solana job - handling multi-step redirect flow...');
       
       try {
-        // Click "Apply now" button on job detail page
+        // Step 1: Click "Apply now" button on Solana job page
         const applyNowButton = await page.evaluateHandle(() => {
           const buttons = Array.from(document.querySelectorAll('button, a'));
           return buttons.find(btn => {
@@ -103,35 +125,77 @@ export async function autoApplyToJob(
         
         const applyNowElement = await applyNowButton.asElement();
         if (applyNowElement) {
-          console.log('[AutoApply] Clicking "Apply now" button...');
+          console.log('[AutoApply] Step 1: Clicking "Apply now" button...');
           await (applyNowElement as any).click();
           await new Promise(resolve => setTimeout(resolve, 2000));
           
-          // Handle popup: Click "No thanks, take me to the application form"
-          const noThanksButton = await page.evaluateHandle(() => {
-            const buttons = Array.from(document.querySelectorAll('button, a'));
-            return buttons.find(btn => {
-              const text = btn.textContent?.toLowerCase() || '';
-              return text.includes('no thanks') || text.includes('take me to the application');
-            });
+          // Step 2: Handle popup - Click "No thanks" or look for external link
+          const currentUrl = page.url();
+          console.log('[AutoApply] Step 2: Current URL after click:', currentUrl);
+          
+          // Look for external application link (Notion, Ashby, TeamTailor, etc.)
+          const externalLink = await page.evaluate(() => {
+            // Find links that go to external job boards
+            const links = Array.from(document.querySelectorAll('a'));
+            for (const link of links) {
+              const href = link.href || '';
+              const text = link.textContent?.toLowerCase() || '';
+              
+              // Check for external job board domains
+              if (href.includes('notion.site') || 
+                  href.includes('ashbyhq.com') || 
+                  href.includes('teamtailor.com') ||
+                  href.includes('greenhouse.io') ||
+                  href.includes('lever.co') ||
+                  href.includes('workable.com')) {
+                return href;
+              }
+              
+              // Or look for "No thanks" / "Go to application" text
+              if (text.includes('no thanks') || 
+                  text.includes('take me to') || 
+                  text.includes('go to application')) {
+                return link.href;
+              }
+            }
+            return null;
           });
           
-          const noThanksElement = await noThanksButton.asElement();
-          if (noThanksElement) {
-            console.log('[AutoApply] Clicking "No thanks" to skip to application form...');
-            await (noThanksElement as any).click();
+          if (externalLink) {
+            console.log('[AutoApply] Step 3: Found external link, navigating to:', externalLink);
+            await page.goto(externalLink, { waitUntil: 'networkidle2', timeout: 15000 });
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // Wait for navigation to final ATS page
-            await Promise.race([
-              page.waitForNavigation({ timeout: 10000, waitUntil: 'networkidle2' }),
-              new Promise(resolve => setTimeout(resolve, 5000)),
-            ]);
+            // Step 4: If on Notion page, look for another external link
+            if (page.url().includes('notion.site')) {
+              console.log('[AutoApply] Step 4: On Notion page, looking for final application link...');
+              
+              const finalLink = await page.evaluate(() => {
+                const links = Array.from(document.querySelectorAll('a'));
+                for (const link of links) {
+                  const href = link.href || '';
+                  if (href.includes('teamtailor.com') ||
+                      href.includes('ashbyhq.com') ||
+                      href.includes('greenhouse.io') ||
+                      href.includes('lever.co')) {
+                    return href;
+                  }
+                }
+                return null;
+              });
+              
+              if (finalLink) {
+                console.log('[AutoApply] Step 5: Found final application link:', finalLink);
+                await page.goto(finalLink, { waitUntil: 'networkidle2', timeout: 15000 });
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+            }
             
-            console.log('[AutoApply] Navigated to final ATS page:', page.url());
+            console.log('[AutoApply] Final URL:', page.url());
           }
         }
       } catch (error) {
-        console.log('[AutoApply] Solana popup handling failed, continuing with current page:', error);
+        console.log('[AutoApply] Solana redirect handling failed, continuing with current page:', error);
       }
       
       // Additional wait for form to load

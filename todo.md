@@ -899,3 +899,9 @@
 - [ ] Test each scraper - verify URLs are lever.co, greenhouse.io, ashbyhq.com, etc.
 - [ ] Delete all intermediate URLs from database
 - [ ] Re-scrape with fixed scrapers
+
+- [x] Fix Solana automation to handle multi-step redirects (3+ clicks to reach application form)
+- [x] Update job-automation.ts to follow redirect chains through Notion/Ashby/TeamTailor pages
+- [x] Test with Crossmint job (3 clicks: Solana → Notion → TeamTailor → form)
+- [ ] Test with Phantom job (2 clicks: Solana → Ashby → form)
+- [x] Fix Chrome path detection for production environment (currently failing with "Chrome not found")
