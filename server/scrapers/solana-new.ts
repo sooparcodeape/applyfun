@@ -85,10 +85,14 @@ async function extractApplicationUrl(browser: Browser, detailUrl: string, title:
       return null;
     }
     
-    // Return the URL as-is - automation will handle clicking Apply button
+    // For Ashby URLs, append /application to get the final form URL
+    let finalUrl = applyUrl;
+    if (applyUrl.includes('jobs.ashbyhq.com') && !applyUrl.includes('/application')) {
+      finalUrl = applyUrl.split('?')[0] + '/application' + (applyUrl.includes('?') ? '?' + applyUrl.split('?')[1] : '');
+    }
     
     await page.close();
-    return applyUrl;
+    return finalUrl;
     
   } catch (error) {
     console.error(`[SolanaJobs] Error extracting URL from ${detailUrl}:`, error);

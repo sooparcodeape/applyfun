@@ -55,7 +55,7 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
         const jobId = job.id || job.jobId;
         if (!jobId || !job.title) continue;
         
-        const applyUrl = `https://jobs.ashbyhq.com/${companySlug}/${jobId}`;
+        const applyUrl = `https://jobs.ashbyhq.com/${companySlug}/${jobId}/application`;
         
         // Format tags as JSON array for frontend compatibility
         const tagArray = [job.departmentName, job.teamName].filter(Boolean);

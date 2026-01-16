@@ -948,3 +948,11 @@
 - [x] Delete CryptoJobsList Rain jobs from database
 - [x] Run Rain/Ashby scraper to populate direct Ashby URLs (50 jobs saved)
 - [x] Verify Rain jobs show https://jobs.ashbyhq.com/rain/* URLs (confirmed in database)
+
+## CRITICAL FIXES NEEDED
+- [x] Fix Chrome dependencies to install automatically (added to postinstall script)
+- [x] Fix Solana scraper to extract final /application URLs (appends /application for Ashby URLs)
+- [x] Fix Ashby scraper to use /application URLs directly
+- [x] Rain jobs re-scraped with /application URLs (50 jobs updated)
+- [x] Verified database contains correct /application URLs
+- [ ] Test automation end-to-end with real job application
