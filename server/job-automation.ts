@@ -709,7 +709,7 @@ async function autoApplyToJobInternal(
     }
 
     // Fallback 1: Try vision-based field detection if few fields filled
-    if (fieldsFilledCount < 3) {
+    if (fieldsFilledCount <= 3) {
       console.log('[AutoApply] Few fields filled, trying vision-based detection...');
       try {
         const { detectFieldsFromForm } = await import('./vision-field-detector');
@@ -894,7 +894,9 @@ async function autoApplyToJobInternal(
       
       // Save application log to database (if userId, jobId, and applicationId provided)
       if (userId && jobId && applicationId) {
+        console.log(`[AutoApply] Saving application log - appId: ${applicationId}, userId: ${userId}, jobId: ${jobId}`);
         const proxyInfo = await proxyManager.getCurrentProxyInfo();
+        console.log(`[AutoApply] Proxy info:`, proxyInfo);
         await createApplicationLog({
           applicationId,
           userId,

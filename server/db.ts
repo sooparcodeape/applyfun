@@ -282,8 +282,17 @@ export async function createApplicationLog(log: {
     
     await connection.end();
     console.log(`[Database] Created application log for application ${log.applicationId}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[Database] Failed to create application log:", error);
+    console.error("[Database] Error details:", {
+      message: error.message,
+      code: error.code,
+      errno: error.errno,
+      sql: error.sql,
+      sqlState: error.sqlState,
+      sqlMessage: error.sqlMessage
+    });
+    throw error; // Re-throw to surface the error
   }
 }
 
