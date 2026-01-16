@@ -996,3 +996,5 @@
 - [x] Add dynamic field discovery to detect all available fields
 - [ ] Verify all fields are being filled (name, email, phone, resume, LinkedIn, GitHub, portfolio, cover letter)
 - [ ] Test field detection on each ATS platform
+
+- [x] Add detailed resume upload logging (success rate, selector used, file size, ATS platform)

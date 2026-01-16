@@ -543,19 +543,35 @@ async function autoApplyToJobInternal(
       }
     }
 
-    // Step 4: Handle resume file upload
+    // Step 4: Handle resume file upload with detailed tracking
+    let resumeUploadSuccess = false;
+    let resumeSelector = 'none';
+    let resumeFileSize = 0;
+    
     if (applicantData.resumeUrl && fieldMappings.resume) {
       try {
+        console.log(`[Resume Upload] Starting for ATS: ${atsType}`);
+        console.log(`[Resume Upload] Resume URL: ${applicantData.resumeUrl}`);
+        console.log(`[Resume Upload] Available selectors: ${fieldMappings.resume.selectors.length}`);
+        
         // Use ATS-specific resume selectors
         const fileInputSelectors = fieldMappings.resume.selectors;
 
         let fileInput = null;
+        let selectorIndex = 0;
         for (const selector of fileInputSelectors) {
+          selectorIndex++;
+          console.log(`[Resume Upload] Trying selector ${selectorIndex}/${fileInputSelectors.length}: ${selector}`);
           fileInput = await page.$(selector);
           if (fileInput) {
-            console.log(`[AutoApply] Found resume input with selector: ${selector}`);
+            resumeSelector = selector;
+            console.log(`[Resume Upload] ✅ Found resume input with selector: ${selector}`);
             break;
           }
+        }
+
+        if (!fileInput) {
+          console.log(`[Resume Upload] ❌ No resume input found after trying ${fileInputSelectors.length} selectors`);
         }
 
         if (fileInput) {
@@ -565,23 +581,44 @@ async function autoApplyToJobInternal(
           const path = await import('path');
           const os = await import('os');
           
+          console.log(`[Resume Upload] Downloading resume from S3...`);
+          const downloadStart = Date.now();
           const response = await axios.default.get(applicantData.resumeUrl, { responseType: 'arraybuffer' });
+          const downloadTime = Date.now() - downloadStart;
+          
+          resumeFileSize = response.data.length;
+          const fileSizeKB = (resumeFileSize / 1024).toFixed(2);
+          console.log(`[Resume Upload] Downloaded ${fileSizeKB} KB in ${downloadTime}ms`);
+          
           const tempFilePath = path.join(os.tmpdir(), `resume-${Date.now()}.pdf`);
           fs.writeFileSync(tempFilePath, response.data);
+          console.log(`[Resume Upload] Saved to temp file: ${tempFilePath}`);
           
           // Upload file
+          console.log(`[Resume Upload] Uploading to form...`);
+          const uploadStart = Date.now();
           await (fileInput as any).uploadFile(tempFilePath);
+          const uploadTime = Date.now() - uploadStart;
+          console.log(`[Resume Upload] Upload completed in ${uploadTime}ms`);
+          
           fieldsFilledCount++;
+          resumeUploadSuccess = true;
           
           // Clean up temp file
           fs.unlinkSync(tempFilePath);
+          console.log(`[Resume Upload] Temp file cleaned up`);
           
-          console.log('[AutoApply] Resume uploaded successfully');
+          console.log(`[Resume Upload] ✅ SUCCESS - ATS: ${atsType}, Selector: ${resumeSelector}, Size: ${fileSizeKB}KB`);
         }
-      } catch (error) {
-        console.error('[AutoApply] Resume upload failed:', error);
+      } catch (error: any) {
+        console.error(`[Resume Upload] ❌ FAILED - ATS: ${atsType}, Error: ${error.message}`);
+        console.error(`[Resume Upload] Stack trace:`, error.stack);
         // Continue even if resume upload fails
       }
+    } else if (!applicantData.resumeUrl) {
+      console.log(`[Resume Upload] ⚠️ SKIPPED - No resume URL in applicant profile`);
+    } else if (!fieldMappings.resume) {
+      console.log(`[Resume Upload] ⚠️ SKIPPED - No resume field mapping for ATS: ${atsType}`);
     }
 
     // Fallback to generic selectors if no fields filled
