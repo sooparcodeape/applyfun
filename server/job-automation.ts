@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser, Page } from 'puppeteer';
 import { proxyManager } from './proxy-manager';
+import { getATSFieldMappings, getAllFieldSelectors, type ATSFieldMappings } from './ats-field-mappings';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -496,117 +497,65 @@ async function autoApplyToJobInternal(
     
     console.log(`[AutoApply] Detected ATS type: ${atsType}`);
 
-    // Step 3: Fill form fields
+    // Step 3: Fill form fields using comprehensive ATS-specific mappings
     let fieldsFilledCount = 0;
 
-    // ATS-specific selectors
-    const atsSelectors: Record<string, Record<string, string[]>> = {
-      greenhouse: {
-        firstName: ['#first_name', 'input[name="job_application[first_name]"]'],
-        lastName: ['#last_name', 'input[name="job_application[last_name]"]'],
-        email: ['#email', 'input[name="job_application[email]"]'],
-        phone: ['#phone', 'input[name="job_application[phone]"]'],
-        coverLetter: ['#cover_letter_text', 'textarea[name="job_application[cover_letter]"]'],
-        linkedin: ['input[name="job_application[linkedin_url]"]'],
-        github: ['input[name="job_application[github_url]"]'],
-      },
-      lever: {
-        name: ['input[name="name"]', '.application-name input'],
-        email: ['input[name="email"]', '.application-email input'],
-        phone: ['input[name="phone"]', '.application-phone input'],
-        coverLetter: ['textarea[name="comments"]', '.application-comments textarea', '#additional-information'],
-        linkedin: ['input[name="urls[LinkedIn]"]'],
-        github: ['input[name="urls[GitHub]"]'],
-      },
-      workable: {
-        firstName: ['input[name="candidate[firstname]"]'],
-        lastName: ['input[name="candidate[lastname]"]'],
-        email: ['input[name="candidate[email]"]'],
-        phone: ['input[name="candidate[phone]"]'],
-        coverLetter: ['textarea[name="candidate[cover_letter]"]'],
-        linkedin: ['input[name="candidate[social_linkedin]"]'],
-        github: ['input[name="candidate[social_github]"]'],
-      },
-      ashby: {
-        name: ['input[name="name"]'],
-        email: ['input[name="email"]'],
-        phone: ['input[name="phone"]'],
-        linkedin: ['input[name="linkedInUrl"]'],
-        github: ['input[name="githubUrl"]'],
-      },
-      teamtailor: {
-        firstName: ['input[name="first_name"]', 'input[placeholder*="First name"]'],
-        lastName: ['input[name="last_name"]', 'input[placeholder*="Last name"]'],
-        email: ['input[name="email"]', 'input[type="email"]'],
-        phone: ['input[name="phone"]', 'input[type="tel"]'],
-        linkedin: ['input[name="linkedin"]', 'input[placeholder*="LinkedIn"]'],
-        github: ['input[name="github"]', 'input[placeholder*="GitHub"]'],
-        coverLetter: ['textarea[name="message"]', 'textarea[placeholder*="message"]'],
-      },
-      linkedin: {
-        // LinkedIn Easy Apply is detected but we don't auto-submit
-        phone: ['input[id*="phoneNumber"]', 'input[name*="phoneNumber"]'],
-      },
+    // Get field mappings for detected ATS platform
+    const fieldMappings: ATSFieldMappings = atsType !== 'generic' 
+      ? getATSFieldMappings(atsType)
+      : getAllFieldSelectors(); // Use all selectors as fallback
+    
+    console.log(`[AutoApply] Using field mappings for: ${atsType}`);
+    
+    // Split name for platforms that use separate first/last name fields
+    const nameParts = applicantData.fullName.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || nameParts[0]; // Fallback to firstName if no lastName
+    
+    // Map applicant data to field values
+    const fieldValues: Record<string, string> = {
+      firstName,
+      lastName,
+      fullName: applicantData.fullName,
+      email: applicantData.email,
+      phone: applicantData.phone,
+      location: applicantData.location || '',
+      linkedin: applicantData.linkedinUrl || '',
+      github: applicantData.githubUrl || '',
+      portfolio: applicantData.portfolioUrl || '',
+      coverLetter: applicantData.coverLetter || '',
     };
-
-    // Try ATS-specific selectors
-    if (atsType !== 'generic' && atsSelectors[atsType]) {
-      const mapping = atsSelectors[atsType];
-      
-      // Split name
-      const nameParts = applicantData.fullName.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ');
-      
-      // Fill name fields
-      if (mapping.firstName) {
-        fieldsFilledCount += await fillField(mapping.firstName, firstName);
-      }
-      if (mapping.lastName) {
-        fieldsFilledCount += await fillField(mapping.lastName, lastName);
-      }
-      if (mapping.name) {
-        fieldsFilledCount += await fillField(mapping.name, applicantData.fullName);
-      }
-      
-      // Fill contact fields
-      if (mapping.email) {
-        fieldsFilledCount += await fillField(mapping.email, applicantData.email);
-      }
-      if (mapping.phone) {
-        fieldsFilledCount += await fillField(mapping.phone, applicantData.phone);
-      }
-      
-      // Fill social links
-      if (mapping.linkedin && applicantData.linkedinUrl) {
-        fieldsFilledCount += await fillField(mapping.linkedin, applicantData.linkedinUrl);
-      }
-      if (mapping.github && applicantData.githubUrl) {
-        fieldsFilledCount += await fillField(mapping.github, applicantData.githubUrl);
-      }
-      
-      // Fill cover letter
-      if (mapping.coverLetter && applicantData.coverLetter) {
-        fieldsFilledCount += await fillField(mapping.coverLetter, applicantData.coverLetter);
+    
+    // Sort fields by priority (higher priority first)
+    const sortedFields = Object.entries(fieldMappings)
+      .filter(([fieldName]) => fieldName !== 'resume') // Handle resume separately
+      .sort(([, a], [, b]) => b.priority - a.priority);
+    
+    // Fill all available fields
+    for (const [fieldName, mapping] of sortedFields) {
+      const value = fieldValues[fieldName];
+      if (value) {
+        const filled = await fillField(mapping.selectors, value);
+        if (filled > 0) {
+          console.log(`[AutoApply] Filled ${fieldName}: ${value.substring(0, 30)}...`);
+        }
+        fieldsFilledCount += filled;
       }
     }
 
     // Step 4: Handle resume file upload
-    if (applicantData.resumeUrl) {
+    if (applicantData.resumeUrl && fieldMappings.resume) {
       try {
-        // Find file input for resume
-        const fileInputSelectors = [
-          'input[type="file"][name*="resume"]',
-          'input[type="file"][name*="cv"]',
-          'input[type="file"][id*="resume"]',
-          'input[type="file"][id*="cv"]',
-          'input[type="file"]', // Fallback to any file input
-        ];
+        // Use ATS-specific resume selectors
+        const fileInputSelectors = fieldMappings.resume.selectors;
 
         let fileInput = null;
         for (const selector of fileInputSelectors) {
           fileInput = await page.$(selector);
-          if (fileInput) break;
+          if (fileInput) {
+            console.log(`[AutoApply] Found resume input with selector: ${selector}`);
+            break;
+          }
         }
 
         if (fileInput) {

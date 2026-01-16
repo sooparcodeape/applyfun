@@ -989,3 +989,10 @@
 - [ ] Test proxy integration end-to-end with real job applications
 
 - [x] Enable full auto-submit functionality (detect and click Submit button automatically)
+
+### Field Detection & ATS Platform Support
+- [x] Create comprehensive ATS-specific field mapping system (Ashby, Greenhouse, Lever, Workable, TeamTailor, LinkedIn)
+- [x] Store platform-specific selectors for reuse across all applications
+- [x] Add dynamic field discovery to detect all available fields
+- [ ] Verify all fields are being filled (name, email, phone, resume, LinkedIn, GitHub, portfolio, cover letter)
+- [ ] Test field detection on each ATS platform
