@@ -87,6 +87,41 @@ export async function autoApplyToJob(
 
     // Wait for dynamic content with human-like delay
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+    
+    // Anti-bot evasion: Simulate human behavior before interacting
+    console.log('[AutoApply] Simulating human behavior...');
+    
+    // 1. Random mouse movements
+    await page.mouse.move(100 + Math.random() * 200, 100 + Math.random() * 200);
+    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+    await page.mouse.move(300 + Math.random() * 400, 200 + Math.random() * 300);
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    
+    // 2. Scroll down and up to simulate reading
+    await page.evaluate(() => {
+      window.scrollTo({
+        top: 300 + Math.random() * 200,
+        behavior: 'smooth'
+      });
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
+    
+    await page.evaluate(() => {
+      window.scrollTo({
+        top: 100 + Math.random() * 100,
+        behavior: 'smooth'
+      });
+    });
+    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
+    
+    // 3. Move mouse to random positions (simulate reading)
+    for (let i = 0; i < 3; i++) {
+      await page.mouse.move(
+        200 + Math.random() * 600,
+        150 + Math.random() * 400
+      );
+      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
+    }
 
     // Step 0: Handle Solana jobs multi-step redirect flow
     if (jobUrl.includes('jobs.solana.com')) {
@@ -193,16 +228,47 @@ export async function autoApplyToJob(
       }, element);
     };
 
-    // Helper: Type with human-like delays
+    // Helper: Type like a human with realistic behavior (ANTI-BOT EVASION)
     const humanType = async (element: any, text: string) => {
-      await element.click({ delay: 100 });
-      await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
-      for (const char of text) {
-        await element.type(char, { delay: 50 + Math.random() * 100 });
+      // Move mouse to element with curved path (not straight line)
+      const box = await element.boundingBox();
+      if (box) {
+        const targetX = box.x + box.width / 2 + (Math.random() - 0.5) * 30;
+        const targetY = box.y + box.height / 2 + (Math.random() - 0.5) * 15;
+        await page!.mouse.move(targetX, targetY, { steps: 20 + Math.floor(Math.random() * 20) });
+        await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
       }
-    };
-
-    // Helper: Fill field by selectors
+      
+      // Click with human-like delay
+      await element.click({ delay: 150 + Math.random() * 250 });
+      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
+      
+      // Type with realistic variable speed
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        
+        // Longer pause every 5-10 characters (thinking/reading)
+        if (i > 0 && i % (5 + Math.floor(Math.random() * 5)) === 0) {
+          await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
+        }
+        
+        // Variable typing speed: faster for common patterns, slower for complex
+        let delay = 80 + Math.random() * 150;
+        if (/[A-Z]/.test(char)) delay += 50; // Slower for capitals
+        if (/[0-9]/.test(char)) delay += 30; // Slower for numbers
+        if (/[@._-]/.test(char)) delay += 40; // Slower for special chars
+        
+        await element.type(char, { delay });
+        
+        // Pause after spaces (between words)
+        if (char === ' ' && Math.random() < 0.4) {
+          await new Promise(resolve => setTimeout(resolve, 250 + Math.random() * 500));
+        }
+      }
+      
+      // Pause after finishing field (reviewing what was typed)
+      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 700));
+    };   // Helper: Fill field by selectors with anti-bot delays
     const fillField = async (selectors: string[], value: string): Promise<number> => {
       if (!value) return 0;
       
@@ -210,7 +276,21 @@ export async function autoApplyToJob(
         try {
           const element = await page!.$(selector);
           if (element && await isElementVisible(element)) {
+            // Random delay before interacting with field (thinking time)
+            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1500));
+            
+            // Scroll element into view smoothly
+            await page!.evaluate((el) => {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, element);
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 800));
+            
+            // Type with human behavior
             await humanType(element, value);
+            
+            // Random delay after filling (reviewing what was typed)
+            await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
+            
             return 1;
           }
         } catch (e) {
@@ -276,7 +356,11 @@ export async function autoApplyToJob(
       atsType = 'linkedin';
     } else if (url.includes('ashbyhq.com')) {
       atsType = 'ashby';
+    } else if (url.includes('teamtailor.com')) {
+      atsType = 'teamtailor';
     }
+    
+    console.log(`[AutoApply] Detected ATS type: ${atsType}`);
 
     // Step 3: Fill form fields
     let fieldsFilledCount = 0;
@@ -315,6 +399,15 @@ export async function autoApplyToJob(
         phone: ['input[name="phone"]'],
         linkedin: ['input[name="linkedInUrl"]'],
         github: ['input[name="githubUrl"]'],
+      },
+      teamtailor: {
+        firstName: ['input[name="first_name"]', 'input[placeholder*="First name"]'],
+        lastName: ['input[name="last_name"]', 'input[placeholder*="Last name"]'],
+        email: ['input[name="email"]', 'input[type="email"]'],
+        phone: ['input[name="phone"]', 'input[type="tel"]'],
+        linkedin: ['input[name="linkedin"]', 'input[placeholder*="LinkedIn"]'],
+        github: ['input[name="github"]', 'input[placeholder*="GitHub"]'],
+        coverLetter: ['textarea[name="message"]', 'textarea[placeholder*="message"]'],
       },
       linkedin: {
         // LinkedIn Easy Apply is detected but we don't auto-submit

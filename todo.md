@@ -910,3 +910,9 @@
 - [x] Revert Browserless integration (too expensive: $4-5k/year)
 - [x] Fix self-hosted Chrome installation with postinstall script
 - [x] Ensure Chrome is installed automatically when dependencies are installed
+- [x] Implement advanced anti-bot evasion for TeamTailor and Greenhouse
+- [x] Add human-like mouse movements and scrolling
+- [x] Add randomized delays between actions (2-5 seconds)
+- [x] Implement typing with human-like speed variations
+- [x] Add page interaction before filling forms (scroll, move mouse)
+- [ ] Test evasion techniques with real applications
