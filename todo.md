@@ -907,3 +907,6 @@
 - [x] Fix Chrome path detection for production environment (currently failing with "Chrome not found")
 - [x] Fix Chrome auto-detection failing in production (Puppeteer auto-detection not working)
 - [x] Switched to Browserless API to avoid Chrome installation issues
+- [x] Revert Browserless integration (too expensive: $4-5k/year)
+- [x] Fix self-hosted Chrome installation with postinstall script
+- [x] Ensure Chrome is installed automatically when dependencies are installed

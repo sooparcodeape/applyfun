@@ -35,24 +35,25 @@ export interface ApplicationResult {
 let browserInstance: Browser | null = null;
 
 /**
- * Get or create browser instance using Browserless API
+ * Get or create browser instance
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    const browserlessApiKey = process.env.BROWSERLESS_API_KEY;
+    const executablePath = findChromePath();
     
-    if (!browserlessApiKey) {
-      throw new Error('BROWSERLESS_API_KEY environment variable is required');
-    }
-    
-    // Connect to Browserless cloud service
-    const browserWSEndpoint = `wss://production-sfo.browserless.io?token=${browserlessApiKey}&stealth`;
-    
-    console.log('[AutoApply] Connecting to Browserless...');
-    browserInstance = await puppeteer.connect({
-      browserWSEndpoint,
+    browserInstance = await puppeteer.launch({
+      headless: true,
+      executablePath,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920,1080',
+      ],
     });
-    console.log('[AutoApply] Connected to Browserless successfully');
+    console.log(`[AutoApply] Chrome launched from: ${executablePath}`);
   }
   return browserInstance;
 }
