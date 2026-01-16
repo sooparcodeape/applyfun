@@ -1,0 +1,21 @@
+Copy these environment variables to Railway (Settings → Variables):
+
+DATABASE_URL=mysql://41HBMwttDW7LZLW.root:cAv67U4RFRf8B3Yhl2fj@gateway03.us-east-1.prod.aws.tidbcloud.com:4000/G7Bah27Bb9yyPz9EaUBZuy?ssl={"rejectUnauthorized":true}
+
+JWT_SECRET=V9TXYz77wJVBbDD5KYHmcB
+
+BROWSERLESS_API_KEY=2TnGFqdEEMchPiA816f9c059cb7cf9994a941f8650e12f58a
+
+NODE_ENV=production
+
+---
+
+IMPORTANT: These are your actual production credentials from Manus. Keep them secure!
+
+How to add in Railway:
+1. Go to your Railway project dashboard
+2. Click on your service
+3. Go to "Variables" tab
+4. Click "New Variable"
+5. Add each variable name and value
+6. Railway will automatically redeploy after adding variables

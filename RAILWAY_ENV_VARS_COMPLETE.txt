@@ -1,0 +1,27 @@
+COMPLETE LIST - Add ALL these environment variables to Railway:
+
+=== Database & Auth (Already added) ===
+DATABASE_URL=mysql://41HBMwttDW7LZLW.root:cAv67U4RFRf8B3Yhl2fj@gateway03.us-east-1.prod.aws.tidbcloud.com:4000/G7Bah27Bb9yyPz9EaUBZuy?ssl={"rejectUnauthorized":true}
+JWT_SECRET=V9TXYz77wJVBbDD5KYHmcB
+BROWSERLESS_API_KEY=2TnGFqdEEMchPiA816f9c059cb7cf9994a941f8650e12f58a
+NODE_ENV=production
+
+=== OAuth (MISSING - Add these now!) ===
+OAUTH_SERVER_URL=https://api.manus.im
+VITE_OAUTH_PORTAL_URL=https://manus.im
+VITE_APP_ID=G7Bah27Bb9yyPz9EaUBZuy
+
+=== App Info ===
+VITE_APP_TITLE=CryptoApply - Automated Crypto Job Applications
+VITE_APP_LOGO=https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663252503662/ykjivjjGTNhONRYq.png
+
+=== Owner Info ===
+OWNER_NAME=WallStreet Wealthy
+OWNER_OPEN_ID=PUx2LYkPAMWMhfSufdAqM4
+
+=== Port (IMPORTANT!) ===
+PORT=3000
+
+---
+
+PRIORITY: Add the OAuth variables first to fix the authentication error!

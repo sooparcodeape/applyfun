@@ -45,7 +45,7 @@
 - [ ] Support for embedded forms
 - [ ] Handle file uploads (resume, cover letter)
 - [ ] Error handling and retry logic
-- [ ] Enhanced anti-bot evasion (longer delays, realistic mouse patterns, random scrolling, stealth plugins)
+- [x] Enhanced anti-bot evasion (longer delays, realistic mouse patterns, random scrolling, stealth plugins)
 
 ### Application Tracking
 - [ ] Application history data model
