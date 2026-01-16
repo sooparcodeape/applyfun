@@ -137,6 +137,13 @@ export const userProfiles = mysqlTable("user_profiles", {
   currentSalary: int("current_salary"),
   expectedSalary: int("expected_salary"),
   writingSample: text("writing_sample"),
+  // New fields for comprehensive ATS form filling
+  currentCompany: varchar("current_company", { length: 255 }),
+  currentTitle: varchar("current_title", { length: 255 }),
+  workAuthorization: varchar("work_authorization", { length: 100 }), // e.g., "US Citizen", "Green Card", "H1B", "Requires Sponsorship"
+  howDidYouHear: varchar("how_did_you_hear", { length: 255 }), // Referral source
+  availableStartDate: varchar("available_start_date", { length: 100 }), // e.g., "Immediately", "2 weeks", "1 month"
+  willingToRelocate: int("willing_to_relocate").default(0), // 0 = no, 1 = yes
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

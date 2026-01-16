@@ -33,6 +33,13 @@ export default function Profile() {
     yearsOfExperience: 0,
     currentSalary: 0,
     expectedSalary: 0,
+    // New ATS fields
+    currentCompany: "",
+    currentTitle: "",
+    workAuthorization: "",
+    howDidYouHear: "",
+    availableStartDate: "",
+    willingToRelocate: 0,
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -55,6 +62,13 @@ export default function Profile() {
         yearsOfExperience: profileData.profile.yearsOfExperience || 0,
         currentSalary: profileData.profile.currentSalary || 0,
         expectedSalary: profileData.profile.expectedSalary || 0,
+        // New ATS fields
+        currentCompany: profileData.profile.currentCompany || "",
+        currentTitle: profileData.profile.currentTitle || "",
+        workAuthorization: profileData.profile.workAuthorization || "",
+        howDidYouHear: profileData.profile.howDidYouHear || "",
+        availableStartDate: profileData.profile.availableStartDate || "",
+        willingToRelocate: profileData.profile.willingToRelocate || 0,
       });
     }
   });
@@ -353,7 +367,75 @@ export default function Profile() {
                 </div>
               </div>
 
-              <Button onClick={handleSaveProfile} disabled={updateProfile.isPending} className="w-full">
+              <div className="border-t pt-4 mt-6">
+                <h3 className="text-lg font-semibold mb-4">Job Application Details</h3>
+                <p className="text-sm text-muted-foreground mb-4">Complete these fields to automatically fill more application forms</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentCompany">Current Company</Label>
+                    <Input
+                      id="currentCompany"
+                      value={formData.currentCompany}
+                      onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
+                      placeholder="e.g., Coinbase"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="currentTitle">Current Title</Label>
+                    <Input
+                      id="currentTitle"
+                      value={formData.currentTitle}
+                      onChange={(e) => setFormData({ ...formData, currentTitle: e.target.value })}
+                      placeholder="e.g., Senior Software Engineer"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="workAuthorization">Work Authorization</Label>
+                    <Input
+                      id="workAuthorization"
+                      value={formData.workAuthorization}
+                      onChange={(e) => setFormData({ ...formData, workAuthorization: e.target.value })}
+                      placeholder="e.g., US Citizen, Green Card, H1B"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="availableStartDate">Available Start Date</Label>
+                    <Input
+                      id="availableStartDate"
+                      value={formData.availableStartDate}
+                      onChange={(e) => setFormData({ ...formData, availableStartDate: e.target.value })}
+                      placeholder="e.g., Immediately, 2 weeks, 1 month"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="howDidYouHear">How did you hear about us? (Default answer for applications)</Label>
+                  <Input
+                    id="howDidYouHear"
+                    value={formData.howDidYouHear}
+                    onChange={(e) => setFormData({ ...formData, howDidYouHear: e.target.value })}
+                    placeholder="e.g., LinkedIn, Company website, Referral"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2 mt-4">
+                  <input
+                    type="checkbox"
+                    id="willingToRelocate"
+                    checked={formData.willingToRelocate === 1}
+                    onChange={(e) => setFormData({ ...formData, willingToRelocate: e.target.checked ? 1 : 0 })}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="willingToRelocate" className="cursor-pointer">Willing to relocate</Label>
+                </div>
+              </div>
+
+              <Button onClick={handleSaveProfile} disabled={updateProfile.isPending} className="w-full mt-6">
                 {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Save Profile
               </Button>

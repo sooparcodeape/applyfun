@@ -673,6 +673,13 @@ ${extractedText}`,
               linkedinUrl: userProfile?.linkedinUrl || undefined,
               githubUrl: userProfile?.githubUrl || undefined,
               portfolioUrl: userProfile?.portfolioUrl || undefined,
+              // New ATS fields from profile
+              currentCompany: userProfile?.currentCompany || undefined,
+              currentTitle: userProfile?.currentTitle || undefined,
+              yearsOfExperience: userProfile?.yearsOfExperience?.toString() || undefined,
+              workAuthorization: userProfile?.workAuthorization || undefined,
+              howDidYouHear: userProfile?.howDidYouHear || undefined,
+              availableStartDate: userProfile?.availableStartDate || undefined,
             },
             3, // maxRetries
             ctx.user.id,

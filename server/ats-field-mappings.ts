@@ -135,9 +135,56 @@ export const ASHBY_FIELDS: ATSFieldMappings = {
       'textarea[placeholder*="cover letter"]',
       'textarea[aria-label*="Cover letter"]',
       'textarea[name*="message"]',
+      'textarea[placeholder*="Why"]',
+      'textarea[placeholder*="Tell us"]',
     ],
     type: 'textarea',
     priority: 4,
+  },
+  currentCompany: {
+    selectors: [
+      'input[name*="company"]',
+      'input[name*="employer"]',
+      'input[id*="company"]',
+      'input[placeholder*="Company"]',
+      'input[placeholder*="Current employer"]',
+      'input[aria-label*="Company"]',
+    ],
+    type: 'text',
+    priority: 6,
+  },
+  yearsOfExperience: {
+    selectors: [
+      'input[name*="experience"]',
+      'input[name*="years"]',
+      'input[id*="experience"]',
+      'input[placeholder*="years of experience"]',
+      'input[placeholder*="Years"]',
+      'select[name*="experience"]',
+    ],
+    type: 'text',
+    priority: 6,
+  },
+  workAuthorization: {
+    selectors: [
+      'select[name*="authorization"]',
+      'select[name*="work_auth"]',
+      'select[id*="authorization"]',
+      'input[name*="authorization"]',
+    ],
+    type: 'text',
+    priority: 5,
+  },
+  howDidYouHear: {
+    selectors: [
+      'select[name*="hear"]',
+      'select[name*="source"]',
+      'select[id*="referral"]',
+      'input[name*="hear"]',
+      'input[placeholder*="How did you hear"]',
+    ],
+    type: 'text',
+    priority: 3,
   },
 };
 

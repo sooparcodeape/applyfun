@@ -26,6 +26,13 @@ export interface JobApplicationData {
   writingSample?: string;
   skills?: string[];
   experience?: string;
+  // New ATS fields from profile
+  currentCompany?: string;
+  currentTitle?: string;
+  yearsOfExperience?: string;
+  workAuthorization?: string;
+  howDidYouHear?: string;
+  availableStartDate?: string;
 }
 
 export interface ApplicationResult {
@@ -61,6 +68,26 @@ function getRandomUserAgent(): string {
 }
 
 /**
+ * Parse proxy URL to extract credentials and server
+ */
+function parseProxyUrl(proxyUrl: string): { server: string; username: string; password: string } | null {
+  try {
+    // Format: http://username:password@ip:port
+    const match = proxyUrl.match(/^https?:\/\/([^:]+):([^@]+)@(.+)$/);
+    if (!match) return null;
+    
+    return {
+      username: match[1],
+      password: match[2],
+      server: match[3], // ip:port
+    };
+  } catch (error) {
+    console.error('[AutoApply] Failed to parse proxy URL:', error);
+    return null;
+  }
+}
+
+/**
  * Get or create browser instance with proxy
  */
 async function getBrowser(useProxy = true): Promise<Browser> {
@@ -77,11 +104,16 @@ async function getBrowser(useProxy = true): Promise<Browser> {
     
     // Add proxy to browser args if configured
     if (proxyUrl) {
-      const proxyArg = `--proxy-server=${proxyUrl}`;
-      launchArgs.push(proxyArg);
-      console.log(`[AutoApply] Launching Chrome with ASOCKS residential proxy`);
+      const proxyConfig = parseProxyUrl(proxyUrl);
+      if (proxyConfig) {
+        const proxyArg = `--proxy-server=${proxyConfig.server}`;
+        launchArgs.push(proxyArg);
+        console.log(`[AutoApply] Launching Chrome with ASOCKS residential proxy: ${proxyConfig.server}`);
+      } else {
+        console.log(`[AutoApply] Failed to parse proxy URL, launching without proxy`);
+      }
     } else {
-      console.log(`[AutoApply] Launching Chrome without proxy`);
+      console.log(`[AutoApply] No proxy configured, launching Chrome without proxy`);
     }
     
     browserInstance = await puppeteer.launch({
@@ -122,6 +154,19 @@ async function autoApplyToJobInternal(
   try {
     const browser = await getBrowser();
     page = await browser.newPage();
+    
+    // Authenticate with proxy if configured
+    const proxyUrl = await getProxyUrl();
+    if (proxyUrl) {
+      const proxyConfig = parseProxyUrl(proxyUrl);
+      if (proxyConfig) {
+        await page.authenticate({
+          username: proxyConfig.username,
+          password: proxyConfig.password,
+        });
+        console.log(`[AutoApply] Authenticated with ASOCKS proxy`);
+      }
+    }
 
     // Set stealth mode - mimic real browser with random user agent
     const userAgent = getRandomUserAgent();
@@ -534,7 +579,7 @@ async function autoApplyToJobInternal(
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ') || nameParts[0]; // Fallback to firstName if no lastName
     
-    // Map applicant data to field values
+    // Map applicant data to field values (no defaults - use real profile data only)
     const fieldValues: Record<string, string> = {
       firstName,
       lastName,
@@ -546,6 +591,12 @@ async function autoApplyToJobInternal(
       github: applicantData.githubUrl || '',
       portfolio: applicantData.portfolioUrl || '',
       coverLetter: applicantData.coverLetter || '',
+      currentCompany: applicantData.currentCompany || '',
+      currentTitle: applicantData.currentTitle || '',
+      yearsOfExperience: applicantData.yearsOfExperience || '',
+      workAuthorization: applicantData.workAuthorization || '',
+      howDidYouHear: applicantData.howDidYouHear || '',
+      availableStartDate: applicantData.availableStartDate || '',
     };
     
     // Sort fields by priority (higher priority first)
@@ -554,15 +605,31 @@ async function autoApplyToJobInternal(
       .sort(([, a], [, b]) => b.priority - a.priority);
     
     // Fill all available fields
+    console.log(`[AutoApply] Attempting to fill ${sortedFields.length} field types...`);
+    const skippedFields: string[] = [];
+    const attemptedFields: string[] = [];
+    const filledFields: string[] = [];
+    
     for (const [fieldName, mapping] of sortedFields) {
       const value = fieldValues[fieldName];
       if (value) {
+        attemptedFields.push(fieldName);
         const filled = await fillField(mapping.selectors, value);
         if (filled > 0) {
-          console.log(`[AutoApply] Filled ${fieldName}: ${value.substring(0, 30)}...`);
+          filledFields.push(fieldName);
+          console.log(`[AutoApply] ✅ Filled ${fieldName}: ${value.substring(0, 30)}...`);
+        } else {
+          console.log(`[AutoApply] ⚠️ Field ${fieldName} not found on page (tried ${mapping.selectors.length} selectors)`);
         }
         fieldsFilledCount += filled;
+      } else {
+        skippedFields.push(fieldName);
       }
+    }
+    
+    console.log(`[AutoApply] Field Summary: ${filledFields.length} filled, ${attemptedFields.length - filledFields.length} not found, ${skippedFields.length} skipped (no data)`);
+    if (skippedFields.length > 0) {
+      console.log(`[AutoApply] Skipped fields (no user data): ${skippedFields.join(', ')}`);
     }
 
     // Step 4: Handle resume file upload with detailed tracking
@@ -822,10 +889,15 @@ async function autoApplyToJobInternal(
       
       await page.close();
       
+      // Add helpful message if many fields were skipped
+      const profileCompletionHint = skippedFields.length > 3 
+        ? ' Complete your profile page to fill more fields.'
+        : '';
+      
       if (isSuccessPage || hasSuccessMessage) {
         return {
           success: true,
-          message: `Successfully submitted application! Filled ${fieldsFilledCount} fields and clicked Submit.`,
+          message: `Successfully submitted application! Filled ${fieldsFilledCount} fields and clicked Submit.${profileCompletionHint}`,
         };
       } else {
         // Submitted but can't confirm success
