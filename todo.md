@@ -905,3 +905,5 @@
 - [x] Test with Crossmint job (3 clicks: Solana → Notion → TeamTailor → form)
 - [ ] Test with Phantom job (2 clicks: Solana → Ashby → form)
 - [x] Fix Chrome path detection for production environment (currently failing with "Chrome not found")
+- [x] Fix Chrome auto-detection failing in production (Puppeteer auto-detection not working)
+- [x] Switched to Browserless API to avoid Chrome installation issues

@@ -35,46 +35,24 @@ export interface ApplicationResult {
 let browserInstance: Browser | null = null;
 
 /**
- * Get or create browser instance
+ * Get or create browser instance using Browserless API
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    // Try to use Puppeteer's built-in Chrome first, fallback to manual detection
-    let executablePath: string | undefined;
+    const browserlessApiKey = process.env.BROWSERLESS_API_KEY;
     
-    try {
-      // Let Puppeteer find Chrome automatically
-      browserInstance = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--window-size=1920,1080',
-        ],
-      });
-      console.log('[AutoApply] Chrome launched successfully using Puppeteer auto-detection');
-    } catch (error) {
-      // Fallback to manual path detection
-      console.log('[AutoApply] Puppeteer auto-detection failed, trying manual paths...');
-      executablePath = findChromePath();
-      
-      browserInstance = await puppeteer.launch({
-        headless: true,
-        executablePath,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--window-size=1920,1080',
-        ],
-      });
-      console.log(`[AutoApply] Chrome launched successfully using manual path: ${executablePath}`);
+    if (!browserlessApiKey) {
+      throw new Error('BROWSERLESS_API_KEY environment variable is required');
     }
+    
+    // Connect to Browserless cloud service
+    const browserWSEndpoint = `wss://production-sfo.browserless.io?token=${browserlessApiKey}&stealth`;
+    
+    console.log('[AutoApply] Connecting to Browserless...');
+    browserInstance = await puppeteer.connect({
+      browserWSEndpoint,
+    });
+    console.log('[AutoApply] Connected to Browserless successfully');
   }
   return browserInstance;
 }
