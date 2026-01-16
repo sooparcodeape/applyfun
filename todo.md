@@ -1009,3 +1009,8 @@
 - [x] Add tRPC endpoints for application logs
 
 - [x] Add profile completion progress bar to Profile page showing percentage of essential fields filled
+
+- [x] Implement vision-based field detection using built-in LLM for form analysis
+- [x] Integrate vision detection as fallback when CSS selectors fail
+- [x] Add screenshot capture and field mapping logic
+- [x] Create database schema for cached ATS form field mappings

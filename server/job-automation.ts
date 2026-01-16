@@ -708,7 +708,37 @@ async function autoApplyToJobInternal(
       console.log(`[Resume Upload] ⚠️ SKIPPED - No resume field mapping for ATS: ${atsType}`);
     }
 
-    // Fallback to generic selectors if no fields filled
+    // Fallback 1: Try vision-based field detection if few fields filled
+    if (fieldsFilledCount < 3) {
+      console.log('[AutoApply] Few fields filled, trying vision-based detection...');
+      try {
+        const { detectFieldsFromForm } = await import('./vision-field-detector');
+        
+        // Capture screenshot
+        const screenshot = await page.screenshot({ encoding: 'base64', fullPage: true });
+        const formHtml = await page.content();
+        
+        // Analyze form with vision (uses cache if available)
+        const visionResult = await detectFieldsFromForm(screenshot, formHtml, jobUrl);
+        console.log(`[AutoApply] Vision detected ${visionResult.fields.length} fields`);
+        
+        // Try to fill fields using vision-detected selectors
+        for (const field of visionResult.fields) {
+          const value = fieldValues[field.fieldName];
+          if (value && field.confidence > 0.7) {
+            const filled = await fillField([field.selector], value);
+            if (filled > 0) {
+              fieldsFilledCount++;
+              console.log(`[AutoApply] ✅ Vision-filled ${field.fieldName} (confidence: ${field.confidence})`);
+            }
+          }
+        }
+      } catch (visionError: any) {
+        console.error('[AutoApply] Vision detection failed:', visionError.message);
+      }
+    }
+    
+    // Fallback 2: Generic selectors if still no fields filled
     if (fieldsFilledCount === 0) {
       const nameParts = applicantData.fullName.split(' ');
       const firstName = nameParts[0];
