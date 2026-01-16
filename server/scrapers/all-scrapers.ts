@@ -54,10 +54,19 @@ export async function scrapeCryptoJobsList(): Promise<ScrapedJob[]> {
           try {
             const $row = $(element);
             
-            // Extract title
+            // Extract title and URL
             const titleLink = $row.find("a").first();
             const title = titleLink.text().trim();
             if (!title) return;
+            
+            // Extract real job URL from href
+            let applyUrl = titleLink.attr("href") || "";
+            if (!applyUrl) return;
+            
+            // Make URL absolute
+            if (!applyUrl.startsWith("http")) {
+              applyUrl = `https://cryptojobslist.com${applyUrl.startsWith("/") ? applyUrl : "/" + applyUrl}`;
+            }
             
             // Extract company
             const companyLink = $row.find("a").eq(1);
@@ -87,9 +96,9 @@ export async function scrapeCryptoJobsList(): Promise<ScrapedJob[]> {
               }
             });
             
-            const jobSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            const applyUrl = `https://cryptojobslist.com/${jobSlug}`;
-            const externalId = `cryptojobslist-${company.toLowerCase().replace(/\s+/g, "-")}-${jobSlug}`;
+            // Use URL as external ID
+            const urlSlug = applyUrl.split("/").pop() || title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const externalId = `cryptojobslist-${urlSlug}`;
             
             scrapedJobs.push({
               externalId,

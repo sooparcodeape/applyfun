@@ -73,10 +73,32 @@ async function scrapeBlockchainCareerPage(
             if (!title) title = $el.text().trim().split("\n")[0];
             if (!title || title.length < 5 || title.length > 200) return;
 
-            // Skip if it's navigation or footer links
-            if (title.toLowerCase().includes("view all") || 
-                title.toLowerCase().includes("see all") ||
-                title.toLowerCase().includes("apply now")) return;
+            // Skip if it's navigation, footer links, or non-job content
+            const lowerTitle = title.toLowerCase();
+            const invalidPatterns = [
+              "view all", "see all", "apply now",
+              "fortune", "best workplace", "talent titans",
+              "why ", "about ", "our culture", "our values",
+              "blog", "news", "press", "article",
+              "top 100", "best medium", "awards",
+              "learn more", "read more", "discover"
+            ];
+            
+            if (invalidPatterns.some(pattern => lowerTitle.includes(pattern))) {
+              return;
+            }
+            
+            // Must contain job-related keywords
+            const jobKeywords = [
+              "engineer", "developer", "manager", "designer",
+              "analyst", "lead", "senior", "junior", "intern",
+              "specialist", "coordinator", "director", "architect",
+              "scientist", "researcher", "consultant", "associate"
+            ];
+            
+            if (!jobKeywords.some(keyword => lowerTitle.includes(keyword))) {
+              return;
+            }
 
             // Extract location
             let location = $el.find("[class*='location'], .location").text().trim();

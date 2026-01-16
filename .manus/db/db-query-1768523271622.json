@@ -1,0 +1,60 @@
+{
+  "query": "SELECT source, title, apply_url FROM jobs WHERE source IN ('cryptojobslist.com', 'web3.career', 'Chainlink', 'Solana') LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT source, title, apply_url FROM jobs WHERE source IN ('cryptojobslist.com', 'web3.career', 'Chainlink', 'Solana') LIMIT 10;",
+  "rows": [
+    {
+      "source": "cryptojobslist.com",
+      "title": "Asset Manager - DeFi",
+      "apply_url": "https://cryptojobslist.com/asset-manager-defi"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "[Prediction Markets] Growth Marketing",
+      "apply_url": "https://cryptojobslist.com/-prediction-markets-growth-marketing"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Senior Data Engineer",
+      "apply_url": "https://cryptojobslist.com/senior-data-engineer"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Project Manager - Contract",
+      "apply_url": "https://cryptojobslist.com/project-manager-contract"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Client Success Manager",
+      "apply_url": "https://cryptojobslist.com/client-success-manager"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Growth Product Manager",
+      "apply_url": "https://cryptojobslist.com/growth-product-manager"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Web3 Solidity Bootcamp - Job Guaranteed",
+      "apply_url": "https://cryptojobslist.com/web3-solidity-bootcamp-job-guaranteed"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Operations & Risk Manager",
+      "apply_url": "https://cryptojobslist.com/operations-risk-manager"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Talent Acquisition Specialist",
+      "apply_url": "https://cryptojobslist.com/talent-acquisition-specialist"
+    },
+    {
+      "source": "cryptojobslist.com",
+      "title": "Senior Product / Systems Engineer (Founding)",
+      "apply_url": "https://cryptojobslist.com/senior-product-systems-engineer-founding-"
+    }
+  ],
+  "messages": [],
+  "stdout": "source\ttitle\tapply_url\ncryptojobslist.com\tAsset Manager - DeFi\thttps://cryptojobslist.com/asset-manager-defi\ncryptojobslist.com\t[Prediction Markets] Growth Marketing\thttps://cryptojobslist.com/-prediction-markets-growth-marketing\ncryptojobslist.com\tSenior Data Engineer\thttps://cryptojobslist.com/senior-data-engineer\ncryptojobslist.com\tProject Manager - Contract\thttps://cryptojobslist.com/project-manager-contract\ncryptojobslist.com\tClient Success Manager\thttps://cryptojobslist.com/client-success-manager\ncryptojobslist.com\tGrowth Product Manager\thttps://cryptojobslist.com/growth-product-manager\ncryptojobslist.com\tWeb3 Solidity Bootcamp - Job Guaranteed\thttps://cryptojobslist.com/web3-solidity-bootcamp-job-guaranteed\ncryptojobslist.com\tOperations & Risk Manager\thttps://cryptojobslist.com/operations-risk-manager\ncryptojobslist.com\tTalent Acquisition Specialist\thttps://cryptojobslist.com/talent-acquisition-specialist\ncryptojobslist.com\tSenior Product / Systems Engineer (Founding)\thttps://cryptojobslist.com/senior-product-systems-engineer-founding-\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

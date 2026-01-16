@@ -1,0 +1,26 @@
+{
+  "query": "SELECT COUNT(*) as total, source FROM jobs GROUP BY source;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as total, source FROM jobs GROUP BY source;",
+  "rows": [
+    {
+      "total": "1",
+      "source": "Ripple"
+    },
+    {
+      "total": "304",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "total": "1",
+      "source": "Polygon"
+    },
+    {
+      "total": "18",
+      "source": "Solana"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tsource\n1\tRipple\n304\tcryptojobslist.com\n1\tPolygon\n18\tSolana\n",
+  "stderr": "",
+  "execution_time_ms": 158
+}

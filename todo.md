@@ -881,3 +881,12 @@
 - [x] Simplify scrapers to extract job URLs (let automation handle Apply clicks)
 - [ ] Test end-to-end automation with real job URLs
 - [ ] Verify automation successfully applies to jobs
+
+### Fix All Broken Scrapers - CRITICAL
+- [x] Delete all fake jobs (articles, blog posts, company info pages)
+- [x] Fix Chainlink scraper - currently saving articles like "Fortune Best Workplaces", "Why Chainlink Labs?"
+- [x] Fix CryptoJobsList scraper - all URLs return 404 errors
+- [x] Fix Web3Career scraper - ensure it gets real ATS URLs
+- [x] Add validation: reject URLs containing "blog", "news", "about", "why-"
+- [x] Test each scraper individually with 5 jobs max
+- [x] Verify all saved URLs are actual job application pages
