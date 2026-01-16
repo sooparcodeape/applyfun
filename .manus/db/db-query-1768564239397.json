@@ -1,0 +1,40 @@
+{
+  "query": "SELECT company, title, apply_url, source FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT company, title, apply_url, source FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "rows": [
+    {
+      "company": "Rain",
+      "title": "Disputes & Chargebacks Specialist",
+      "apply_url": "https://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Sales Engineer",
+      "apply_url": "https://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Backend Engineer",
+      "apply_url": "https://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Business Development Analyst",
+      "apply_url": "https://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Account Manager",
+      "apply_url": "https://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c",
+      "source": "Ashby-Rain"
+    }
+  ],
+  "messages": [],
+  "stdout": "company\ttitle\tapply_url\tsource\nRain\tDisputes & Chargebacks Specialist\thttps://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain\tcryptojobslist.com\nRain\tSales Engineer\thttps://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain\tcryptojobslist.com\nRain\tBackend Engineer\thttps://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain\tcryptojobslist.com\nRain\tBusiness Development Analyst\thttps://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain\tcryptojobslist.com\nRain\tAccount Manager\thttps://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c\tAshby-Rain\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

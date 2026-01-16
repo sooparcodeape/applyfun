@@ -1,0 +1,70 @@
+{
+  "query": "SELECT company, title, apply_url, source FROM jobs WHERE company LIKE '%Rain%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT company, title, apply_url, source FROM jobs WHERE company LIKE '%Rain%' LIMIT 10;",
+  "rows": [
+    {
+      "company": "Rain",
+      "title": "Disputes & Chargebacks Specialist",
+      "apply_url": "https://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Sales Engineer",
+      "apply_url": "https://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Backend Engineer",
+      "apply_url": "https://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Business Development Analyst",
+      "apply_url": "https://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "company": "Rain",
+      "title": "Account Manager",
+      "apply_url": "https://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c",
+      "source": "Ashby-Rain"
+    },
+    {
+      "company": "Rain",
+      "title": "Account Manager APAC",
+      "apply_url": "https://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b",
+      "source": "Ashby-Rain"
+    },
+    {
+      "company": "Rain",
+      "title": "Backend Engineer",
+      "apply_url": "https://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8",
+      "source": "Ashby-Rain"
+    },
+    {
+      "company": "Rain",
+      "title": "Business Development Analyst",
+      "apply_url": "https://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be",
+      "source": "Ashby-Rain"
+    },
+    {
+      "company": "Rain",
+      "title": "Business Development Analyst - LATAM",
+      "apply_url": "https://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad",
+      "source": "Ashby-Rain"
+    },
+    {
+      "company": "Rain",
+      "title": "Business Operations Analyst",
+      "apply_url": "https://jobs.ashbyhq.com/rain/1b21ce47-6d0c-427a-a2f5-3a90a6b7bc27",
+      "source": "Ashby-Rain"
+    }
+  ],
+  "messages": [],
+  "stdout": "company\ttitle\tapply_url\tsource\nRain\tDisputes & Chargebacks Specialist\thttps://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain\tcryptojobslist.com\nRain\tSales Engineer\thttps://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain\tcryptojobslist.com\nRain\tBackend Engineer\thttps://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain\tcryptojobslist.com\nRain\tBusiness Development Analyst\thttps://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain\tcryptojobslist.com\nRain\tAccount Manager\thttps://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c\tAshby-Rain\nRain\tAccount Manager APAC\thttps://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b\tAshby-Rain\nRain\tBackend Engineer\thttps://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8\tAshby-Rain\nRain\tBusiness Development Analyst\thttps://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be\tAshby-Rain\nRain\tBusiness Development Analyst - LATAM\thttps://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad\tAshby-Rain\nRain\tBusiness Operations Analyst\thttps://jobs.ashbyhq.com/rain/1b21ce47-6d0c-427a-a2f5-3a90a6b7bc27\tAshby-Rain\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

@@ -945,3 +945,6 @@
 - [x] Fix Chrome dependencies not persisting across server restarts
 - [x] Run setup-chrome.sh again to install dependencies
 - [x] Document deployment requirements for production (added to CHROME_SETUP.md)
+- [x] Delete CryptoJobsList Rain jobs from database
+- [x] Run Rain/Ashby scraper to populate direct Ashby URLs (50 jobs saved)
+- [x] Verify Rain jobs show https://jobs.ashbyhq.com/rain/* URLs (confirmed in database)
