@@ -228,8 +228,100 @@ export default function Profile() {
     );
   }
 
+  // Calculate profile completion percentage
+  const calculateCompletion = () => {
+    if (!profileData?.profile) return { percentage: 0, missing: [] };
+    
+    const essentialFields = [
+      { key: 'phone', label: 'Phone number' },
+      { key: 'location', label: 'Location' },
+      { key: 'resumeUrl', label: 'Resume' },
+      { key: 'linkedinUrl', label: 'LinkedIn URL' },
+      { key: 'yearsOfExperience', label: 'Years of experience' },
+      { key: 'currentCompany', label: 'Current company' },
+      { key: 'currentTitle', label: 'Current title' },
+      { key: 'workAuthorization', label: 'Work authorization' },
+      { key: 'howDidYouHear', label: 'Referral source' },
+      { key: 'availableStartDate', label: 'Available start date' },
+    ];
+    
+    const profile = profileData.profile as any;
+    const filledFields = essentialFields.filter(field => {
+      const value = profile[field.key];
+      return value !== null && value !== undefined && value !== '' && value !== 0;
+    });
+    
+    const missing = essentialFields
+      .filter(field => {
+        const value = profile[field.key];
+        return value === null || value === undefined || value === '' || value === 0;
+      })
+      .map(f => f.label);
+    
+    return {
+      percentage: Math.round((filledFields.length / essentialFields.length) * 100),
+      missing,
+      filled: filledFields.length,
+      total: essentialFields.length
+    };
+  };
+  
+  const completion = calculateCompletion();
+
   return (
     <div className="space-y-6">
+      {/* Profile Completion Progress Bar */}
+      {completion.percentage < 100 && (
+        <Card className="border-purple-500/20 bg-purple-500/5">
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">Profile Completion</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Complete your profile to maximize application success rate
+                  </p>
+                </div>
+                <div className="text-2xl font-bold text-purple-500">{completion.percentage}%</div>
+              </div>
+              
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                <div
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${completion.percentage}%` }}
+                />
+              </div>
+              
+              {completion.missing.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium">Missing fields:</span> {completion.missing.join(', ')}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {completion.percentage === 100 && (
+        <Card className="border-green-500/20 bg-green-500/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-green-500">Profile Complete!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your profile is fully optimized for automated job applications
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div>
         <h1 className="text-3xl font-bold">Profile</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
