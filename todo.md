@@ -935,3 +935,7 @@
 - [x] Chrome dependencies installed and working (Chrome launches successfully)
 - [ ] Rain scraper needs debugging (hanging during execution)
 - [ ] Consider alternative: scrape Rain via HTTP requests instead of browser
+- [x] Debug Rain scraper - not populating database with Ashby URLs (FIXED - parses JSON data)
+- [x] Delete old Rain/Solana jobs from database
+- [x] Run scraper to populate Rain jobs (50 jobs saved with Ashby URLs)
+- [x] Confirm Rain jobs show Ashby URLs on frontend (verified in database)

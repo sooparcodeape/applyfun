@@ -1,0 +1,18 @@
+{
+  "query": "SELECT COUNT(*) as count, source FROM jobs WHERE company = 'Rain' GROUP BY source;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as count, source FROM jobs WHERE company = 'Rain' GROUP BY source;",
+  "rows": [
+    {
+      "count": "50",
+      "source": "Ashby-Rain"
+    },
+    {
+      "count": "84",
+      "source": "cryptojobslist.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "count\tsource\n50\tAshby-Rain\n84\tcryptojobslist.com\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

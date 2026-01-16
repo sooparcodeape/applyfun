@@ -1,0 +1,35 @@
+{
+  "query": "SELECT title, apply_url, source FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT title, apply_url, source FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "rows": [
+    {
+      "title": "Executive Assistant",
+      "apply_url": "https://cryptojobslist.com/executive-assistant",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "title": "Customer Experience Operations & Enablement Lead",
+      "apply_url": "https://cryptojobslist.com/customer-experience-operations-enablement-lead",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "title": "Customer Experience Associate",
+      "apply_url": "https://cryptojobslist.com/customer-experience-associate",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "title": "IT Manager",
+      "apply_url": "https://cryptojobslist.com/it-manager",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "title": "Senior Product Designer",
+      "apply_url": "https://cryptojobslist.com/senior-product-designer",
+      "source": "cryptojobslist.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "title\tapply_url\tsource\nExecutive Assistant\thttps://cryptojobslist.com/executive-assistant\tcryptojobslist.com\nCustomer Experience Operations & Enablement Lead\thttps://cryptojobslist.com/customer-experience-operations-enablement-lead\tcryptojobslist.com\nCustomer Experience Associate\thttps://cryptojobslist.com/customer-experience-associate\tcryptojobslist.com\nIT Manager\thttps://cryptojobslist.com/it-manager\tcryptojobslist.com\nSenior Product Designer\thttps://cryptojobslist.com/senior-product-designer\tcryptojobslist.com\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

@@ -1,11 +1,4 @@
 import axios from "axios";
-import * as cheerio from "cheerio";
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import type { Browser } from 'puppeteer';
-
-// Add stealth plugin
-puppeteer.use(StealthPlugin());
 
 interface ScrapedJob {
   externalId: string;
@@ -26,7 +19,7 @@ interface ScrapedJob {
 }
 
 /**
- * Scrape jobs from a company's Ashby job board
+ * Scrape jobs from a company's Ashby job board by parsing embedded JSON data
  * @param companySlug - The company slug in Ashby URL (e.g., "rain" for https://jobs.ashbyhq.com/rain)
  * @param companyName - The display name of the company
  */
@@ -36,115 +29,57 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
   
   console.log(`[Ashby-${companyName}] Starting scrape from ${baseUrl}...`);
   
-  let browser: Browser | null = null;
-  
   try {
-    // Launch browser
-    const executablePath = findChromePath();
-    browser = await puppeteer.launch({
-      headless: true,
-      executablePath,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-      ],
+    const response = await axios.get(baseUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      timeout: 15000,
     });
     
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
+    // Ashby embeds job data as JSON in window.__appData
+    const match = response.data.match(/window\.__appData\s*=\s*({[\s\S]+?});/);
     
-    // Navigate to company job board
-    await page.goto(baseUrl, {
-      waitUntil: 'networkidle2',
-      timeout: 30000,
-    });
+    if (!match) {
+      console.error(`[Ashby-${companyName}] Could not find __appData in HTML`);
+      return jobs;
+    }
     
-    // Wait for job listings to load
-    await page.waitForSelector('a[href*="/jobs/"]', { timeout: 10000 }).catch(() => {});
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const appData = JSON.parse(match[1]);
+    const jobList = appData?.jobBoard?.jobPostings || [];
     
-    // Extract job listings
-    const jobLinks = await page.evaluate((slug) => {
-      const links: Array<{ title: string; url: string; location: string }> = [];
-      
-      // Ashby uses different structures, try multiple selectors
-      const jobElements = document.querySelectorAll('a[href*="/jobs/"]');
-      
-      jobElements.forEach((element) => {
-        const href = element.getAttribute('href');
-        if (!href) return;
-        
-        // Build full URL
-        const fullUrl = href.startsWith('http') ? href : `https://jobs.ashbyhq.com${href}`;
-        
-        // Extract title (usually in a heading or strong text)
-        const titleEl = element.querySelector('h3, h4, strong, [class*="title"]');
-        const title = titleEl?.textContent?.trim() || element.textContent?.trim() || '';
-        
-        // Extract location if available
-        const locationEl = element.querySelector('[class*="location"], [class*="Location"]');
-        const location = locationEl?.textContent?.trim() || 'Remote';
-        
-        if (title && fullUrl.includes(`/${slug}/jobs/`)) {
-          links.push({ title, url: fullUrl, location });
-        }
-      });
-      
-      return links;
-    }, companySlug);
+    console.log(`[Ashby-${companyName}] Found ${jobList.length} jobs in JSON data`);
     
-    console.log(`[Ashby-${companyName}] Found ${jobLinks.length} job listings`);
-    
-    // Process each job
-    for (const jobLink of jobLinks) {
+    for (const job of jobList) {
       try {
-        const jobId = jobLink.url.split('/jobs/')[1]?.split('?')[0] || '';
-        if (!jobId) continue;
+        const jobId = job.id || job.jobId;
+        if (!jobId || !job.title) continue;
         
-        const job: ScrapedJob = {
+        const applyUrl = `https://jobs.ashbyhq.com/${companySlug}/${jobId}`;
+        
+        jobs.push({
           externalId: `ashby-${companySlug}-${jobId}`,
-          source: `ashby-${companySlug}`,
-          title: jobLink.title,
+          source: `Ashby-${companyName}`,
+          title: job.title,
           company: companyName,
-          location: jobLink.location,
-          jobType: 'Full-time', // Ashby doesn't always show this on listing page
-          tags: JSON.stringify([]),
-          applyUrl: jobLink.url,
-          postedDate: new Date(),
-          isActive: 1,
-        };
-        
-        jobs.push(job);
-        console.log(`[Ashby-${companyName}] ✓ ${job.title} -> ${job.applyUrl}`);
-        
-      } catch (error) {
-        console.error(`[Ashby-${companyName}] Error processing job ${jobLink.url}:`, error);
+          location: job.locationName || 'Remote',
+          jobType: job.employmentType === 'FullTime' ? 'Full-time' : (job.employmentType || 'Full-time'),
+          tags: [job.departmentName, job.teamName].filter(Boolean).join(', '),
+          applyUrl,
+          postedDate: job.publishedDate ? new Date(job.publishedDate) : new Date(),
+          isActive: job.isListed ? 1 : 0,
+        });
+      } catch (err) {
+        console.error(`[Ashby-${companyName}] Error processing job:`, err);
       }
     }
     
-    await page.close();
-    
-  } catch (error) {
-    console.error(`[Ashby-${companyName}] Scraping error:`, error);
-  } finally {
-    if (browser) {
-      await browser.close().catch(() => {});
-    }
+    console.log(`[Ashby-${companyName}] Successfully scraped ${jobs.length} jobs`);
+  } catch (error: any) {
+    console.error(`[Ashby-${companyName}] Scraping failed:`, error.message);
   }
   
-  console.log(`[Ashby-${companyName}] Scraping complete. Found ${jobs.length} jobs.`);
   return jobs;
-}
-
-/**
- * Find Chrome executable path using Puppeteer's built-in detection
- */
-function findChromePath(): string | undefined {
-  // Let Puppeteer auto-detect Chrome (returns undefined to use default)
-  return undefined;
 }
 
 /**

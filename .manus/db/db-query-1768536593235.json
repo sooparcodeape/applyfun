@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, title, company, source, apply_url FROM jobs WHERE company LIKE '%Rain%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, source, apply_url FROM jobs WHERE company LIKE '%Rain%' LIMIT 10;",
+  "rows": [
+    {
+      "id": "1830727",
+      "title": "Executive Assistant",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/executive-assistant"
+    },
+    {
+      "id": "1830742",
+      "title": "Customer Experience Operations & Enablement Lead",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/customer-experience-operations-enablement-lead"
+    },
+    {
+      "id": "1830743",
+      "title": "Customer Experience Associate",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/customer-experience-associate"
+    },
+    {
+      "id": "1830751",
+      "title": "IT Manager",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/it-manager"
+    },
+    {
+      "id": "1830761",
+      "title": "Senior Product Designer",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/senior-product-designer"
+    },
+    {
+      "id": "1830768",
+      "title": "Product Program Manager",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/product-program-manager"
+    },
+    {
+      "id": "1830772",
+      "title": "Senior Data Analyst",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/senior-data-analyst"
+    },
+    {
+      "id": "1830775",
+      "title": "Account Manager APAC",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/account-manager-apac"
+    },
+    {
+      "id": "1830776",
+      "title": "GTM Engineer",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/gtm-engineer"
+    },
+    {
+      "id": "1830777",
+      "title": "Marketing Manager LATAM",
+      "company": "Rain",
+      "source": "cryptojobslist.com",
+      "apply_url": "https://cryptojobslist.com/marketing-manager-latam"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tsource\tapply_url\n1830727\tExecutive Assistant\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/executive-assistant\n1830742\tCustomer Experience Operations & Enablement Lead\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/customer-experience-operations-enablement-lead\n1830743\tCustomer Experience Associate\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/customer-experience-associate\n1830751\tIT Manager\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/it-manager\n1830761\tSenior Product Designer\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/senior-product-designer\n1830768\tProduct Program Manager\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/product-program-manager\n1830772\tSenior Data Analyst\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/senior-data-analyst\n1830775\tAccount Manager APAC\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/account-manager-apac\n1830776\tGTM Engineer\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/gtm-engineer\n1830777\tMarketing Manager LATAM\tRain\tcryptojobslist.com\thttps://cryptojobslist.com/marketing-manager-latam\n",
+  "stderr": "",
+  "execution_time_ms": 844
+}
