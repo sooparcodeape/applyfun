@@ -956,3 +956,9 @@
 - [x] Rain jobs re-scraped with /application URLs (50 jobs updated)
 - [x] Verified database contains correct /application URLs
 - [ ] Test automation end-to-end with real job application
+
+## AUTOMATION STABILITY FIX
+- [x] Add page.isClosed() checks before all mouse/keyboard operations
+- [x] Wrap operations in try-catch to detect "Session closed" errors
+- [x] Implement retry logic (2-3 attempts with exponential backoff: 2s, 4s, 8s)
+- [ ] Test with Rain Account Manager job

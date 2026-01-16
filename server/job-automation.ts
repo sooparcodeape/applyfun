@@ -55,9 +55,9 @@ async function getBrowser(): Promise<Browser> {
 }
 
 /**
- * Attempts to automatically fill and submit a job application form using self-hosted Puppeteer
+ * Internal function: Attempts to automatically fill and submit a job application form
  */
-export async function autoApplyToJob(
+async function autoApplyToJobInternal(
   jobUrl: string,
   applicantData: JobApplicationData
 ): Promise<ApplicationResult> {
@@ -87,11 +87,20 @@ export async function autoApplyToJob(
     // Anti-bot evasion: Simulate human behavior before interacting
     console.log('[AutoApply] Simulating human behavior...');
     
-    // 1. Random mouse movements
-    await page.mouse.move(100 + Math.random() * 200, 100 + Math.random() * 200);
-    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
-    await page.mouse.move(300 + Math.random() * 400, 200 + Math.random() * 300);
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    // 1. Random mouse movements (with page closure detection)
+    try {
+      if (page.isClosed()) throw new Error('Page closed before mouse movement');
+      await page.mouse.move(100 + Math.random() * 200, 100 + Math.random() * 200);
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+      if (page.isClosed()) throw new Error('Page closed during mouse movement');
+      await page.mouse.move(300 + Math.random() * 400, 200 + Math.random() * 300);
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    } catch (err: any) {
+      if (err.message.includes('Session closed') || err.message.includes('Page closed')) {
+        throw new Error('Page closed unexpectedly during human behavior simulation');
+      }
+      throw err;
+    }
     
     // 2. Scroll down and up to simulate reading
     await page.evaluate(() => {
@@ -240,16 +249,28 @@ export async function autoApplyToJob(
 
     // Helper: Type like a human with realistic behavior (ANTI-BOT EVASION)
     const humanType = async (element: any, text: string) => {
+      // Check page is still open
+      if (page!.isClosed()) throw new Error('Page closed before typing');
+      
       // Move mouse to element with curved path (not straight line)
-      const box = await element.boundingBox();
-      if (box) {
-        const targetX = box.x + box.width / 2 + (Math.random() - 0.5) * 30;
-        const targetY = box.y + box.height / 2 + (Math.random() - 0.5) * 15;
-        await page!.mouse.move(targetX, targetY, { steps: 20 + Math.floor(Math.random() * 20) });
-        await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
+      try {
+        const box = await element.boundingBox();
+        if (box) {
+          const targetX = box.x + box.width / 2 + (Math.random() - 0.5) * 30;
+          const targetY = box.y + box.height / 2 + (Math.random() - 0.5) * 15;
+          if (page!.isClosed()) throw new Error('Page closed before mouse move');
+          await page!.mouse.move(targetX, targetY, { steps: 20 + Math.floor(Math.random() * 20) });
+          await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
+        }
+      } catch (err: any) {
+        if (err.message.includes('Session closed') || err.message.includes('Page closed')) {
+          throw new Error('Page closed during mouse movement to element');
+        }
+        throw err;
       }
       
       // Click with human-like delay
+      if (page!.isClosed()) throw new Error('Page closed before click');
       await element.click({ delay: 150 + Math.random() * 250 });
       await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
       
@@ -577,6 +598,70 @@ export async function autoApplyToJob(
       message: `Automation failed: ${error.message}. Manual review required.`,
     };
   }
+}
+
+/**
+ * Public function: Auto-apply with retry logic (2-3 attempts with exponential backoff)
+ */
+export async function autoApplyToJob(
+  jobUrl: string,
+  applicantData: JobApplicationData,
+  maxRetries: number = 3
+): Promise<ApplicationResult> {
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[AutoApply] Attempt ${attempt}/${maxRetries} for ${jobUrl}`);
+      const result = await autoApplyToJobInternal(jobUrl, applicantData);
+      
+      // If successful, return immediately
+      if (result.success) {
+        console.log(`[AutoApply] Success on attempt ${attempt}`);
+        return result;
+      }
+      
+      // If failed but not due to page closure, don't retry
+      if (!result.message.includes('Page closed') && !result.message.includes('Session closed')) {
+        console.log(`[AutoApply] Non-retryable error: ${result.message}`);
+        return result;
+      }
+      
+      lastError = result.message;
+      
+      // Exponential backoff: wait before retry
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+        console.log(`[AutoApply] Page closure detected. Retrying in ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    } catch (error: any) {
+      lastError = error.message;
+      
+      // Check if it's a retryable error
+      const isRetryable = error.message.includes('Page closed') || 
+                         error.message.includes('Session closed') ||
+                         error.message.includes('Navigation timeout');
+      
+      if (!isRetryable || attempt === maxRetries) {
+        console.log(`[AutoApply] Failed after ${attempt} attempts: ${error.message}`);
+        return {
+          success: false,
+          message: `Automation failed after ${attempt} attempts: ${error.message}. Manual review required.`
+        };
+      }
+      
+      // Exponential backoff
+      const waitTime = Math.pow(2, attempt) * 1000;
+      console.log(`[AutoApply] Retryable error. Retrying in ${waitTime}ms...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+  
+  return {
+    success: false,
+    message: `Automation failed after ${maxRetries} attempts: ${lastError}. Manual review required.`
+  };
 }
 
 /**
