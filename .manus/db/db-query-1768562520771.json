@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE jobs \nSET tags = CONCAT('[\"', REPLACE(REPLACE(tags, ', ', '\",\"'), ',', ''), '\"]')\nWHERE company = 'Rain' AND source = 'Ashby-Rain' AND tags NOT LIKE '[%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute UPDATE jobs \nSET tags = CONCAT('[\"', REPLACE(REPLACE(tags, ', ', '\",\"'), ',', ''), '\"]')\nWHERE company = 'Rain' AND source = 'Ashby-Rain' AND tags NOT LIKE '[%';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}

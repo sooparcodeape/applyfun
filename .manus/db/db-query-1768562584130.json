@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, title, tags FROM jobs WHERE company = 'Rain' LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, tags FROM jobs WHERE company = 'Rain' LIMIT 3;",
+  "rows": [
+    {
+      "id": "2250188",
+      "title": "Disputes & Chargebacks Specialist",
+      "tags": "[]"
+    },
+    {
+      "id": "2250189",
+      "title": "Sales Engineer",
+      "tags": "[]"
+    },
+    {
+      "id": "2250200",
+      "title": "Backend Engineer",
+      "tags": "[]"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttags\n2250188\tDisputes & Chargebacks Specialist\t[]\n2250189\tSales Engineer\t[]\n2250200\tBackend Engineer\t[]\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

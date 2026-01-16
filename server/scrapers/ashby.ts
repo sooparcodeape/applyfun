@@ -57,6 +57,9 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
         
         const applyUrl = `https://jobs.ashbyhq.com/${companySlug}/${jobId}`;
         
+        // Format tags as JSON array for frontend compatibility
+        const tagArray = [job.departmentName, job.teamName].filter(Boolean);
+        
         jobs.push({
           externalId: `ashby-${companySlug}-${jobId}`,
           source: `Ashby-${companyName}`,
@@ -64,7 +67,7 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
           company: companyName,
           location: job.locationName || 'Remote',
           jobType: job.employmentType === 'FullTime' ? 'Full-time' : (job.employmentType || 'Full-time'),
-          tags: [job.departmentName, job.teamName].filter(Boolean).join(', '),
+          tags: JSON.stringify(tagArray),
           applyUrl,
           postedDate: job.publishedDate ? new Date(job.publishedDate) : new Date(),
           isActive: job.isListed ? 1 : 0,

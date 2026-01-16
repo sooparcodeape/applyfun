@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, title, tags FROM jobs WHERE company = 'Rain' LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, tags FROM jobs WHERE company = 'Rain' LIMIT 3;",
+  "rows": [
+    {
+      "id": "1830727",
+      "title": "Executive Assistant",
+      "tags": "[]"
+    },
+    {
+      "id": "1830742",
+      "title": "Customer Experience Operations & Enablement Lead",
+      "tags": "[]"
+    },
+    {
+      "id": "1830743",
+      "title": "Customer Experience Associate",
+      "tags": "[]"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttags\n1830727\tExecutive Assistant\t[]\n1830742\tCustomer Experience Operations & Enablement Lead\t[]\n1830743\tCustomer Experience Associate\t[]\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

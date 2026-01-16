@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, title, tags FROM jobs WHERE company = 'Rain' AND source = 'Ashby-Rain' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, tags FROM jobs WHERE company = 'Rain' AND source = 'Ashby-Rain' LIMIT 5;",
+  "rows": [
+    {
+      "id": "1860856",
+      "title": "Account Manager",
+      "tags": "GTM, GTM"
+    },
+    {
+      "id": "1860857",
+      "title": "Account Manager APAC",
+      "tags": "GTM, GTM"
+    },
+    {
+      "id": "1860858",
+      "title": "Backend Engineer",
+      "tags": "Engineering, Engineering"
+    },
+    {
+      "id": "1860859",
+      "title": "Business Development Analyst",
+      "tags": "GTM, GTM"
+    },
+    {
+      "id": "1860860",
+      "title": "Business Development Analyst - LATAM",
+      "tags": "GTM, GTM"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttags\n1860856\tAccount Manager\tGTM, GTM\n1860857\tAccount Manager APAC\tGTM, GTM\n1860858\tBackend Engineer\tEngineering, Engineering\n1860859\tBusiness Development Analyst\tGTM, GTM\n1860860\tBusiness Development Analyst - LATAM\tGTM, GTM\n",
+  "stderr": "",
+  "execution_time_ms": 96
+}

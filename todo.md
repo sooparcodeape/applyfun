@@ -939,3 +939,6 @@
 - [x] Delete old Rain/Solana jobs from database
 - [x] Run scraper to populate Rain jobs (50 jobs saved with Ashby URLs)
 - [x] Confirm Rain jobs show Ashby URLs on frontend (verified in database)
+- [x] Fix JSON parsing error on /jobs page (tags field causing "Customer, Customer" parse error)
+- [x] Investigate frontend code handling tags field
+- [x] Ensure tags field is properly formatted as JSON array (fixed Ashby scraper)
