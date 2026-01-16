@@ -967,3 +967,10 @@
 - [x] Remove sudo-based Chrome setup from postinstall (causing timeout)
 - [x] Update CHROME_SETUP.md to clarify manual setup requirement (added deployment checklist)
 - [ ] Test deployment without sudo in postinstall
+
+## RAILWAY MIGRATION
+- [x] Create Dockerfile with Chrome system dependencies
+- [x] Create .dockerignore file
+- [x] Create Railway deployment guide (RAILWAY_DEPLOY.md)
+- [ ] Test Docker build locally
+- [ ] Export code to GitHub
