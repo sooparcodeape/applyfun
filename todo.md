@@ -928,3 +928,7 @@
 - [x] Run Rain scraper manually to populate Ashby jobs (running in background)
 - [x] Create cron job for daily scraping at 3 AM UTC
 - [x] Add tRPC endpoint to trigger scraper manually from admin panel (admin.runScrapers)
+- [x] Create setup script to install Chrome system dependencies (setup-chrome.sh)
+- [x] Create CHROME_SETUP.md with instructions
+- [ ] User needs to run: sudo bash setup-chrome.sh
+- [ ] Test automation after Chrome dependencies are installed
