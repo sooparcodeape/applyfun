@@ -1,7 +1,6 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser, Page } from 'puppeteer';
-import { findChromePath } from './chrome-utils';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -39,11 +38,8 @@ let browserInstance: Browser | null = null;
  */
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    const executablePath = findChromePath();
-    
     browserInstance = await puppeteer.launch({
       headless: true,
-      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -53,7 +49,7 @@ async function getBrowser(): Promise<Browser> {
         '--window-size=1920,1080',
       ],
     });
-    console.log(`[AutoApply] Chrome launched from: ${executablePath}`);
+    console.log(`[AutoApply] Chrome launched successfully`);
   }
   return browserInstance;
 }
@@ -177,11 +173,17 @@ export async function autoApplyToJob(
           
           if (externalLink) {
             console.log('[AutoApply] Step 3: Found external link, navigating to:', externalLink);
-            await page.goto(externalLink, { waitUntil: 'networkidle2', timeout: 15000 });
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            try {
+              await page.goto(externalLink, { waitUntil: 'networkidle2', timeout: 15000 });
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (navError) {
+              console.log('[AutoApply] Navigation error, waiting for page to stabilize:', navError);
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            }
             
             // Step 4: If on Notion page, look for another external link
-            if (page.url().includes('notion.site')) {
+            try {
+              if (page.url().includes('notion.site')) {
               console.log('[AutoApply] Step 4: On Notion page, looking for final application link...');
               
               const finalLink = await page.evaluate(() => {
@@ -198,11 +200,19 @@ export async function autoApplyToJob(
                 return null;
               });
               
-              if (finalLink) {
-                console.log('[AutoApply] Step 5: Found final application link:', finalLink);
-                await page.goto(finalLink, { waitUntil: 'networkidle2', timeout: 15000 });
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                if (finalLink) {
+                  console.log('[AutoApply] Step 5: Found final application link:', finalLink);
+                  try {
+                    await page.goto(finalLink, { waitUntil: 'networkidle2', timeout: 15000 });
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                  } catch (navError2) {
+                    console.log('[AutoApply] Final navigation error:', navError2);
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                  }
+                }
               }
+            } catch (notionError) {
+              console.log('[AutoApply] Notion page handling error:', notionError);
             }
             
             console.log('[AutoApply] Final URL:', page.url());

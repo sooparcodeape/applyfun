@@ -140,23 +140,11 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
 }
 
 /**
- * Find Chrome executable path
+ * Find Chrome executable path using Puppeteer's built-in detection
  */
-function findChromePath(): string {
-  const possiblePaths = [
-    '/home/ubuntu/.cache/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
-    '/root/.cache/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
-    '/usr/local/share/puppeteer/chrome/linux-143.0.7499.192/chrome-linux64/chrome',
-  ];
-  
-  const fs = require('fs');
-  for (const path of possiblePaths) {
-    if (fs.existsSync(path)) {
-      return path;
-    }
-  }
-  
-  throw new Error(`Chrome not found. Tried paths: ${possiblePaths.join(', ')}`);
+function findChromePath(): string | undefined {
+  // Let Puppeteer auto-detect Chrome (returns undefined to use default)
+  return undefined;
 }
 
 /**

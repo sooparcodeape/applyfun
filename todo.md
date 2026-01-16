@@ -920,3 +920,8 @@
 - [x] Fix Rain scraper to use https://jobs.ashbyhq.com/rain directly
 - [x] Update postinstall script to install system dependencies
 - [x] Create general-purpose Ashby scraper for any company
+- [x] Fix "Navigating frame was detached" error in automation
+- [x] Add try-catch for page navigation errors
+- [x] Delete old Rain jobs from database (Solana URLs)
+- [x] Use Puppeteer's auto-detection instead of manual Chrome path
+- [ ] Run Rain scraper to populate fresh Ashby URLs (requires testing)
