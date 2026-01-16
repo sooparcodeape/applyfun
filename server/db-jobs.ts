@@ -227,7 +227,7 @@ export async function addApplication(application: InsertApplication) {
 
 export async function updateApplicationStatus(
   id: number,
-  status: "pending" | "applied" | "viewed" | "rejected" | "interview" | "offer" | "accepted",
+  status: "pending" | "applied" | "viewed" | "rejected" | "interview" | "offer" | "accepted" | "requires_manual_review",
   notes?: string
 ) {
   const db = await getDb();

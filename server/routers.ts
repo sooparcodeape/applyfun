@@ -649,18 +649,36 @@ ${extractedText}`,
       let failed = 0;
 
       for (const item of queueItems) {
+        let applicationId: number | undefined;
         try {
-          // Attempt browser automation
-          const automationResult = await autoApplyToJob(item.job.applyUrl, {
-            fullName: ctx.user.name || '',
-            email: ctx.user.email,
-            phone: userProfile?.phone || '',
-            location: userProfile?.location || '',
-            resumeUrl: userProfile?.resumeUrl || undefined,
-            linkedinUrl: userProfile?.linkedinUrl || undefined,
-            githubUrl: userProfile?.githubUrl || undefined,
-            portfolioUrl: userProfile?.portfolioUrl || undefined,
+          // Create application record FIRST to get valid ID for logging
+          const appResult = await addApplication({
+            userId: ctx.user.id,
+            jobId: item.queueItem.jobId,
+            status: 'pending', // Will update after automation
+            notes: 'Automation in progress...',
+            retryCount: 0,
           });
+          applicationId = appResult.id;
+          
+          // Attempt browser automation with application ID for logging
+          const automationResult = await autoApplyToJob(
+            item.job.applyUrl,
+            {
+              fullName: ctx.user.name || '',
+              email: ctx.user.email,
+              phone: userProfile?.phone || '',
+              location: userProfile?.location || '',
+              resumeUrl: userProfile?.resumeUrl || undefined,
+              linkedinUrl: userProfile?.linkedinUrl || undefined,
+              githubUrl: userProfile?.githubUrl || undefined,
+              portfolioUrl: userProfile?.portfolioUrl || undefined,
+            },
+            3, // maxRetries
+            ctx.user.id,
+            item.queueItem.jobId,
+            applicationId // Pass application ID for logging
+          );
 
           // Calculate next retry time with exponential backoff (if failed)
           let nextRetryAt = null;
@@ -669,15 +687,13 @@ ${extractedText}`,
             nextRetryAt = new Date(Date.now() + retryDelayMinutes * 60 * 1000);
           }
 
-          // Record application in database
-          await addApplication({
-            userId: ctx.user.id,
-            jobId: item.queueItem.jobId,
-            status: automationResult.success ? 'applied' : 'requires_manual_review',
-            notes: automationResult.message,
-            retryCount: 0,
-            nextRetryAt: nextRetryAt,
-          });
+          // Update application status after automation
+          const { updateApplicationStatus } = await import('./db-jobs');
+          await updateApplicationStatus(
+            applicationId,
+            automationResult.success ? 'applied' : 'requires_manual_review',
+            automationResult.message
+          );
           
           await deleteFromQueue(item.queueItem.id);
           
@@ -688,13 +704,22 @@ ${extractedText}`,
           }
         } catch (error) {
           console.error(`[Apply All] Error applying to job ${item.job.id}:`, error);
-          // Still record the attempt
-          await addApplication({
-            userId: ctx.user.id,
-            jobId: item.queueItem.jobId,
-            status: 'rejected',
-            notes: error instanceof Error ? error.message : 'Unknown error',
-          });
+          // Update application status if we have an ID, otherwise create new record
+          if (applicationId) {
+            const { updateApplicationStatus } = await import('./db-jobs');
+            await updateApplicationStatus(
+              applicationId,
+              'rejected',
+              error instanceof Error ? error.message : 'Unknown error'
+            );
+          } else {
+            await addApplication({
+              userId: ctx.user.id,
+              jobId: item.queueItem.jobId,
+              status: 'rejected',
+              notes: error instanceof Error ? error.message : 'Unknown error',
+            });
+          }
           failed++;
         }
       }

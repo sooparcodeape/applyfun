@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as total FROM application_logs; SELECT * FROM application_logs LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT COUNT(*) as total FROM application_logs; SELECT * FROM application_logs LIMIT 5;",
+  "rows": [
+    {
+      "total": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n0\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

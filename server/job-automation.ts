@@ -100,7 +100,8 @@ async function autoApplyToJobInternal(
   jobUrl: string,
   applicantData: JobApplicationData,
   userId?: number,
-  jobId?: number
+  jobId?: number,
+  applicationId?: number
 ): Promise<ApplicationResult> {
   let page: Page | null = null;
   
@@ -793,11 +794,11 @@ async function autoApplyToJobInternal(
       console.log(`[AutoApply] Form Analysis: ${getFormAnalysisSummary(formAnalysis)}`);
       console.log(`[AutoApply] Execution time: ${executionTime}ms`);
       
-      // Save application log to database (if userId and jobId provided)
-      if (userId && jobId) {
+      // Save application log to database (if userId, jobId, and applicationId provided)
+      if (userId && jobId && applicationId) {
         const proxyInfo = await proxyManager.getCurrentProxyInfo();
         await createApplicationLog({
-          applicationId: 0, // Will be updated when we have application ID
+          applicationId,
           userId,
           jobId,
           atsType,
@@ -881,7 +882,8 @@ export async function autoApplyToJob(
   applicantData: JobApplicationData,
   maxRetries: number = 3,
   userId?: number,
-  jobId?: number
+  jobId?: number,
+  applicationId?: number
 ): Promise<ApplicationResult> {
   let lastError: any;
   
@@ -896,7 +898,7 @@ export async function autoApplyToJob(
         browserInstance = null;
       }
       
-      const result = await autoApplyToJobInternal(jobUrl, applicantData, userId, jobId);
+      const result = await autoApplyToJobInternal(jobUrl, applicantData, userId, jobId, applicationId);
       
       // If successful, report to proxy manager and return
       if (result.success) {
