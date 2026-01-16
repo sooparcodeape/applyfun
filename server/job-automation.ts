@@ -82,19 +82,41 @@ async function autoApplyToJobInternal(
     });
 
     // Wait for dynamic content with human-like delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1500));
     
-    // Anti-bot evasion: Simulate human behavior before interacting
-    console.log('[AutoApply] Simulating human behavior...');
+    // ENHANCED Anti-bot evasion: Extremely human-like behavior
+    console.log('[AutoApply] Simulating realistic human behavior...');
     
-    // 1. Random mouse movements (with page closure detection)
+    // 1. Initial page scan - Move mouse in reading pattern (F-pattern)
     try {
       if (page.isClosed()) throw new Error('Page closed before mouse movement');
-      await page.mouse.move(100 + Math.random() * 200, 100 + Math.random() * 200);
-      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
-      if (page.isClosed()) throw new Error('Page closed during mouse movement');
-      await page.mouse.move(300 + Math.random() * 400, 200 + Math.random() * 300);
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+      
+      // Start top-left (like reading header)
+      await page.mouse.move(50 + Math.random() * 100, 80 + Math.random() * 50, { steps: 15 + Math.floor(Math.random() * 10) });
+      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
+      
+      // Move right across header (F-pattern horizontal)
+      await page.mouse.move(600 + Math.random() * 300, 100 + Math.random() * 80, { steps: 25 + Math.floor(Math.random() * 15) });
+      await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 800));
+      
+      // Move down and left (F-pattern vertical)
+      await page.mouse.move(120 + Math.random() * 100, 300 + Math.random() * 100, { steps: 20 + Math.floor(Math.random() * 15) });
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 700));
+      
+      // Move right again (second horizontal of F)
+      await page.mouse.move(500 + Math.random() * 200, 320 + Math.random() * 80, { steps: 18 + Math.floor(Math.random() * 12) });
+      await new Promise(resolve => setTimeout(resolve, 700 + Math.random() * 1000));
+      
+      // Random micro-movements (like hovering over text while reading)
+      for (let i = 0; i < 4; i++) {
+        const currentPos = await page.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
+        await page.mouse.move(
+          currentPos.x + (Math.random() - 0.5) * 150,
+          currentPos.y + (Math.random() - 0.5) * 100,
+          { steps: 8 + Math.floor(Math.random() * 7) }
+        );
+        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+      }
     } catch (err: any) {
       if (err.message.includes('Session closed') || err.message.includes('Page closed')) {
         throw new Error('Page closed unexpectedly during human behavior simulation');
@@ -102,30 +124,49 @@ async function autoApplyToJobInternal(
       throw err;
     }
     
-    // 2. Scroll down and up to simulate reading
+    // 2. Realistic scrolling behavior - Multiple small scrolls (like reading)
+    const scrollSteps = 3 + Math.floor(Math.random() * 3); // 3-5 scroll actions
+    for (let i = 0; i < scrollSteps; i++) {
+      const scrollAmount = 200 + Math.random() * 300;
+      await page.evaluate((amount) => {
+        window.scrollBy({
+          top: amount,
+          behavior: 'smooth'
+        });
+      }, scrollAmount);
+      
+      // Variable pause between scrolls (reading time)
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1500));
+      
+      // Sometimes scroll back up a bit (like re-reading)
+      if (Math.random() < 0.3) {
+        await page.evaluate(() => {
+          window.scrollBy({
+            top: -(50 + Math.random() * 100),
+            behavior: 'smooth'
+          });
+        });
+        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 800));
+      }
+    }
+    
+    // 3. Scroll back to top (ready to fill form)
     await page.evaluate(() => {
       window.scrollTo({
-        top: 300 + Math.random() * 200,
+        top: 0,
         behavior: 'smooth'
       });
     });
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
+    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1000));
     
-    await page.evaluate(() => {
-      window.scrollTo({
-        top: 100 + Math.random() * 100,
-        behavior: 'smooth'
-      });
-    });
-    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
-    
-    // 3. Move mouse to random positions (simulate reading)
-    for (let i = 0; i < 3; i++) {
+    // 4. Final mouse movements before interaction (locating form fields)
+    for (let i = 0; i < 2; i++) {
       await page.mouse.move(
-        200 + Math.random() * 600,
-        150 + Math.random() * 400
+        300 + Math.random() * 800,
+        200 + Math.random() * 400,
+        { steps: 12 + Math.floor(Math.random() * 10) }
       );
-      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
+      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 700));
     }
 
     // Step 0: Handle Solana jobs multi-step redirect flow
@@ -278,27 +319,51 @@ async function autoApplyToJobInternal(
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
         
-        // Longer pause every 5-10 characters (thinking/reading)
-        if (i > 0 && i % (5 + Math.floor(Math.random() * 5)) === 0) {
-          await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
+        // ENHANCED: Variable thinking pauses (every 4-8 characters)
+        if (i > 0 && i % (4 + Math.floor(Math.random() * 4)) === 0) {
+          await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 1000));
         }
         
-        // Variable typing speed: faster for common patterns, slower for complex
-        let delay = 80 + Math.random() * 150;
-        if (/[A-Z]/.test(char)) delay += 50; // Slower for capitals
-        if (/[0-9]/.test(char)) delay += 30; // Slower for numbers
-        if (/[@._-]/.test(char)) delay += 40; // Slower for special chars
+        // Longer pause at punctuation (end of sentence)
+        if (/[.!?]/.test(char)) {
+          await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 800));
+        }
+        
+        // ENHANCED: More realistic variable typing speed
+        let delay = 60 + Math.random() * 120; // Base: 60-180ms per char
+        if (/[A-Z]/.test(char)) delay += 40 + Math.random() * 30; // Slower for capitals
+        if (/[0-9]/.test(char)) delay += 25 + Math.random() * 25; // Slower for numbers
+        if (/[@._-]/.test(char)) delay += 35 + Math.random() * 30; // Slower for special chars
+        
+        // Occasional typos and corrections (very human!)
+        if (Math.random() < 0.02 && i < text.length - 1) { // 2% chance of "typo"
+          await element.type('x', { delay: 80 }); // Wrong key
+          await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 200));
+          await element.press('Backspace', { delay: 120 }); // Correct it
+          await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+        }
         
         await element.type(char, { delay });
         
-        // Pause after spaces (between words)
-        if (char === ' ' && Math.random() < 0.4) {
-          await new Promise(resolve => setTimeout(resolve, 250 + Math.random() * 500));
+        // Pause after spaces (between words) - more frequent
+        if (char === ' ' && Math.random() < 0.5) {
+          await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
         }
       }
       
-      // Pause after finishing field (reviewing what was typed)
-      await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 700));
+      // ENHANCED: Longer pause after finishing field (reviewing)
+      await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
+      
+      // Sometimes move mouse away and back (like checking other fields)
+      if (Math.random() < 0.3) {
+        const currentPos = await page!.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
+        await page!.mouse.move(
+          currentPos.x + (Math.random() - 0.5) * 300,
+          currentPos.y + (Math.random() - 0.5) * 200,
+          { steps: 10 }
+        );
+        await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
+      }
     };   // Helper: Fill field by selectors with anti-bot delays
     const fillField = async (selectors: string[], value: string): Promise<number> => {
       if (!value) return 0;
@@ -307,8 +372,8 @@ async function autoApplyToJobInternal(
         try {
           const element = await page!.$(selector);
           if (element && await isElementVisible(element)) {
-            // Random delay before interacting with field (thinking time)
-            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1500));
+            // ENHANCED: Realistic thinking time before each field (capped at 8s total per app)
+            await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
             
             // Scroll element into view smoothly
             await page!.evaluate((el) => {
@@ -319,8 +384,8 @@ async function autoApplyToJobInternal(
             // Type with human behavior
             await humanType(element, value);
             
-            // Random delay after filling (reviewing what was typed)
-            await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1200));
+            // ENHANCED: Review delay after filling
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
             
             return 1;
           }
