@@ -979,3 +979,11 @@
 - [x] Integrate residential proxy service (ASOCKS or similar) for automation
 - [x] Add proxy rotation between applications
 - [x] Add user-agent rotation for extra stealth
+
+### ASOCKS Proxy Integration
+- [x] Audit existing proxy implementation and dependencies
+- [x] Remove redundant proxy code (puppeteer-page-proxy)
+- [x] Create ASOCKS API client (list, create, delete proxies)
+- [x] Create Proxy Manager with smart rotation (Option B: use proxy until it fails)
+- [x] Update job automation to retry with 2 new proxies on failure (3 attempts total)
+- [ ] Test proxy integration end-to-end with real job applications

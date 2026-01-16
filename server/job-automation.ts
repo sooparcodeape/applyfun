@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import type { Browser, Page } from 'puppeteer';
-import proxy from 'puppeteer-page-proxy';
+import { proxyManager } from './proxy-manager';
 
 // Add stealth plugin
 puppeteer.use(StealthPlugin());
@@ -44,20 +44,10 @@ const USER_AGENTS = [
 ];
 
 /**
- * Get ASOCKS proxy URL from environment variables
+ * Get ASOCKS proxy URL from proxy manager
  */
-function getProxyUrl(): string | null {
-  const proxyHost = process.env.ASOCKS_PROXY_HOST;
-  const proxyPort = process.env.ASOCKS_PROXY_PORT || '8080';
-  const proxyUser = process.env.ASOCKS_PROXY_USER;
-  const proxyPass = process.env.ASOCKS_PROXY_PASS;
-  
-  if (!proxyHost || !proxyUser || !proxyPass) {
-    console.log('[AutoApply] No proxy configured - running without proxy');
-    return null;
-  }
-  
-  return `http://${proxyUser}:${proxyPass}@${proxyHost}:${proxyPort}`;
+async function getProxyUrl(): Promise<string | null> {
+  return await proxyManager.getProxyUrl();
 }
 
 /**
@@ -68,11 +58,11 @@ function getRandomUserAgent(): string {
 }
 
 /**
- * Get or create browser instance
+ * Get or create browser instance with proxy
  */
-async function getBrowser(): Promise<Browser> {
+async function getBrowser(useProxy = true): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    const proxyUrl = getProxyUrl();
+    const proxyUrl = useProxy ? await getProxyUrl() : null;
     const launchArgs = [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -714,7 +704,11 @@ async function autoApplyToJobInternal(
 }
 
 /**
- * Public function: Auto-apply with retry logic (2-3 attempts with exponential backoff)
+ * Public function: Auto-apply with proxy rotation and retry logic
+ * - Attempt 1: Use current proxy
+ * - Attempt 2: Rotate to new proxy and retry
+ * - Attempt 3: Rotate to another new proxy and retry
+ * - After 3 failures: Return "Manual review required"
  */
 export async function autoApplyToJob(
   jobUrl: string,
@@ -726,15 +720,39 @@ export async function autoApplyToJob(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`[AutoApply] Attempt ${attempt}/${maxRetries} for ${jobUrl}`);
+      
+      // Close existing browser to force new proxy on retry
+      if (attempt > 1 && browserInstance) {
+        console.log(`[AutoApply] Closing browser to rotate proxy...`);
+        await browserInstance.close();
+        browserInstance = null;
+      }
+      
       const result = await autoApplyToJobInternal(jobUrl, applicantData);
       
-      // If successful, return immediately
+      // If successful, report to proxy manager and return
       if (result.success) {
         console.log(`[AutoApply] Success on attempt ${attempt}`);
+        await proxyManager.reportSuccess();
         return result;
       }
       
-      // If failed but not due to page closure, don't retry
+      // Report failure to proxy manager
+      await proxyManager.reportFailure();
+      
+      // If failed due to anti-bot detection, rotate proxy and retry
+      if (result.message.includes('anti-bot') || result.message.includes('did not submit')) {
+        lastError = result.message;
+        
+        if (attempt < maxRetries) {
+          console.log(`[AutoApply] Anti-bot detected. Rotating proxy and retrying...`);
+          // Small delay before retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          continue;
+        }
+      }
+      
+      // If failed but not due to anti-bot, don't retry
       if (!result.message.includes('Page closed') && !result.message.includes('Session closed')) {
         console.log(`[AutoApply] Non-retryable error: ${result.message}`);
         return result;
@@ -750,17 +768,19 @@ export async function autoApplyToJob(
       }
     } catch (error: any) {
       lastError = error.message;
+      await proxyManager.reportFailure();
       
       // Check if it's a retryable error
       const isRetryable = error.message.includes('Page closed') || 
                          error.message.includes('Session closed') ||
-                         error.message.includes('Navigation timeout');
+                         error.message.includes('Navigation timeout') ||
+                         error.message.includes('anti-bot');
       
       if (!isRetryable || attempt === maxRetries) {
         console.log(`[AutoApply] Failed after ${attempt} attempts: ${error.message}`);
         return {
           success: false,
-          message: `Automation failed after ${attempt} attempts: ${error.message}. Manual review required.`
+          message: `Automation failed after ${attempt} attempts with ${attempt} different proxies: ${error.message}. Manual review required.`
         };
       }
       
