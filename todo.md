@@ -962,3 +962,8 @@
 - [x] Wrap operations in try-catch to detect "Session closed" errors
 - [x] Implement retry logic (2-3 attempts with exponential backoff: 2s, 4s, 8s)
 - [ ] Test with Rain Account Manager job
+
+## DEPLOYMENT FIX
+- [x] Remove sudo-based Chrome setup from postinstall (causing timeout)
+- [x] Update CHROME_SETUP.md to clarify manual setup requirement (added deployment checklist)
+- [ ] Test deployment without sudo in postinstall

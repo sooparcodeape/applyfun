@@ -50,7 +50,9 @@ If you see "✅ Chrome launched successfully!", the setup worked!
 
 ## Production Deployment
 
-**Important:** Chrome system dependencies must be installed on the production server before automation will work.
+**CRITICAL:** The npm postinstall script only installs Chrome binary, NOT system dependencies. You must manually run `setup-chrome.sh` after deployment.
+
+**Why manual setup?** The `sudo` command requires elevated privileges that aren't available during npm postinstall. Running `sudo` in postinstall causes deployment timeouts.
 
 ### First-Time Setup
 
@@ -63,6 +65,14 @@ After deploying to production:
    cd /path/to/crypto-job-auto-apply
    sudo bash setup-chrome.sh
    ```
+
+### Deployment Checklist
+
+1. ✅ Deploy application (pnpm install runs automatically, installs Chrome binary)
+2. ✅ SSH into server
+3. ✅ Run `sudo bash setup-chrome.sh` (installs system dependencies)
+4. ✅ Verify with test script (see Verification section)
+5. ✅ Automation ready
 
 ### After Server Restarts
 
