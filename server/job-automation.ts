@@ -667,14 +667,139 @@ async function autoApplyToJobInternal(
       };
     }
 
-    // Don't actually submit - too risky with anti-bot protection
-    // Just return success with fields filled
-    await page.close();
+    // Step 4: Find and click Submit button with human-like behavior
+    console.log('[AutoApply] Looking for Submit button...');
     
-    return {
-      success: false, // Mark as false to trigger manual review
-      message: `Filled ${fieldsFilledCount} fields but did not submit due to anti-bot protection. Manual review required.`,
-    };
+    // Wait a bit before submitting (like reviewing the form)
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 2000));
+    
+    // Scroll to bottom where Submit button usually is
+    await page.evaluate(() => {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
+    
+    // Try to find Submit button
+    const submitButtonSelectors = [
+      'button[type="submit"]',
+      'input[type="submit"]',
+      'button[id*="submit"]',
+      'button[class*="submit"]',
+      'button[data-testid*="submit"]',
+      'button[aria-label*="submit"]',
+      'a[class*="submit"]',
+      'button[name="commit"]', // Greenhouse specific
+      'button.submit-button',
+      'input.submit-button',
+    ];
+    
+    let submitButton = null;
+    for (const selector of submitButtonSelectors) {
+      try {
+        const element = await page.$(selector);
+        if (element && await isElementVisible(element)) {
+          submitButton = element;
+          console.log(`[AutoApply] Found Submit button with selector: ${selector}`);
+          break;
+        }
+      } catch (e) {
+        // Try next selector
+      }
+    }
+    
+    // Fallback: Find button by text content
+    if (!submitButton) {
+      submitButton = await page.evaluateHandle(() => {
+        const buttons = Array.from(document.querySelectorAll('button, input[type="button"], a'));
+        return buttons.find(btn => {
+          const text = (btn.textContent || (btn as HTMLInputElement).value || '').toLowerCase();
+          return text.includes('submit') || text.includes('apply') || text.includes('send application');
+        });
+      }).then(handle => handle.asElement());
+      
+      if (submitButton) {
+        console.log('[AutoApply] Found Submit button by text content');
+      }
+    }
+    
+    if (!submitButton) {
+      await page.close();
+      return {
+        success: false,
+        message: `Filled ${fieldsFilledCount} fields but could not find Submit button. Manual review required.`,
+      };
+    }
+    
+    // Move mouse to Submit button with realistic movement
+    try {
+      const buttonBox = await submitButton.boundingBox();
+      if (buttonBox) {
+        // Move to button with curved path
+        const targetX = buttonBox.x + buttonBox.width / 2 + (Math.random() - 0.5) * 20;
+        const targetY = buttonBox.y + buttonBox.height / 2 + (Math.random() - 0.5) * 10;
+        
+        await page.mouse.move(targetX, targetY, { steps: 25 + Math.floor(Math.random() * 15) });
+        await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 800));
+        
+        // Hover over button (like hesitating)
+        await page.mouse.move(
+          targetX + (Math.random() - 0.5) * 5,
+          targetY + (Math.random() - 0.5) * 5,
+          { steps: 3 }
+        );
+        await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 1000));
+      }
+    } catch (e) {
+      console.log('[AutoApply] Could not move mouse to button, will click directly');
+    }
+    
+    // Click Submit button
+    try {
+      console.log('[AutoApply] Clicking Submit button...');
+      await (submitButton as any).click();
+      
+      // Wait for submission to complete
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Check if we got redirected to success page
+      const finalUrl = page.url().toLowerCase();
+      const isSuccessPage = finalUrl.includes('thank') || 
+                           finalUrl.includes('success') || 
+                           finalUrl.includes('confirmation') ||
+                           finalUrl.includes('submitted');
+      
+      // Check page content for success indicators
+      const pageText = await page.evaluate(() => document.body.textContent?.toLowerCase() || '');
+      const hasSuccessMessage = pageText.includes('thank you') ||
+                               pageText.includes('application submitted') ||
+                               pageText.includes('we received your application') ||
+                               pageText.includes('successfully submitted');
+      
+      await page.close();
+      
+      if (isSuccessPage || hasSuccessMessage) {
+        return {
+          success: true,
+          message: `Successfully submitted application! Filled ${fieldsFilledCount} fields and clicked Submit.`,
+        };
+      } else {
+        // Submitted but can't confirm success
+        return {
+          success: true,
+          message: `Submitted application (filled ${fieldsFilledCount} fields). Please verify submission manually.`,
+        };
+      }
+    } catch (clickError: any) {
+      console.error('[AutoApply] Failed to click Submit button:', clickError.message);
+      await page.close();
+      return {
+        success: false,
+        message: `Filled ${fieldsFilledCount} fields but failed to click Submit button: ${clickError.message}. Manual review required.`,
+      };
+    }
 
   } catch (error: any) {
     console.error('[Job Automation] Self-hosted Puppeteer error:', error.message);
