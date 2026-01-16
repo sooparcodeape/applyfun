@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, title, company, apply_url, source FROM jobs LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url, source FROM jobs LIMIT 10;",
+  "rows": [
+    {
+      "id": "1830691",
+      "title": "Asset Manager - DeFi",
+      "company": "MEV Capital",
+      "apply_url": "https://cryptojobslist.com/asset-manager-defi",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830692",
+      "title": "[Prediction Markets] Growth Marketing",
+      "company": "Seer",
+      "apply_url": "https://cryptojobslist.com/-prediction-markets-growth-marketing",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830693",
+      "title": "Senior Data Engineer",
+      "company": "Paradex",
+      "apply_url": "https://cryptojobslist.com/senior-data-engineer",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830694",
+      "title": "Project Manager - Contract",
+      "company": "Re7 Capital",
+      "apply_url": "https://cryptojobslist.com/project-manager-contract",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830695",
+      "title": "Client Success Manager",
+      "company": "Movimentum",
+      "apply_url": "https://cryptojobslist.com/client-success-manager",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830696",
+      "title": "Growth Product Manager",
+      "company": "Trezor",
+      "apply_url": "https://cryptojobslist.com/growth-product-manager",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830697",
+      "title": "Web3 Solidity Bootcamp - Job Guaranteed",
+      "company": "Metana, Inc.",
+      "apply_url": "https://cryptojobslist.com/web3-solidity-bootcamp-job-guaranteed",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830698",
+      "title": "Operations & Risk Manager",
+      "company": "SideShift.ai",
+      "apply_url": "https://cryptojobslist.com/operations-risk-manager",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830699",
+      "title": "Talent Acquisition Specialist",
+      "company": "ApeX Protocol",
+      "apply_url": "https://cryptojobslist.com/talent-acquisition-specialist",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "1830700",
+      "title": "Senior Product / Systems Engineer (Founding)",
+      "company": "talentpair.com",
+      "apply_url": "https://cryptojobslist.com/senior-product-systems-engineer-founding-",
+      "source": "cryptojobslist.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tapply_url\tsource\n1830691\tAsset Manager - DeFi\tMEV Capital\thttps://cryptojobslist.com/asset-manager-defi\tcryptojobslist.com\n1830692\t[Prediction Markets] Growth Marketing\tSeer\thttps://cryptojobslist.com/-prediction-markets-growth-marketing\tcryptojobslist.com\n1830693\tSenior Data Engineer\tParadex\thttps://cryptojobslist.com/senior-data-engineer\tcryptojobslist.com\n1830694\tProject Manager - Contract\tRe7 Capital\thttps://cryptojobslist.com/project-manager-contract\tcryptojobslist.com\n1830695\tClient Success Manager\tMovimentum\thttps://cryptojobslist.com/client-success-manager\tcryptojobslist.com\n1830696\tGrowth Product Manager\tTrezor\thttps://cryptojobslist.com/growth-product-manager\tcryptojobslist.com\n1830697\tWeb3 Solidity Bootcamp - Job Guaranteed\tMetana, Inc.\thttps://cryptojobslist.com/web3-solidity-bootcamp-job-guaranteed\tcryptojobslist.com\n1830698\tOperations & Risk Manager\tSideShift.ai\thttps://cryptojobslist.com/operations-risk-manager\tcryptojobslist.com\n1830699\tTalent Acquisition Specialist\tApeX Protocol\thttps://cryptojobslist.com/talent-acquisition-specialist\tcryptojobslist.com\n1830700\tSenior Product / Systems Engineer (Founding)\ttalentpair.com\thttps://cryptojobslist.com/senior-product-systems-engineer-founding-\tcryptojobslist.com\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

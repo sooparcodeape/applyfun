@@ -930,5 +930,8 @@
 - [x] Add tRPC endpoint to trigger scraper manually from admin panel (admin.runScrapers)
 - [x] Create setup script to install Chrome system dependencies (setup-chrome.sh)
 - [x] Create CHROME_SETUP.md with instructions
-- [ ] User needs to run: sudo bash setup-chrome.sh
-- [ ] Test automation after Chrome dependencies are installed
+- [x] User needs to run: sudo bash setup-chrome.sh (COMPLETED)
+- [x] Test automation after Chrome dependencies are installed (Chrome launched successfully!)
+- [x] Chrome dependencies installed and working (Chrome launches successfully)
+- [ ] Rain scraper needs debugging (hanging during execution)
+- [ ] Consider alternative: scrape Rain via HTTP requests instead of browser

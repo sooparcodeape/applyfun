@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, title, company, apply_url, source FROM jobs WHERE apply_url LIKE '%teamtailor%' OR apply_url LIKE '%ashbyhq%' OR apply_url LIKE '%greenhouse%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url, source FROM jobs WHERE apply_url LIKE '%teamtailor%' OR apply_url LIKE '%ashbyhq%' OR apply_url LIKE '%greenhouse%' LIMIT 5;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}
