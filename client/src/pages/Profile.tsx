@@ -268,58 +268,64 @@ export default function Profile() {
   
   const completion = calculateCompletion();
 
+  // Debug logging
+  console.log('[Profile] Completion data:', completion);
+  console.log('[Profile] Profile data:', profileData?.profile);
+
   return (
     <div className="space-y-6">
-      {/* Profile Completion Progress Bar */}
-      {completion.percentage < 100 && (
-        <Card className="border-purple-500/20 bg-purple-500/5">
-          <CardContent className="pt-6">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">Profile Completion</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Complete your profile to maximize application success rate
-                  </p>
+      {/* Profile Completion Progress Bar - Always show */}
+      {profileData?.profile && (
+        <>
+          {completion.percentage < 100 ? (
+            <Card className="border-purple-500/20 bg-purple-500/5">
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">Profile Completion</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Complete your profile to maximize application success rate
+                      </p>
+                    </div>
+                    <div className="text-2xl font-bold text-purple-500">{completion.percentage}%</div>
+                  </div>
+                  
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${completion.percentage}%` }}
+                    />
+                  </div>
+                  
+                  {completion.missing.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium">Missing fields:</span> {completion.missing.join(', ')}
+                    </div>
+                  )}
                 </div>
-                <div className="text-2xl font-bold text-purple-500">{completion.percentage}%</div>
-              </div>
-              
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${completion.percentage}%` }}
-                />
-              </div>
-              
-              {completion.missing.length > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  <span className="font-medium">Missing fields:</span> {completion.missing.join(', ')}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-green-500/20 bg-green-500/5">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-green-500">Profile Complete!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your profile is fully optimized for automated job applications
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {completion.percentage === 100 && (
-        <Card className="border-green-500/20 bg-green-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-green-500">Profile Complete!</h3>
-                <p className="text-sm text-muted-foreground">
-                  Your profile is fully optimized for automated job applications
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       <div>
