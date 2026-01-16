@@ -916,3 +916,7 @@
 - [x] Implement typing with human-like speed variations
 - [x] Add page interaction before filling forms (scroll, move mouse)
 - [ ] Test evasion techniques with real applications
+- [x] Install Chrome system dependencies (libglib-2.0.so.0 and others)
+- [x] Fix Rain scraper to use https://jobs.ashbyhq.com/rain directly
+- [x] Update postinstall script to install system dependencies
+- [x] Create general-purpose Ashby scraper for any company

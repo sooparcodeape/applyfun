@@ -393,6 +393,7 @@ export async function runAllScrapers() {
   const results = {
     cryptojobslist: 0,
     remote3: 0,
+    rain: 0,
     solana: 0,
     web3career: 0,
     cryptocurrencyjobs: 0,
@@ -404,6 +405,7 @@ export async function runAllScrapers() {
   const { scrapeWeb3Career } = await import("./web3career");
   const { scrapeCryptocurrencyJobs } = await import("./cryptocurrencyjobs");
   const { scrapeBlockchainCareers } = await import("./blockchain-careers");
+  const { scrapeRainJobs } = await import("./ashby");
   
   // CryptoJobsList
   const cryptoJobs = await scrapeCryptoJobsList();
@@ -429,11 +431,16 @@ export async function runAllScrapers() {
   const blockchainJobs = await scrapeBlockchainCareers();
   results.blockchainCareers = await saveJobs(blockchainJobs);
   
-  results.total = results.cryptojobslist + results.remote3 + results.solana + results.web3career + results.cryptocurrencyjobs + results.blockchainCareers;
+  // Rain (Ashby)
+  const rainJobs = await scrapeRainJobs();
+  results.rain = await saveJobs(rainJobs);
+  
+  results.total = results.cryptojobslist + results.remote3 + results.rain + results.solana + results.web3career + results.cryptocurrencyjobs + results.blockchainCareers;
   
   console.log("\n=== Scraping Complete ===");
   console.log(`CryptoJobsList: ${results.cryptojobslist} jobs`);
   console.log(`Remote3: ${results.remote3} jobs`);
+  console.log(`Rain (Ashby): ${results.rain} jobs`);
   console.log(`Solana Jobs: ${results.solana} jobs`);
   console.log(`Web3.career: ${results.web3career} jobs`);
   console.log(`CryptocurrencyJobs.co: ${results.cryptocurrencyjobs} jobs`);
