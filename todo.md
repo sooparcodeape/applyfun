@@ -942,3 +942,6 @@
 - [x] Fix JSON parsing error on /jobs page (tags field causing "Customer, Customer" parse error)
 - [x] Investigate frontend code handling tags field
 - [x] Ensure tags field is properly formatted as JSON array (fixed Ashby scraper)
+- [x] Fix Chrome dependencies not persisting across server restarts
+- [x] Run setup-chrome.sh again to install dependencies
+- [x] Document deployment requirements for production (added to CHROME_SETUP.md)

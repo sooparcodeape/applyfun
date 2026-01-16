@@ -48,6 +48,58 @@ import puppeteer from 'puppeteer';
 
 If you see "✅ Chrome launched successfully!", the setup worked!
 
+## Production Deployment
+
+**Important:** Chrome system dependencies must be installed on the production server before automation will work.
+
+### First-Time Setup
+
+After deploying to production:
+
+1. SSH into your production server
+2. Navigate to the project directory
+3. Run the setup script:
+   ```bash
+   cd /path/to/crypto-job-auto-apply
+   sudo bash setup-chrome.sh
+   ```
+
+### After Server Restarts
+
+The dependencies persist across normal restarts, but may need reinstallation if:
+- Server is rebuilt/redeployed from scratch
+- System packages are cleared
+- Docker container is recreated
+
+In these cases, simply run `sudo bash setup-chrome.sh` again.
+
+### Alternative: Docker
+
+For containerized deployments, add this to your Dockerfile:
+
+```dockerfile
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    libxshmfence1 \
+    && rm -rf /var/lib/apt/lists/*
+```
+
 ## Troubleshooting
 
 If the setup script fails, manually install the dependencies:
