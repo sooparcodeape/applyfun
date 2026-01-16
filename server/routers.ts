@@ -842,6 +842,24 @@ ${extractedText}`,
         return await getBestMatchingJobs(ctx.user.id, input.limit || 20);
       }),
   }),
+  
+  applicationLogs: router({
+    list: protectedProcedure
+      .input(z.object({
+        limit: z.number().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const { getApplicationLogs } = await import('./db');
+        return await getApplicationLogs(ctx.user.id, input.limit);
+      }),
+    
+    getByApplicationId: protectedProcedure
+      .input(z.object({ applicationId: z.number() }))
+      .query(async ({ input }) => {
+        const { getApplicationLogByApplicationId } = await import('./db');
+        return await getApplicationLogByApplicationId(input.applicationId);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

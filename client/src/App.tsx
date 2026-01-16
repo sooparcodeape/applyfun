@@ -20,6 +20,7 @@ import Applications from "./pages/Applications";
 import Credits from "./pages/Credits";
 import PublicJobs from "./pages/PublicJobs";
 import AdminDashboard from "./pages/AdminDashboard";
+import ApplicationLogs from "./pages/ApplicationLogs";
 
 function Router() {
   return (
@@ -74,6 +75,13 @@ function Router() {
         <DashboardLayout>
           <PageTransition>
             <Credits />
+          </PageTransition>
+        </DashboardLayout>
+      </Route>
+      <Route path="/application-logs">
+        <DashboardLayout>
+          <PageTransition>
+            <ApplicationLogs />
           </PageTransition>
         </DashboardLayout>
       </Route>
