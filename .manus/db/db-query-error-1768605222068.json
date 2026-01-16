@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO application_logs (\n  application_id, user_id, job_id, ats_type, apply_url,\n  available_fields, filled_fields, missed_fields,\n  resume_uploaded, fields_filled_count, submit_clicked,\n  proxy_used, success, execution_time_ms\n) VALUES (\n  1, 1, 1, 'test', 'https://test.com',\n  '[]', '[]', '[]',\n  0, 0, 0,\n  0, 1, 1000\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute INSERT INTO application_logs (\n  application_id, user_id, job_id, ats_type, apply_url,\n  available_fields, filled_fields, missed_fields,\n  resume_uploaded, fields_filled_count, submit_clicked,\n  proxy_used, success, execution_time_ms\n) VALUES (\n  1, 1, 1, 'test', 'https://test.com',\n  '[]', '[]', '[]',\n  0, 0, 0,\n  0, 1, 1000\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1452 (23000) at line 1: Cannot add or update a child row: a foreign key constraint fails (`g7bah27bb9yypz9eaubzuy`.`application_logs`, CONSTRAINT `fk_1` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE)"
+  ]
+}

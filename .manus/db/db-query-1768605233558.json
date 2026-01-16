@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, user_id, job_id FROM applications ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, user_id, job_id FROM applications ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "420003",
+      "user_id": "420001",
+      "job_id": "2251639"
+    },
+    {
+      "id": "420002",
+      "user_id": "420001",
+      "job_id": "2436167"
+    },
+    {
+      "id": "420001",
+      "user_id": "420001",
+      "job_id": "2251645"
+    },
+    {
+      "id": "390011",
+      "user_id": "150304",
+      "job_id": "2251651"
+    },
+    {
+      "id": "390010",
+      "user_id": "150304",
+      "job_id": "2436177"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuser_id\tjob_id\n420003\t420001\t2251639\n420002\t420001\t2436167\n420001\t420001\t2251645\n390011\t150304\t2251651\n390010\t150304\t2436177\n",
+  "stderr": "",
+  "execution_time_ms": 370
+}

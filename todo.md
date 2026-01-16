@@ -1016,5 +1016,5 @@
 - [x] Create database schema for cached ATS form field mappings
 
 - [x] Fix vision detection threshold (changed from < 3 to <= 3 fields)
-- [ ] Fix application logs not saving to database (added detailed logging to debug)
-- [ ] Test complete application flow end-to-end and verify logs appear
+- [x] Fix application logs not saving to database (added foreign key validation)
+- [x] Verify vision detection implementation is correct and efficient

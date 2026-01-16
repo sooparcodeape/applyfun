@@ -1,0 +1,15 @@
+{
+  "query": "SELECT a.id as app_id, a.user_id, a.job_id FROM applications a LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT a.id as app_id, a.user_id, a.job_id FROM applications a LIMIT 1;",
+  "rows": [
+    {
+      "app_id": "240001",
+      "user_id": "420001",
+      "job_id": "1831792"
+    }
+  ],
+  "messages": [],
+  "stdout": "app_id\tuser_id\tjob_id\n240001\t420001\t1831792\n",
+  "stderr": "",
+  "execution_time_ms": 996
+}

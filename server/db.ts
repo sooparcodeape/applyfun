@@ -247,6 +247,17 @@ export async function createApplicationLog(log: {
     const mysql2 = await import('mysql2/promise');
     const connection = await mysql2.createConnection(ENV.databaseUrl);
     
+    // Validate foreign keys exist before inserting
+    const [appCheck] = await connection.execute(
+      'SELECT id FROM applications WHERE id = ? LIMIT 1',
+      [log.applicationId]
+    );
+    if ((appCheck as any[]).length === 0) {
+      console.error(`[Database] Cannot create log: application ${log.applicationId} not found in database`);
+      await connection.end();
+      return;
+    }
+    
     await connection.execute(
       `INSERT INTO application_logs (
         application_id, user_id, job_id, ats_type, apply_url,

@@ -1,0 +1,45 @@
+{
+  "query": "SHOW CREATE TABLE application_logs;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SHOW CREATE TABLE application_logs;",
+  "rows": [
+    {
+      "Table": "application_logs",
+      "Create Table": "CREATE TABLE `application_logs` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `application_id` int(11) NOT NULL,",
+    "  `user_id` int(11) NOT NULL,",
+    "  `job_id` int(11) NOT NULL,",
+    "  `ats_type` varchar(50) NOT NULL,",
+    "  `apply_url` varchar(1024) NOT NULL,",
+    "  `available_fields` text DEFAULT NULL,",
+    "  `filled_fields` text DEFAULT NULL,",
+    "  `missed_fields` text DEFAULT NULL,",
+    "  `resume_uploaded` int(11) NOT NULL DEFAULT '0',",
+    "  `resume_selector` varchar(255) DEFAULT NULL,",
+    "  `resume_file_size` int(11) DEFAULT NULL,",
+    "  `fields_filled_count` int(11) NOT NULL DEFAULT '0',",
+    "  `submit_clicked` int(11) NOT NULL DEFAULT '0',",
+    "  `submit_selector` varchar(255) DEFAULT NULL,",
+    "  `proxy_used` int(11) NOT NULL DEFAULT '0',",
+    "  `proxy_ip` varchar(50) DEFAULT NULL,",
+    "  `proxy_country` varchar(10) DEFAULT NULL,",
+    "  `success` int(11) NOT NULL DEFAULT '0',",
+    "  `error_message` text DEFAULT NULL,",
+    "  `execution_time_ms` int(11) DEFAULT NULL,",
+    "  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,",
+    "  KEY `fk_1` (`application_id`),",
+    "  KEY `fk_2` (`user_id`),",
+    "  KEY `fk_3` (`job_id`),",
+    "  CONSTRAINT `fk_1` FOREIGN KEY (`application_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`applications` (`id`) ON DELETE CASCADE,",
+    "  CONSTRAINT `fk_2` FOREIGN KEY (`user_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`users` (`id`) ON DELETE CASCADE,",
+    "  CONSTRAINT `fk_3` FOREIGN KEY (`job_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`jobs` (`id`) ON DELETE CASCADE",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"
+  ],
+  "stdout": "Table\tCreate Table\napplication_logs\tCREATE TABLE `application_logs` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `application_id` int(11) NOT NULL,\n  `user_id` int(11) NOT NULL,\n  `job_id` int(11) NOT NULL,\n  `ats_type` varchar(50) NOT NULL,\n  `apply_url` varchar(1024) NOT NULL,\n  `available_fields` text DEFAULT NULL,\n  `filled_fields` text DEFAULT NULL,\n  `missed_fields` text DEFAULT NULL,\n  `resume_uploaded` int(11) NOT NULL DEFAULT '0',\n  `resume_selector` varchar(255) DEFAULT NULL,\n  `resume_file_size` int(11) DEFAULT NULL,\n  `fields_filled_count` int(11) NOT NULL DEFAULT '0',\n  `submit_clicked` int(11) NOT NULL DEFAULT '0',\n  `submit_selector` varchar(255) DEFAULT NULL,\n  `proxy_used` int(11) NOT NULL DEFAULT '0',\n  `proxy_ip` varchar(50) DEFAULT NULL,\n  `proxy_country` varchar(10) DEFAULT NULL,\n  `success` int(11) NOT NULL DEFAULT '0',\n  `error_message` text DEFAULT NULL,\n  `execution_time_ms` int(11) DEFAULT NULL,\n  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,\n  KEY `fk_1` (`application_id`),\n  KEY `fk_2` (`user_id`),\n  KEY `fk_3` (`job_id`),\n  CONSTRAINT `fk_1` FOREIGN KEY (`application_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`applications` (`id`) ON DELETE CASCADE,\n  CONSTRAINT `fk_2` FOREIGN KEY (`user_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`users` (`id`) ON DELETE CASCADE,\n  CONSTRAINT `fk_3` FOREIGN KEY (`job_id`) REFERENCES `G7Bah27Bb9yyPz9EaUBZuy`.`jobs` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin\n",
+  "stderr": "",
+  "execution_time_ms": 206
+}
