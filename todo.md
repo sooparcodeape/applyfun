@@ -1059,3 +1059,8 @@
 - [ ] Update backend tRPC procedures to handle new fields
 - [ ] Test all fields save and load correctly
 - [ ] Verify 36/36 fields can be filled on Ashby forms after profile completion
+
+## Add Pagination to Jobs Page (Jan 17)
+- [x] Add pagination controls to /jobs page frontend
+- [x] Update backend jobs.list procedure to support offset/page parameter (already supported)
+- [x] Show total job count and current page
