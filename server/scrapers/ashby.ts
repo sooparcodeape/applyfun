@@ -97,3 +97,49 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
 export async function scrapeRainJobs(): Promise<ScrapedJob[]> {
   return scrapeAshbyCompany('rain', 'Rain');
 }
+
+
+/**
+ * Scrape all Ashby companies
+ */
+export async function scrapeAllAshbyCompanies(): Promise<{total: number, byCompany: Record<string, number>}> {
+  const companies = [
+    { slug: 'rain', name: 'Rain' },
+    { slug: '0x', name: '0x' },
+    { slug: 'raiku', name: 'Raiku' },
+    { slug: 'helius', name: 'Helius' },
+    { slug: 'li.fi', name: 'Li.Fi' },
+    { slug: 'Blockworks', name: 'Blockworks' },
+    { slug: 'quicknode', name: 'QuickNode' },
+    { slug: 'pythnetwork', name: 'Pyth Network' },
+    { slug: 'inference', name: 'Inference' },
+  ];
+
+  const results: Record<string, number> = {};
+  let total = 0;
+
+  for (const company of companies) {
+    try {
+      const jobs = await scrapeAshbyCompany(company.slug, company.name);
+      
+      // Save jobs to database
+      const { upsertJob } = await import('../db-jobs');
+      for (const job of jobs) {
+        await upsertJob(job);
+      }
+      
+      results[company.name] = jobs.length;
+      total += jobs.length;
+      
+      console.log(`[Ashby] ${company.name}: ${jobs.length} jobs saved`);
+      
+      // Small delay between companies to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error: any) {
+      console.error(`[Ashby] Error scraping ${company.name}:`, error.message);
+      results[company.name] = 0;
+    }
+  }
+
+  return { total, byCompany: results };
+}

@@ -393,7 +393,7 @@ export async function runAllScrapers() {
   const results = {
     cryptojobslist: 0,
     remote3: 0,
-    rain: 0,
+    rain: 0, // All Ashby companies combined
     solana: 0,
     web3career: 0,
     cryptocurrencyjobs: 0,
@@ -405,7 +405,7 @@ export async function runAllScrapers() {
   const { scrapeWeb3Career } = await import("./web3career");
   const { scrapeCryptocurrencyJobs } = await import("./cryptocurrencyjobs");
   const { scrapeBlockchainCareers } = await import("./blockchain-careers");
-  const { scrapeRainJobs } = await import("./ashby");
+  const { scrapeAllAshbyCompanies } = await import("./ashby");
   
   // CryptoJobsList
   const cryptoJobs = await scrapeCryptoJobsList();
@@ -431,16 +431,22 @@ export async function runAllScrapers() {
   const blockchainJobs = await scrapeBlockchainCareers();
   results.blockchainCareers = await saveJobs(blockchainJobs);
   
-  // Rain (Ashby)
-  const rainJobs = await scrapeRainJobs();
-  results.rain = await saveJobs(rainJobs);
+  // All Ashby Companies (Rain, 0x, Helius, etc.)
+  const ashbyResults = await scrapeAllAshbyCompanies();
+  results.rain = ashbyResults.total;
   
   results.total = results.cryptojobslist + results.remote3 + results.rain + results.solana + results.web3career + results.cryptocurrencyjobs + results.blockchainCareers;
   
   console.log("\n=== Scraping Complete ===");
   console.log(`CryptoJobsList: ${results.cryptojobslist} jobs`);
   console.log(`Remote3: ${results.remote3} jobs`);
-  console.log(`Rain (Ashby): ${results.rain} jobs`);
+  console.log(`Ashby Companies: ${results.rain} jobs`);
+  console.log(`  - Rain: ${ashbyResults.byCompany['Rain'] || 0}`);
+  console.log(`  - 0x: ${ashbyResults.byCompany['0x'] || 0}`);
+  console.log(`  - Helius: ${ashbyResults.byCompany['Helius'] || 0}`);
+  console.log(`  - QuickNode: ${ashbyResults.byCompany['QuickNode'] || 0}`);
+  console.log(`  - Pyth Network: ${ashbyResults.byCompany['Pyth Network'] || 0}`);
+  console.log(`  - Others: ${(ashbyResults.byCompany['Raiku'] || 0) + (ashbyResults.byCompany['Li.Fi'] || 0) + (ashbyResults.byCompany['Blockworks'] || 0) + (ashbyResults.byCompany['Inference'] || 0)}`);
   console.log(`Solana Jobs: ${results.solana} jobs`);
   console.log(`Web3.career: ${results.web3career} jobs`);
   console.log(`CryptocurrencyJobs.co: ${results.cryptocurrencyjobs} jobs`);
