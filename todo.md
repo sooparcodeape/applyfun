@@ -1035,3 +1035,9 @@
 - [x] Integrate vision analysis into Ashby scraper (runs in background during scraping)
 - [x] Pre-cached vision mappings automatically used via ATS field mappings system
 - [x] Cost optimization: ~$0.50-$1 total vs $4K-$15K (99.99% savings)
+
+## Fixes from Test Results (DOM Traversal)
+- [x] Fix ATS detection - Ashby being misidentified as Greenhouse
+- [x] Add comprehensive Ashby field mappings for all common fields
+- [x] Enhance DOM traversal to find more fields (now 7/36 fields filled with available data)
+- [x] Test again and verify DOM traversal working (24/36 fields detected, 7 filled with user data)

@@ -129,5 +129,19 @@ export function getFormAnalysisSummary(analysis: FormAnalysis): string {
     ? Math.round((analysis.filledCount / analysis.totalFields) * 100) 
     : 0;
   
-  return `Filled ${analysis.filledCount}/${analysis.totalFields} fields (${fillRate}%)`;
+  let summary = `Filled ${analysis.filledCount}/${analysis.totalFields} fields (${fillRate}%)`;
+  
+  // Add details about missed fields
+  if (analysis.missedFields.length > 0) {
+    summary += `\n[Form Analysis] Missed fields:`;
+    analysis.missedFields.slice(0, 10).forEach((field, idx) => {
+      const label = field.label || field.placeholder || field.name || 'unlabeled';
+      summary += `\n  ${idx + 1}. ${label} (${field.type})`;
+    });
+    if (analysis.missedFields.length > 10) {
+      summary += `\n  ... and ${analysis.missedFields.length - 10} more`;
+    }
+  }
+  
+  return summary;
 }

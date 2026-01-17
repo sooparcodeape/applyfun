@@ -117,6 +117,17 @@ export const ASHBY_FIELDS: ATSFieldMappings = {
     type: 'url',
     priority: 5,
   },
+  twitter: {
+    selectors: [
+      'input[name*="twitter"]',
+      'input[id*="twitter"]',
+      'input[placeholder*="Twitter"]',
+      'input[aria-label*="Twitter"]',
+      'input[placeholder*="X profile"]',
+    ],
+    type: 'url',
+    priority: 5,
+  },
   portfolio: {
     selectors: [
       'input[name*="portfolio"]',

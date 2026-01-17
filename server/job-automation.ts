@@ -17,6 +17,7 @@ export interface JobApplicationData {
   resumeUrl?: string;
   linkedinUrl?: string;
   githubUrl?: string;
+  twitterUrl?: string;
   portfolioUrl?: string;
   coverLetter?: string;
   // Additional fields for cover letter generation
@@ -119,6 +120,7 @@ async function getBrowser(useProxy = true): Promise<Browser> {
     
     browserInstance = await puppeteer.launch({
       headless: true,
+      executablePath: '/usr/bin/chromium-browser',
       args: launchArgs,
     });
     console.log(`[AutoApply] Chrome launched successfully`);
@@ -469,9 +471,10 @@ async function autoApplyToJobInternal(
         await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 600));
       }
     }    // Helper: Fill field by selectors with anti-bot delays
-    const fillField = async (selectors: string[], value: string): Promise<number> => {
+    const fillField = async (selectors: string[], value: string, fieldName?: string): Promise<number> => {
       if (!value) return 0;
       
+      // Tier 1: Try CSS selectors first (fast, ATS-specific)
       for (const selector of selectors) {
         try {
           const element = await page!.$(selector);
@@ -494,12 +497,71 @@ async function autoApplyToJobInternal(
             // Track filled selector for logging
             filledSelectors.add(selector);
             
+            console.log(`[AutoApply] ✅ Tier 1 (CSS): ${fieldName || 'field'} filled with selector: ${selector}`);
             return 1;
           }
         } catch (e) {
           // Try next selector
         }
       }
+      
+      // Tier 2: Try DOM traversal with label matching (robust for dynamic forms)
+      if (fieldName) {
+        try {
+          const { fillFieldByLabel, fillTextareaByLabel, selectDropdownByLabel } = await import('./dom-field-detector');
+          
+          // Map field names to common label texts
+          const labelMappings: Record<string, string[]> = {
+            firstName: ['first name', 'first', 'given name', 'forename'],
+            lastName: ['last name', 'last', 'surname', 'family name'],
+            fullName: ['full name', 'name', 'your name', 'full legal name'],
+            email: ['email', 'email address', 'e-mail'],
+            phone: ['phone', 'phone number', 'mobile', 'telephone'],
+            location: ['location', 'city', 'address', 'where are you based'],
+            linkedin: ['linkedin', 'linkedin url', 'linkedin profile'],
+            github: ['github', 'github url', 'github profile'],
+            twitter: ['twitter', 'twitter handle', 'twitter url', 'x profile'],
+            portfolio: ['portfolio', 'website', 'personal website', 'portfolio url'],
+            currentCompany: ['current company', 'company', 'current employer', 'employer'],
+            currentTitle: ['current title', 'job title', 'current role', 'position'],
+            yearsOfExperience: ['years of experience', 'experience', 'years experience', 'how many years'],
+            workAuthorization: ['work authorization', 'work auth', 'visa status', 'authorized to work'],
+            howDidYouHear: ['how did you hear', 'referral', 'how did you find', 'source'],
+            availableStartDate: ['start date', 'available', 'when can you start', 'availability'],
+            coverLetter: ['cover letter', 'why', 'additional info', 'tell us about yourself'],
+          };
+          
+          const possibleLabels = labelMappings[fieldName] || [fieldName];
+          
+          for (const label of possibleLabels) {
+            // Try as regular input
+            const inputFilled = await fillFieldByLabel(page!, label, value, humanType);
+            if (inputFilled) {
+              console.log(`[AutoApply] ✅ Tier 2 (DOM): ${fieldName} filled via label "${label}"`);
+              return 1;
+            }
+            
+            // Try as textarea
+            const textareaFilled = await fillTextareaByLabel(page!, label, value, humanType);
+            if (textareaFilled) {
+              console.log(`[AutoApply] ✅ Tier 2 (DOM): ${fieldName} filled via textarea label "${label}"`);
+              return 1;
+            }
+            
+            // Try as dropdown (for workAuthorization, howDidYouHear, etc.)
+            if (['workAuthorization', 'howDidYouHear'].includes(fieldName)) {
+              const dropdownFilled = await selectDropdownByLabel(page!, label, value);
+              if (dropdownFilled) {
+                console.log(`[AutoApply] ✅ Tier 2 (DOM): ${fieldName} selected via dropdown label "${label}"`);
+                return 1;
+              }
+            }
+          }
+        } catch (domError) {
+          console.log(`[AutoApply] Tier 2 (DOM) failed for ${fieldName}:`, domError);
+        }
+      }
+      
       return 0;
     };
 
@@ -548,19 +610,26 @@ async function autoApplyToJobInternal(
     const url = page.url().toLowerCase();
     const bodyHtml = await page.evaluate(() => document.body.innerHTML.toLowerCase());
     
+    // Prioritize URL-based detection (more reliable) over body HTML
     atsType = 'generic'; // Update tracking variable
-    if (url.includes('greenhouse.io') || bodyHtml.includes('greenhouse')) {
+    if (url.includes('ashbyhq.com')) {
+      atsType = 'ashby';
+    } else if (url.includes('greenhouse.io')) {
       atsType = 'greenhouse';
-    } else if (url.includes('lever.co') || bodyHtml.includes('lever-frame')) {
+    } else if (url.includes('lever.co')) {
       atsType = 'lever';
-    } else if (url.includes('workable.com') || bodyHtml.includes('workable')) {
+    } else if (url.includes('workable.com')) {
       atsType = 'workable';
     } else if (url.includes('linkedin.com/jobs')) {
       atsType = 'linkedin';
-    } else if (url.includes('ashbyhq.com')) {
-      atsType = 'ashby';
     } else if (url.includes('teamtailor.com')) {
       atsType = 'teamtailor';
+    } else if (bodyHtml.includes('greenhouse')) {
+      atsType = 'greenhouse';
+    } else if (bodyHtml.includes('lever-frame')) {
+      atsType = 'lever';
+    } else if (bodyHtml.includes('workable')) {
+      atsType = 'workable';
     }
     
     console.log(`[AutoApply] Detected ATS type: ${atsType}`);
@@ -590,6 +659,7 @@ async function autoApplyToJobInternal(
       location: applicantData.location || '',
       linkedin: applicantData.linkedinUrl || '',
       github: applicantData.githubUrl || '',
+      twitter: applicantData.twitterUrl || '',
       portfolio: applicantData.portfolioUrl || '',
       coverLetter: applicantData.coverLetter || '',
       currentCompany: applicantData.currentCompany || '',
@@ -615,12 +685,12 @@ async function autoApplyToJobInternal(
       const value = fieldValues[fieldName];
       if (value) {
         attemptedFields.push(fieldName);
-        const filled = await fillField(mapping.selectors, value);
+        const filled = await fillField(mapping.selectors, value, fieldName);
         if (filled > 0) {
           filledFields.push(fieldName);
           console.log(`[AutoApply] ✅ Filled ${fieldName}: ${value.substring(0, 30)}...`);
         } else {
-          console.log(`[AutoApply] ⚠️ Field ${fieldName} not found on page (tried ${mapping.selectors.length} selectors)`);
+          console.log(`[AutoApply] ⚠️ Field ${fieldName} not found on page (tried ${mapping.selectors.length} CSS selectors + DOM traversal)`);
         }
         fieldsFilledCount += filled;
       } else {
@@ -644,21 +714,42 @@ async function autoApplyToJobInternal(
         // Use ATS-specific resume selectors
         const fileInputSelectors = fieldMappings.resume.selectors;
 
+        // Tier 1: Try CSS selectors first
         let fileInput = null;
         let selectorIndex = 0;
         for (const selector of fileInputSelectors) {
           selectorIndex++;
-          console.log(`[Resume Upload] Trying selector ${selectorIndex}/${fileInputSelectors.length}: ${selector}`);
+          console.log(`[Resume Upload] Tier 1: Trying CSS selector ${selectorIndex}/${fileInputSelectors.length}: ${selector}`);
           fileInput = await page.$(selector);
           if (fileInput) {
             resumeSelector = selector;
-            console.log(`[Resume Upload] ✅ Found resume input with selector: ${selector}`);
+            console.log(`[Resume Upload] ✅ Tier 1: Found resume input with CSS selector: ${selector}`);
             break;
           }
         }
 
+        // Tier 2: Try DOM traversal with label matching
         if (!fileInput) {
-          console.log(`[Resume Upload] ❌ No resume input found after trying ${fileInputSelectors.length} selectors`);
+          console.log(`[Resume Upload] Tier 1 failed, trying Tier 2 (DOM traversal)...`);
+          try {
+            const { findFileInputByLabel } = await import('./dom-field-detector');
+            const resumeLabels = ['resume', 'upload resume', 'cv', 'upload cv', 'attach resume'];
+            
+            for (const label of resumeLabels) {
+              fileInput = await findFileInputByLabel(page, label);
+              if (fileInput) {
+                resumeSelector = `DOM:${label}`;
+                console.log(`[Resume Upload] ✅ Tier 2: Found resume input via label "${label}"`);
+                break;
+              }
+            }
+          } catch (domError) {
+            console.log(`[Resume Upload] Tier 2 (DOM) error:`, domError);
+          }
+        }
+
+        if (!fileInput) {
+          console.log(`[Resume Upload] ❌ No resume input found after trying ${fileInputSelectors.length} CSS selectors + DOM traversal`);
         }
 
         if (fileInput) {
