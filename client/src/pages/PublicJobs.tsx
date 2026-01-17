@@ -27,6 +27,8 @@ export default function PublicJobs() {
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [jobType, setJobType] = useState<string>("all");
   const [location, setLocation] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 20;
   const { user } = useAuth();
   const [, setLocationPath] = useLocation();
 
@@ -35,7 +37,8 @@ export default function PublicJobs() {
     search,
     jobType: jobType === "all" ? undefined : jobType,
     location: location === "all" ? undefined : location,
-    limit: 100,
+    limit: itemsPerPage,
+    offset: (page - 1) * itemsPerPage,
   });
 
   const saveJobMutation = trpc.jobs.save.useMutation();
@@ -278,6 +281,7 @@ export default function PublicJobs() {
         {isLoading ? (
           <JobListSkeleton count={6} />
         ) : filteredJobs.length > 0 ? (
+          <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-lg transition-shadow">
@@ -347,6 +351,37 @@ export default function PublicJobs() {
               </Card>
             ))}
           </div>
+          
+          {/* Pagination Controls */}
+          {jobsData && jobsData.total > itemsPerPage && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 p-4 bg-slate-900/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">
+                Showing {((page - 1) * itemsPerPage) + 1} - {Math.min(page * itemsPerPage, jobsData.total)} of {jobsData.total} jobs
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-2 px-4">
+                  <span className="text-sm">Page {page} of {Math.ceil(jobsData.total / itemsPerPage)}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={page >= Math.ceil(jobsData.total / itemsPerPage)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
         ) : (
           <Card>
             <CardContent className="py-12 text-center">

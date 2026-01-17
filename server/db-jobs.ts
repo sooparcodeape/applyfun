@@ -46,8 +46,8 @@ export async function getAllJobs(filters?: {
     .limit(filters?.limit || 50)
     .offset(filters?.offset || 0);
 
-  // Get total count
-  const countResult = await db.select({ count: sql<number>`count(*)` }).from(jobs).where(eq(jobs.isActive, 1));
+  // Get total count with same filters
+  const countResult = await db.select({ count: sql<number>`count(*)` }).from(jobs).where(and(...conditions));
   const total = countResult[0]?.count || 0;
 
   return { jobs: allJobs, total };

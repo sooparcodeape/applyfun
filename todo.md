@@ -27,7 +27,7 @@
 - [ ] Search functionality (by title, company, location)
 - [ ] Filters (job type, salary range, remote/onsite, tags)
 - [ ] Job detail modal/page
-- [ ] Pagination for job listings
+- [x] Pagination for job listings (20 jobs per page with Previous/Next buttons)
 - [ ] Save/bookmark jobs feature
 
 ### Application Queue & Approval

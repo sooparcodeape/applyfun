@@ -1,5 +1,5 @@
 import axios from "axios";
-import { preAnalyzeFormDuringScraping } from "../vision-field-detector";
+// Vision pre-analysis removed - DOM traversal handles field detection at apply time
 
 interface ScrapedJob {
   externalId: string;
@@ -74,10 +74,7 @@ export async function scrapeAshbyCompany(companySlug: string, companyName: strin
           isActive: job.isListed ? 1 : 0,
         });
         
-        // Pre-analyze form with vision detection (runs in background)
-        preAnalyzeFormDuringScraping(applyUrl, 'ashby').catch((error: any) => {
-          console.log(`[Ashby-${companyName}] Vision analysis queued for ${job.title}`);
-        });
+        // Vision pre-analysis removed - DOM traversal handles field detection at apply time
       } catch (err) {
         console.error(`[Ashby-${companyName}] Error processing job:`, err);
       }
