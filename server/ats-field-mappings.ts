@@ -197,6 +197,52 @@ export const ASHBY_FIELDS: ATSFieldMappings = {
     type: 'text',
     priority: 3,
   },
+  university: {
+    selectors: [
+      'input[name*="university"]',
+      'input[name*="school"]',
+      'input[name*="college"]',
+      'input[id*="university"]',
+      'input[placeholder*="University"]',
+      'input[placeholder*="School"]',
+      'input[aria-label*="University"]',
+    ],
+    type: 'text',
+    priority: 5,
+  },
+  sponsorshipRequired: {
+    selectors: [
+      'input[name*="sponsorship"]',
+      'input[name*="visa"]',
+      'select[name*="sponsorship"]',
+      'input[id*="sponsorship"]',
+      'input[value="Yes"][name*="sponsor"]',
+      'input[value="No"][name*="sponsor"]',
+    ],
+    type: 'text',
+    priority: 5,
+  },
+  fintechExperience: {
+    selectors: [
+      'input[name*="fintech"]',
+      'select[name*="fintech"]',
+      'input[id*="fintech"]',
+      'input[value="Yes"][name*="fintech"]',
+      'input[value="No"][name*="fintech"]',
+    ],
+    type: 'text',
+    priority: 4,
+  },
+  fintechExperienceDescription: {
+    selectors: [
+      'textarea[name*="fintech"]',
+      'textarea[id*="fintech"]',
+      'textarea[placeholder*="fintech"]',
+      'textarea[placeholder*="experience"]',
+    ],
+    type: 'textarea',
+    priority: 4,
+  },
 };
 
 /**

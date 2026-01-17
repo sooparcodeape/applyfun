@@ -425,6 +425,18 @@ ${extractedText}`,
         yearsOfExperience: z.number().optional(),
         currentSalary: z.number().optional(),
         expectedSalary: z.number().optional(),
+        // New ATS fields
+        currentCompany: z.string().optional(),
+        currentTitle: z.string().optional(),
+        workAuthorization: z.string().optional(),
+        howDidYouHear: z.string().optional(),
+        availableStartDate: z.string().optional(),
+        willingToRelocate: z.number().optional(),
+        // Ashby-specific fields
+        university: z.string().optional(),
+        sponsorshipRequired: z.number().optional(),
+        fintechExperience: z.number().optional(),
+        fintechExperienceDescription: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await upsertUserProfile({

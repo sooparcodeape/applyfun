@@ -34,6 +34,11 @@ export interface JobApplicationData {
   workAuthorization?: string;
   howDidYouHear?: string;
   availableStartDate?: string;
+  // Ashby-specific fields
+  university?: string;
+  sponsorshipRequired?: boolean;
+  fintechExperience?: boolean;
+  fintechExperienceDescription?: string;
 }
 
 export interface ApplicationResult {
@@ -668,6 +673,10 @@ async function autoApplyToJobInternal(
       workAuthorization: applicantData.workAuthorization || '',
       howDidYouHear: applicantData.howDidYouHear || '',
       availableStartDate: applicantData.availableStartDate || '',
+      university: applicantData.university || '',
+      sponsorshipRequired: applicantData.sponsorshipRequired ? 'Yes' : 'No',
+      fintechExperience: applicantData.fintechExperience ? 'Yes' : 'No',
+      fintechExperienceDescription: applicantData.fintechExperienceDescription || '',
     };
     
     // Sort fields by priority (higher priority first)

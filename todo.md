@@ -1041,3 +1041,21 @@
 - [x] Add comprehensive Ashby field mappings for all common fields
 - [x] Enhance DOM traversal to find more fields (now 7/36 fields filled with available data)
 - [x] Test again and verify DOM traversal working (24/36 fields detected, 7 filled with user data)
+
+## Profile Page Redesign for Ashby Compatibility
+- [x] Fix resume parsing OpenAI API key issue (fixed misleading error message, restarted server)
+- [x] Add missing fields to user_profiles schema (university, sponsorship_required, fintech_experience, etc.)
+- [x] Redesign Profile page UI to match Ashby form structure
+- [x] Add University field (text input)
+- [x] Add Sponsorship Required field (Yes/No radio)
+- [x] Add Fintech Experience field (Yes/No radio + textarea for description)
+- [x] Update backend tRPC procedures to accept new fields
+- [x] Add new fields to job automation fieldValues mapping
+- [x] Add new fields to Ashby ATS field mappings
+- [x] Add Work Authorization dropdown (already implemented)
+- [x] Add Years of Experience field (already implemented)
+- [x] Add How Did You Hear dropdown (already implemented)
+- [x] Add Available Start Date picker (already implemented)
+- [ ] Update backend tRPC procedures to handle new fields
+- [ ] Test all fields save and load correctly
+- [ ] Verify 36/36 fields can be filled on Ashby forms after profile completion

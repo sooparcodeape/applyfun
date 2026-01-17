@@ -40,6 +40,11 @@ export default function Profile() {
     howDidYouHear: "",
     availableStartDate: "",
     willingToRelocate: 0,
+    // Ashby-specific fields
+    university: "",
+    sponsorshipRequired: 0,
+    fintechExperience: 0,
+    fintechExperienceDescription: "",
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -69,6 +74,11 @@ export default function Profile() {
         howDidYouHear: profileData.profile.howDidYouHear || "",
         availableStartDate: profileData.profile.availableStartDate || "",
         willingToRelocate: profileData.profile.willingToRelocate || 0,
+        // Ashby-specific fields
+        university: profileData.profile.university || "",
+        sponsorshipRequired: profileData.profile.sponsorshipRequired || 0,
+        fintechExperience: profileData.profile.fintechExperience || 0,
+        fintechExperienceDescription: profileData.profile.fintechExperienceDescription || "",
       });
     }
   });
@@ -541,6 +551,88 @@ export default function Profile() {
                     className="rounded border-gray-300"
                   />
                   <Label htmlFor="willingToRelocate" className="cursor-pointer">Willing to relocate</Label>
+                </div>
+
+                {/* Ashby-specific fields */}
+                <div className="border-t pt-4 mt-6">
+                  <h4 className="text-md font-semibold mb-3">Additional Information (Ashby Forms)</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="university">University</Label>
+                    <Input
+                      id="university"
+                      value={formData.university}
+                      onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                      placeholder="e.g., Stanford University"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Sponsorship Required?</Label>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="sponsorshipRequired"
+                            checked={formData.sponsorshipRequired === 0}
+                            onChange={() => setFormData({ ...formData, sponsorshipRequired: 0 })}
+                            className="rounded-full"
+                          />
+                          <span>No</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="sponsorshipRequired"
+                            checked={formData.sponsorshipRequired === 1}
+                            onChange={() => setFormData({ ...formData, sponsorshipRequired: 1 })}
+                            className="rounded-full"
+                          />
+                          <span>Yes</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Fintech Experience?</Label>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="fintechExperience"
+                            checked={formData.fintechExperience === 0}
+                            onChange={() => setFormData({ ...formData, fintechExperience: 0 })}
+                            className="rounded-full"
+                          />
+                          <span>No</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="fintechExperience"
+                            checked={formData.fintechExperience === 1}
+                            onChange={() => setFormData({ ...formData, fintechExperience: 1 })}
+                            className="rounded-full"
+                          />
+                          <span>Yes</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {formData.fintechExperience === 1 && (
+                    <div className="space-y-2 mt-4">
+                      <Label htmlFor="fintechExperienceDescription">Describe your fintech experience</Label>
+                      <Textarea
+                        id="fintechExperienceDescription"
+                        value={formData.fintechExperienceDescription}
+                        onChange={(e) => setFormData({ ...formData, fintechExperienceDescription: e.target.value })}
+                        placeholder="Describe your experience in fintech..."
+                        rows={3}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
