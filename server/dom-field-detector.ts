@@ -267,3 +267,107 @@ export async function findFileInputByLabel(
     return null;
   }
 }
+
+/**
+ * Find and click a radio button by label and value
+ */
+export async function selectRadioByLabel(
+  page: Page,
+  questionLabel: string,
+  answerValue: string | boolean
+): Promise<boolean> {
+  try {
+    // Convert boolean to Yes/No
+    let targetAnswer = answerValue;
+    if (typeof answerValue === 'boolean') {
+      targetAnswer = answerValue ? 'yes' : 'no';
+    }
+    const normalizedAnswer = String(targetAnswer).toLowerCase().trim();
+    
+    console.log(`[DOM Detector] Looking for radio: "${questionLabel}" = "${normalizedAnswer}"`);
+    
+    // Find radio buttons associated with the question
+    const radioButton = await page.evaluateHandle(
+      (questionText: string, answer: string) => {
+        const normalizedQuestion = questionText.toLowerCase().trim();
+        const normalizedAnswer = answer.toLowerCase().trim();
+        
+        // Find all labels/text containing the question
+        const allElements = Array.from(document.querySelectorAll('label, legend, div, span, p'));
+        
+        for (const element of allElements) {
+          const text = element.textContent?.toLowerCase().trim() || '';
+          
+          // Check if this element contains the question
+          if (text.includes(normalizedQuestion) && text.length < 500) {
+            // Look for radio buttons in the same container
+            const container = element.closest('fieldset, div[role="radiogroup"], div, section');
+            if (container) {
+              const radios = Array.from(container.querySelectorAll('input[type="radio"]'));
+              
+              // Try to find radio by associated label
+              for (const radio of radios) {
+                // Check label via "for" attribute
+                const radioId = radio.getAttribute('id');
+                if (radioId) {
+                  const label = container.querySelector(`label[for="${radioId}"]`);
+                  if (label) {
+                    const labelText = label.textContent?.toLowerCase().trim() || '';
+                    if (labelText.includes(normalizedAnswer) || 
+                        (normalizedAnswer === 'yes' && labelText === 'yes') ||
+                        (normalizedAnswer === 'no' && labelText === 'no')) {
+                      return radio;
+                    }
+                  }
+                }
+                
+                // Check label wrapping the radio
+                const parentLabel = radio.closest('label');
+                if (parentLabel) {
+                  const labelText = parentLabel.textContent?.toLowerCase().trim() || '';
+                  if (labelText.includes(normalizedAnswer) ||
+                      (normalizedAnswer === 'yes' && labelText === 'yes') ||
+                      (normalizedAnswer === 'no' && labelText === 'no')) {
+                    return radio;
+                  }
+                }
+                
+                // Check sibling text
+                const nextSibling = radio.nextSibling;
+                if (nextSibling && nextSibling.textContent) {
+                  const siblingText = nextSibling.textContent.toLowerCase().trim();
+                  if (siblingText.includes(normalizedAnswer) ||
+                      (normalizedAnswer === 'yes' && siblingText === 'yes') ||
+                      (normalizedAnswer === 'no' && siblingText === 'no')) {
+                    return radio;
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        return null;
+      },
+      questionLabel,
+      normalizedAnswer
+    );
+    
+    const radioElement = await radioButton.asElement();
+    if (radioElement) {
+      console.log(`[DOM Detector] Found radio button for "${questionLabel}" = "${normalizedAnswer}"`);
+      
+      // Click the radio button
+      await (radioElement as any).click();
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+      
+      return true;
+    }
+    
+    console.log(`[DOM Detector] Radio button not found for "${questionLabel}" = "${normalizedAnswer}"`);
+    return false;
+  } catch (error) {
+    console.error(`[DOM Detector] Error selecting radio "${questionLabel}":`, error);
+    return false;
+  }
+}

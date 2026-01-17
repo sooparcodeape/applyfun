@@ -513,7 +513,7 @@ async function autoApplyToJobInternal(
       // Tier 2: Try DOM traversal with label matching (robust for dynamic forms)
       if (fieldName) {
         try {
-          const { fillFieldByLabel, fillTextareaByLabel, selectDropdownByLabel } = await import('./dom-field-detector');
+          const { fillFieldByLabel, fillTextareaByLabel, selectDropdownByLabel, selectRadioByLabel } = await import('./dom-field-detector');
           
           // Map field names to common label texts
           const labelMappings: Record<string, string[]> = {
@@ -534,6 +534,11 @@ async function autoApplyToJobInternal(
             howDidYouHear: ['how did you hear', 'referral', 'how did you find', 'source'],
             availableStartDate: ['start date', 'available', 'when can you start', 'availability'],
             coverLetter: ['cover letter', 'why', 'additional info', 'tell us about yourself'],
+            university: ['university', 'college', 'school', 'which university', 'which one did you earn', 'degree'],
+            sponsorshipRequired: ['sponsorship', 'require sponsorship', 'employer sponsorship', 'will you now or in the future require'],
+            willingToRelocate: ['relocation', 'relocate', 'open to relocation', 'willing to relocate', 'hybrid role'],
+            fintechExperience: ['fintech', 'payments', 'crypto', 'stablecoins', 'blockchain', 'experience within fintech'],
+            fintechExperienceDescription: ['describe your experience', 'please describe', 'if so please describe', 'what made you apply'],
           };
           
           const possibleLabels = labelMappings[fieldName] || [fieldName];
@@ -553,8 +558,17 @@ async function autoApplyToJobInternal(
               return 1;
             }
             
+            // Try as radio button (for boolean/Yes-No questions)
+            if (['sponsorshipRequired', 'fintechExperience', 'willingToRelocate'].includes(fieldName)) {
+              const radioFilled = await selectRadioByLabel(page!, label, value);
+              if (radioFilled) {
+                console.log(`[AutoApply] ✅ Tier 2 (DOM): ${fieldName} selected via radio label "${label}"`);
+                return 1;
+              }
+            }
+            
             // Try as dropdown (for workAuthorization, howDidYouHear, etc.)
-            if (['workAuthorization', 'howDidYouHear'].includes(fieldName)) {
+            if (['workAuthorization', 'howDidYouHear', 'yearsOfExperience'].includes(fieldName)) {
               const dropdownFilled = await selectDropdownByLabel(page!, label, value);
               if (dropdownFilled) {
                 console.log(`[AutoApply] ✅ Tier 2 (DOM): ${fieldName} selected via dropdown label "${label}"`);
