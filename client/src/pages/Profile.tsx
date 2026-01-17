@@ -1,95 +1,121 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Upload, Plus, X, Loader2, FileText, Download } from "lucide-react";
-import { NextScrapeCountdown } from "@/components/NextScrapeCountdown";
-import { type ParsedResume } from "@/lib/resume-parser";
+import { Upload, Loader2, FileText, Download, CheckCircle2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 export default function Profile() {
   const { data: profileData, isLoading, refetch } = trpc.profile.get.useQuery();
   const updateProfile = trpc.profile.update.useMutation();
   const uploadResume = trpc.profile.uploadResume.useMutation();
   const parseResumeMutation = trpc.profile.parseResume.useMutation();
-  const addWorkExperience = trpc.workExperience.add.useMutation();
-  const deleteWorkExperience = trpc.workExperience.delete.useMutation();
-  const addSkill = trpc.skills.add.useMutation();
-  const deleteSkill = trpc.skills.delete.useMutation();
 
   const [formData, setFormData] = useState({
+    // Basic Info
     phone: "",
     location: "",
     linkedinUrl: "",
     githubUrl: "",
-    telegramHandle: "",
     twitterHandle: "",
     portfolioUrl: "",
     bio: "",
-    yearsOfExperience: 0,
-    currentSalary: 0,
-    expectedSalary: 0,
-    // New ATS fields
+    
+    // Work Info
     currentCompany: "",
     currentTitle: "",
-    workAuthorization: "",
-    howDidYouHear: "",
-    availableStartDate: "",
-    willingToRelocate: 0,
-    // Ashby-specific fields
+    yearsOfExperience: 0,
+    
+    // AshbyHQ specific fields
+    workAuthorization: "", // "yes" | "no"
+    willingToRelocate: 0, // 0=no, 1=yes, 2=open to relocation, 3=open to discussing
     university: "",
-    sponsorshipRequired: 0,
-    fintechExperience: 0,
+    graduatedFromUniversity: 0, // 0=no, 1=yes
+    sponsorshipRequired: 0, // 0=no, 1=yes, 2=not now but future
+    fintechExperience: 0, // 0=no, 1=yes
     fintechExperienceDescription: "",
+    whyApply: "", // "What made you apply to this role?"
+    yearsOfExperienceRange: "", // "1-3" | "3-5" | "5-9" | "9-10+"
   });
 
-  const [newSkill, setNewSkill] = useState("");
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Calculate profile completion
+  const calculateCompletion = () => {
+    const fields = [
+      formData.phone,
+      formData.location,
+      formData.linkedinUrl,
+      formData.githubUrl,
+      formData.currentCompany,
+      formData.workAuthorization,
+      formData.university,
+      formData.yearsOfExperienceRange,
+      profileData?.profile?.resumeUrl,
+    ];
+    const filled = fields.filter(f => f && f !== "").length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
   // Update form data when profile loads
-  useState(() => {
+  useEffect(() => {
     if (profileData?.profile) {
       setFormData({
         phone: profileData.profile.phone || "",
         location: profileData.profile.location || "",
         linkedinUrl: profileData.profile.linkedinUrl || "",
         githubUrl: profileData.profile.githubUrl || "",
-        telegramHandle: profileData.profile.telegramHandle || "",
         twitterHandle: profileData.profile.twitterHandle || "",
         portfolioUrl: profileData.profile.portfolioUrl || "",
         bio: profileData.profile.bio || "",
-        yearsOfExperience: profileData.profile.yearsOfExperience || 0,
-        currentSalary: profileData.profile.currentSalary || 0,
-        expectedSalary: profileData.profile.expectedSalary || 0,
-        // New ATS fields
         currentCompany: profileData.profile.currentCompany || "",
         currentTitle: profileData.profile.currentTitle || "",
+        yearsOfExperience: profileData.profile.yearsOfExperience || 0,
         workAuthorization: profileData.profile.workAuthorization || "",
-        howDidYouHear: profileData.profile.howDidYouHear || "",
-        availableStartDate: profileData.profile.availableStartDate || "",
         willingToRelocate: profileData.profile.willingToRelocate || 0,
-        // Ashby-specific fields
         university: profileData.profile.university || "",
+        graduatedFromUniversity: profileData.profile.university ? 1 : 0,
         sponsorshipRequired: profileData.profile.sponsorshipRequired || 0,
         fintechExperience: profileData.profile.fintechExperience || 0,
         fintechExperienceDescription: profileData.profile.fintechExperienceDescription || "",
+        whyApply: profileData.profile.howDidYouHear || "",
+        yearsOfExperienceRange: getExperienceRange(profileData.profile.yearsOfExperience || 0),
       });
     }
-  });
+  }, [profileData]);
+
+  const getExperienceRange = (years: number): string => {
+    if (years >= 10) return "9-10+";
+    if (years >= 5) return "5-9";
+    if (years >= 3) return "3-5";
+    return "1-3";
+  };
 
   const handleSaveProfile = async () => {
     try {
-      await updateProfile.mutateAsync(formData);
-      toast.success("Profile updated successfully!");
+      // Convert experience range to number
+      let yearsNum = formData.yearsOfExperience;
+      if (formData.yearsOfExperienceRange === "1-3") yearsNum = 2;
+      else if (formData.yearsOfExperienceRange === "3-5") yearsNum = 4;
+      else if (formData.yearsOfExperienceRange === "5-9") yearsNum = 7;
+      else if (formData.yearsOfExperienceRange === "9-10+") yearsNum = 10;
+
+      await updateProfile.mutateAsync({
+        ...formData,
+        yearsOfExperience: yearsNum,
+        howDidYouHear: formData.whyApply,
+      });
+      toast.success("Profile saved!");
       refetch();
     } catch (error) {
-      toast.error("Failed to update profile");
+      toast.error("Failed to save profile");
     }
   };
 
@@ -97,697 +123,467 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword"
-    ];
-    
-    if (!validTypes.includes(file.type)) {
-      toast.error("Please upload a PDF or Word document (.pdf, .doc, .docx)");
+    if (!file.type.includes("pdf") && !file.type.includes("word")) {
+      toast.error("Please upload a PDF or Word document");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File size must be less than 10MB");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
       return;
     }
 
     setUploading(true);
     setParsing(true);
-    
-    try {
-      // 1. Parse resume via server
-      toast.info("Parsing your resume...");
-      const fileData = await file.arrayBuffer();
-      const bytes = new Uint8Array(fileData);
-      const binaryString = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
-      const base64Data = btoa(binaryString);
-      const parsed = await parseResumeMutation.mutateAsync({
-        resumeBase64: `data:${file.type};base64,${base64Data}`,
-      }) as ParsedResume;
-      
-      // 2. Upload resume file to S3
-      await uploadResume.mutateAsync({
-        fileName: file.name,
-        fileData: base64Data,
-        mimeType: file.type,
-      });
-      
-      setParsing(false);
-      
-      // 3. Update profile with parsed data
-      await updateProfile.mutateAsync({
-        phone: parsed.phone || formData.phone,
-        location: parsed.location || formData.location,
-        bio: parsed.summary || formData.bio,
-        githubUrl: parsed.links?.github || formData.githubUrl,
-        linkedinUrl: parsed.links?.linkedin || formData.linkedinUrl,
-        twitterHandle: parsed.links?.twitter || formData.twitterHandle,
-      });
-      
-      // 4. Add skills as individual tags
-      let skillsAdded = 0;
-      if (parsed.skills && parsed.skills.length > 0) {
-        for (const skill of parsed.skills) {
-          try {
-            await addSkill.mutateAsync({
-              name: skill,
-              category: 'technical',
-            });
-            skillsAdded++;
-          } catch (err) {
-            // Skip if skill already exists
-            console.log(`Skill "${skill}" already exists`);
-          }
-        }
-      }
-      
-      // 5. Add work experience entries
-      let experiencesAdded = 0;
-      if (parsed.experience && parsed.experience.length > 0) {
-        for (const exp of parsed.experience) {
-          try {
-            const startDate = exp.startDate ? new Date(exp.startDate) : new Date();
-            const endDate = exp.endDate && exp.endDate.toLowerCase() !== 'present' ? new Date(exp.endDate) : null;
-            const isCurrent = !endDate || exp.endDate?.toLowerCase() === 'present' ? 1 : 0;
-            
-            await addWorkExperience.mutateAsync({
-              company: exp.company,
-              position: exp.title,
-              description: exp.description || '',
-              startDate,
-              endDate: endDate || undefined,
-              isCurrent,
-            });
-            experiencesAdded++;
-          } catch (err) {
-            console.log(`Failed to add experience at ${exp.company}:`, err);
-          }
-        }
-      }
 
-      toast.success(
-        `Resume uploaded and parsed! Added ${skillsAdded} skills and ${experiencesAdded} work experiences.`,
-        { duration: 5000 }
-      );
-      refetch();
-      
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    } catch (error: any) {
-      console.error("[Resume Upload] Error:", error);
-      toast.error(`Failed to parse resume: ${error.message}`);
-    } finally {
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        try {
+          // Parse resume with LLM
+          const parsed = await parseResumeMutation.mutateAsync({
+            resumeBase64: base64,
+            fileName: file.name,
+            mimeType: file.type,
+          });
+
+          // Update form with parsed data
+          if (parsed) {
+            setFormData(prev => ({
+              ...prev,
+              phone: parsed.phone || prev.phone,
+              location: parsed.location || prev.location,
+              linkedinUrl: parsed.linkedin || prev.linkedinUrl,
+              githubUrl: parsed.github || prev.githubUrl,
+            }));
+            toast.success("Resume parsed! Review and save your profile.");
+          }
+
+          // Upload to S3
+          await uploadResume.mutateAsync({
+            resumeBase64: base64,
+            fileName: file.name,
+            mimeType: file.type,
+          });
+
+          refetch();
+        } catch (err) {
+          console.error("Parse error:", err);
+          toast.error("Failed to parse resume");
+        } finally {
+          setParsing(false);
+          setUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Failed to upload resume");
       setUploading(false);
       setParsing(false);
     }
   };
 
-  const handleAddSkill = async () => {
-    if (!newSkill.trim()) return;
-
-    try {
-      await addSkill.mutateAsync({ name: newSkill.trim() });
-      setNewSkill("");
-      toast.success("Skill added!");
-      refetch();
-    } catch (error) {
-      toast.error("Failed to add skill");
-    }
-  };
-
-  const handleDeleteSkill = async (id: number) => {
-    try {
-      await deleteSkill.mutateAsync({ id });
-      toast.success("Skill removed!");
-      refetch();
-    } catch (error) {
-      toast.error("Failed to remove skill");
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
       </div>
     );
   }
 
-  // Calculate profile completion percentage
-  const calculateCompletion = () => {
-    if (!profileData?.profile) return { percentage: 0, missing: [] };
-    
-    // Essential fields based on actual AshbyHQ form requirements (Rain, etc.)
-    const essentialFields = [
-      { key: 'phone', label: 'Phone number', required: true },
-      { key: 'resumeUrl', label: 'Resume', required: true },
-      { key: 'location', label: 'Location', required: false },
-      { key: 'linkedinUrl', label: 'LinkedIn URL', required: false },
-      { key: 'githubUrl', label: 'GitHub URL', required: false },
-      { key: 'portfolioUrl', label: 'Portfolio/Website', required: false },
-      { key: 'currentCompany', label: 'Current Company', required: false },
-      { key: 'currentTitle', label: 'Current Title', required: false },
-      { key: 'yearsOfExperience', label: 'Years of Experience', required: false },
-      { key: 'workAuthorization', label: 'Work Authorization', required: false },
-    ];
-    
-    const profile = profileData.profile as any;
-    const filledFields = essentialFields.filter(field => {
-      const value = profile[field.key];
-      return value !== null && value !== undefined && value !== '' && value !== 0;
-    });
-    
-    const missing = essentialFields
-      .filter(field => {
-        const value = profile[field.key];
-        return value === null || value === undefined || value === '' || value === 0;
-      })
-      .map(f => f.label);
-    
-    // Calculate weighted percentage - required fields count more
-    const requiredFields = essentialFields.filter(f => f.required);
-    const optionalFields = essentialFields.filter(f => !f.required);
-    const filledRequired = filledFields.filter(f => requiredFields.some(r => r.key === f.key)).length;
-    const filledOptional = filledFields.filter(f => optionalFields.some(o => o.key === f.key)).length;
-    
-    // Weight: Required = 60%, Optional = 40%
-    const requiredScore = requiredFields.length > 0 ? (filledRequired / requiredFields.length) * 60 : 60;
-    const optionalScore = optionalFields.length > 0 ? (filledOptional / optionalFields.length) * 40 : 0;
-    
-    return {
-      percentage: Math.round(requiredScore + optionalScore),
-      missing,
-      filled: filledFields.length,
-      total: essentialFields.length
-    };
-  };
-  
   const completion = calculateCompletion();
 
-  // Debug logging
-  console.log('[Profile] Completion data:', completion);
-  console.log('[Profile] Profile data:', profileData?.profile);
-
   return (
-    <div className="space-y-6">
-      {/* Profile Completion Progress Bar - Always show */}
-      {profileData?.profile && (
-        <>
-          {completion.percentage < 100 ? (
-            <Card className="border-purple-500/20 bg-purple-500/5">
-              <CardContent className="pt-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-lg">Profile Completion</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Complete your profile to maximize application success rate
-                      </p>
-                    </div>
-                    <div className="text-2xl font-bold text-purple-500">{completion.percentage}%</div>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                      style={{ width: `${completion.percentage}%` }}
-                    />
-                  </div>
-                  
-                  {completion.missing.length > 0 && (
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium">Missing fields:</span> {completion.missing.join(', ')}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-green-500/20 bg-green-500/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg text-green-500">Profile Complete!</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Your profile is fully optimized for automated job applications
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+    <div className="space-y-6 max-w-4xl mx-auto p-4">
+      {/* Profile Completion */}
+      <Card className="border-purple-500/30 bg-purple-500/5">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Profile Completion</CardTitle>
+            <span className="text-2xl font-bold text-purple-400">{completion}%</span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Progress value={completion} className="h-3" />
+          <p className="text-sm text-muted-foreground mt-2">
+            Complete your profile to auto-fill more application fields
+          </p>
+        </CardContent>
+      </Card>
 
-      <div>
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
-          <p className="text-muted-foreground">Manage your profile and application information</p>
-          <NextScrapeCountdown />
-        </div>
-      </div>
-
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList>
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="resume">Resume</TabsTrigger>
-          <TabsTrigger value="skills">Skills</TabsTrigger>
-          <TabsTrigger value="experience">Experience</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your contact and social information</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+1 234 567 8900"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="San Francisco, CA"
-                  />
-                </div>
+      {/* Resume Upload */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Resume
+          </CardTitle>
+          <CardDescription>
+            Upload your resume to autofill application fields
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.doc,.docx"
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || parsing}
+              variant="outline"
+              className="border-pink-500 text-pink-500 hover:bg-pink-500/10"
+            >
+              {uploading || parsing ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              {parsing ? "Parsing..." : uploading ? "Uploading..." : "Upload File"}
+            </Button>
+            {profileData?.profile?.resumeUrl && (
+              <div className="flex items-center gap-2 text-green-500">
+                <CheckCircle2 className="h-4 w-4" />
+                <a
+                  href={profileData.profile.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:underline"
+                >
+                  View Resume
+                </a>
               </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  placeholder="Tell us about yourself..."
-                  rows={4}
+      {/* Basic Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Basic Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="1-415-555-1234..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location *</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="San Francisco, CA"
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentCompany">Current Company *</Label>
+              <Input
+                id="currentCompany"
+                value={formData.currentCompany}
+                onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
+                placeholder="Type here..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currentTitle">Current Title</Label>
+              <Input
+                id="currentTitle"
+                value={formData.currentTitle}
+                onChange={(e) => setFormData({ ...formData, currentTitle: e.target.value })}
+                placeholder="Software Engineer"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Links */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Social & Portfolio Links</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="linkedinUrl">LinkedIn *</Label>
+              <Input
+                id="linkedinUrl"
+                value={formData.linkedinUrl}
+                onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                placeholder="https://linkedin.com/in/..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="githubUrl">GitHub</Label>
+              <Input
+                id="githubUrl"
+                value={formData.githubUrl}
+                onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
+                placeholder="https://github.com/..."
+              />
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="twitterHandle">Twitter</Label>
+              <Input
+                id="twitterHandle"
+                value={formData.twitterHandle}
+                onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
+                placeholder="@username"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="portfolioUrl">Website or Portfolio</Label>
+              <Input
+                id="portfolioUrl"
+                value={formData.portfolioUrl}
+                onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Work Authorization */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Work Authorization</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>Are you legally authorized to work in the United States for ANY employer without ANY restrictions? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="workAuth"
+                  checked={formData.workAuthorization === "yes"}
+                  onChange={() => setFormData({ ...formData, workAuthorization: "yes" })}
+                  className="w-4 h-4"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
-                  <Input
-                    id="linkedinUrl"
-                    value={formData.linkedinUrl}
-                    onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                    placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="githubUrl">GitHub URL</Label>
-                  <Input
-                    id="githubUrl"
-                    value={formData.githubUrl}
-                    onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                    placeholder="https://github.com/username"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="telegramHandle">Telegram Handle</Label>
-                  <Input
-                    id="telegramHandle"
-                    value={formData.telegramHandle}
-                    onChange={(e) => setFormData({ ...formData, telegramHandle: e.target.value })}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="twitterHandle">Twitter Handle</Label>
-                  <Input
-                    id="twitterHandle"
-                    value={formData.twitterHandle}
-                    onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
-                    placeholder="@username"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="portfolioUrl">Portfolio URL</Label>
-                <Input
-                  id="portfolioUrl"
-                  value={formData.portfolioUrl}
-                  onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
-                  placeholder="https://yourportfolio.com"
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="workAuth"
+                  checked={formData.workAuthorization === "no"}
+                  onChange={() => setFormData({ ...formData, workAuthorization: "no" })}
+                  className="w-4 h-4"
                 />
-              </div>
+                <span>No</span>
+              </label>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-                  <Input
-                    id="yearsOfExperience"
-                    type="number"
-                    value={formData.yearsOfExperience}
-                    onChange={(e) => setFormData({ ...formData, yearsOfExperience: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="currentSalary">Current Salary (USD)</Label>
-                  <Input
-                    id="currentSalary"
-                    type="number"
-                    value={formData.currentSalary}
-                    onChange={(e) => setFormData({ ...formData, currentSalary: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expectedSalary">Expected Salary (USD)</Label>
-                  <Input
-                    id="expectedSalary"
-                    type="number"
-                    value={formData.expectedSalary}
-                    onChange={(e) => setFormData({ ...formData, expectedSalary: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-              </div>
-
-              <div className="border-t pt-4 mt-6">
-                <h3 className="text-lg font-semibold mb-4">Job Application Details</h3>
-                <p className="text-sm text-muted-foreground mb-4">Complete these fields to automatically fill more application forms</p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentCompany">Current Company</Label>
-                    <Input
-                      id="currentCompany"
-                      value={formData.currentCompany}
-                      onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
-                      placeholder="e.g., Coinbase"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="currentTitle">Current Title</Label>
-                    <Input
-                      id="currentTitle"
-                      value={formData.currentTitle}
-                      onChange={(e) => setFormData({ ...formData, currentTitle: e.target.value })}
-                      placeholder="e.g., Senior Software Engineer"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="workAuthorization">Work Authorization</Label>
-                    <Input
-                      id="workAuthorization"
-                      value={formData.workAuthorization}
-                      onChange={(e) => setFormData({ ...formData, workAuthorization: e.target.value })}
-                      placeholder="e.g., US Citizen, Green Card, H1B"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="availableStartDate">Available Start Date</Label>
-                    <Input
-                      id="availableStartDate"
-                      value={formData.availableStartDate}
-                      onChange={(e) => setFormData({ ...formData, availableStartDate: e.target.value })}
-                      placeholder="e.g., Immediately, 2 weeks, 1 month"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2 mt-4">
-                  <Label htmlFor="howDidYouHear">How did you hear about us? (Default answer for applications)</Label>
-                  <Input
-                    id="howDidYouHear"
-                    value={formData.howDidYouHear}
-                    onChange={(e) => setFormData({ ...formData, howDidYouHear: e.target.value })}
-                    placeholder="e.g., LinkedIn, Company website, Referral"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2 mt-4">
+          <div className="space-y-3">
+            <Label>Are you able to work in a hybrid role and come into a NYC office 3 days a week? *</Label>
+            <div className="space-y-2">
+              {[
+                { value: 1, label: "Yes" },
+                { value: 0, label: "No" },
+                { value: 2, label: "Open to relocation" },
+                { value: 3, label: "Open to discussing" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="checkbox"
-                    id="willingToRelocate"
-                    checked={formData.willingToRelocate === 1}
-                    onChange={(e) => setFormData({ ...formData, willingToRelocate: e.target.checked ? 1 : 0 })}
-                    className="rounded border-gray-300"
+                    type="radio"
+                    name="relocate"
+                    checked={formData.willingToRelocate === option.value}
+                    onChange={() => setFormData({ ...formData, willingToRelocate: option.value })}
+                    className="w-4 h-4"
                   />
-                  <Label htmlFor="willingToRelocate" className="cursor-pointer">Willing to relocate</Label>
-                </div>
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-                {/* Ashby-specific fields */}
-                <div className="border-t pt-4 mt-6">
-                  <h4 className="text-md font-semibold mb-3">Additional Information (Ashby Forms)</h4>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="university">University</Label>
-                    <Input
-                      id="university"
-                      value={formData.university}
-                      onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                      placeholder="e.g., Stanford University"
-                    />
-                  </div>
+          <div className="space-y-3">
+            <Label>Will you now or in the future require employer sponsorship for work authorization? *</Label>
+            <div className="space-y-2">
+              {[
+                { value: 1, label: "Yes" },
+                { value: 2, label: "Not right now, but in the future yes" },
+                { value: 0, label: "No" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="sponsorship"
+                    checked={formData.sponsorshipRequired === option.value}
+                    onChange={() => setFormData({ ...formData, sponsorshipRequired: option.value })}
+                    className="w-4 h-4"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="space-y-2">
-                      <Label>Sponsorship Required?</Label>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="sponsorshipRequired"
-                            checked={formData.sponsorshipRequired === 0}
-                            onChange={() => setFormData({ ...formData, sponsorshipRequired: 0 })}
-                            className="rounded-full"
-                          />
-                          <span>No</span>
-                        </label>
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="sponsorshipRequired"
-                            checked={formData.sponsorshipRequired === 1}
-                            onChange={() => setFormData({ ...formData, sponsorshipRequired: 1 })}
-                            className="rounded-full"
-                          />
-                          <span>Yes</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Fintech Experience?</Label>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="fintechExperience"
-                            checked={formData.fintechExperience === 0}
-                            onChange={() => setFormData({ ...formData, fintechExperience: 0 })}
-                            className="rounded-full"
-                          />
-                          <span>No</span>
-                        </label>
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="fintechExperience"
-                            checked={formData.fintechExperience === 1}
-                            onChange={() => setFormData({ ...formData, fintechExperience: 1 })}
-                            className="rounded-full"
-                          />
-                          <span>Yes</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  {formData.fintechExperience === 1 && (
-                    <div className="space-y-2 mt-4">
-                      <Label htmlFor="fintechExperienceDescription">Describe your fintech experience</Label>
-                      <Textarea
-                        id="fintechExperienceDescription"
-                        value={formData.fintechExperienceDescription}
-                        onChange={(e) => setFormData({ ...formData, fintechExperienceDescription: e.target.value })}
-                        placeholder="Describe your experience in fintech..."
-                        rows={3}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <Button onClick={handleSaveProfile} disabled={updateProfile.isPending} className="w-full mt-6">
-                {updateProfile.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Save Profile
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="resume">
-          <Card>
-            <CardHeader>
-              <CardTitle>Resume / CV</CardTitle>
-              <CardDescription>
-                Upload your resume to auto-fill profile and applications.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {profileData?.profile?.resumeUrl && (
-                <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium mb-1">Current Resume</p>
-                        <p className="text-xs text-muted-foreground">
-                          {profileData.profile.resumeFileKey?.split('/').pop() || 'resume.pdf'}
-                        </p>
-                      </div>
-                    </div>
-                    <a
-                      href={profileData.profile.resumeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-purple-500 hover:text-purple-400"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                {parsing ? (
-                  <div className="space-y-4">
-                    <Loader2 className="h-12 w-12 mx-auto animate-spin text-purple-500" />
-                    <div>
-                      <p className="text-sm font-medium mb-1">Parsing your resume...</p>
-                      <p className="text-xs text-muted-foreground">
-                        Extracting skills, experience, and contact info using your browser
-                      </p>
-                    </div>
-                  </div>
-                ) : uploading ? (
-                  <div className="space-y-4">
-                    <Loader2 className="h-12 w-12 mx-auto animate-spin text-purple-500" />
-                    <div>
-                      <p className="text-sm font-medium mb-1">Uploading to S3...</p>
-                      <p className="text-xs text-muted-foreground">Saving your resume file</p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm font-medium mb-2">
-                      Upload a new resume
-                    </p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      PDF, DOC, or DOCX • Max 10MB • Auto-parses skills & experience
-                    </p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
-                      onChange={handleFileUpload}
-                      disabled={uploading || parsing}
-                      className="hidden"
-                    />
-                    <Button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading || parsing}
-                      variant="outline"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Choose File
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="skills">
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills</CardTitle>
-              <CardDescription>Add your technical and soft skills</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  placeholder="e.g., Solidity, React, Smart Contracts"
-                  onKeyPress={(e) => e.key === "Enter" && handleAddSkill()}
+      {/* Education & Experience */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Education & Experience</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>Did you graduate from a 4 year university? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="graduated"
+                  checked={formData.graduatedFromUniversity === 1}
+                  onChange={() => setFormData({ ...formData, graduatedFromUniversity: 1 })}
+                  className="w-4 h-4"
                 />
-                <Button onClick={handleAddSkill} disabled={addSkill.isPending}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="graduated"
+                  checked={formData.graduatedFromUniversity === 0}
+                  onChange={() => setFormData({ ...formData, graduatedFromUniversity: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
+            </div>
+          </div>
 
-              <div className="flex flex-wrap gap-2">
-                {profileData?.skills?.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="flex items-center gap-2 px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded-full"
-                  >
-                    <span className="text-sm">{skill.name}</span>
-                    <button
-                      onClick={() => handleDeleteSkill(skill.id)}
-                      className="hover:text-red-500 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+          {formData.graduatedFromUniversity === 1 && (
+            <div className="space-y-2">
+              <Label htmlFor="university">If you did graduate from a 4 year university, which one did you earn your degree? *</Label>
+              <Input
+                id="university"
+                value={formData.university}
+                onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                placeholder="Type here..."
+              />
+            </div>
+          )}
 
-              {profileData?.skills?.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No skills added yet. Add your first skill above!
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div className="space-y-3">
+            <Label>How many years of industry experience do you have? *</Label>
+            <p className="text-xs text-muted-foreground">Exclude internships or personal projects. Include jobs you've held after graduating university.</p>
+            <div className="space-y-2">
+              {[
+                { value: "1-3", label: "1-3 years" },
+                { value: "3-5", label: "3-5 years" },
+                { value: "5-9", label: "5-9 years" },
+                { value: "9-10+", label: "9-10+ years" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="experience"
+                    checked={formData.yearsOfExperienceRange === option.value}
+                    onChange={() => setFormData({ ...formData, yearsOfExperienceRange: option.value })}
+                    className="w-4 h-4"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="experience">
-          <Card>
-            <CardHeader>
-              <CardTitle>Work Experience</CardTitle>
-              <CardDescription>Add your work history</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Work experience management coming soon...
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Fintech Experience */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Industry Experience</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>Do you have experience within fintech, payments, crypto, stablecoins, or blockchain? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fintech"
+                  checked={formData.fintechExperience === 1}
+                  onChange={() => setFormData({ ...formData, fintechExperience: 1 })}
+                  className="w-4 h-4"
+                />
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fintech"
+                  checked={formData.fintechExperience === 0}
+                  onChange={() => setFormData({ ...formData, fintechExperience: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          {formData.fintechExperience === 1 && (
+            <div className="space-y-2">
+              <Label htmlFor="fintechDesc">If so, please describe your experience</Label>
+              <Textarea
+                id="fintechDesc"
+                value={formData.fintechExperienceDescription}
+                onChange={(e) => setFormData({ ...formData, fintechExperienceDescription: e.target.value })}
+                placeholder="Type here..."
+                rows={4}
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="whyApply">What made you apply to this role? *</Label>
+            <Textarea
+              id="whyApply"
+              value={formData.whyApply}
+              onChange={(e) => setFormData({ ...formData, whyApply: e.target.value })}
+              placeholder="Type here..."
+              rows={4}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Save Button */}
+      <div className="flex justify-end gap-4 pb-8">
+        <Button
+          onClick={handleSaveProfile}
+          disabled={updateProfile.isPending}
+          size="lg"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+        >
+          {updateProfile.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
+          Save Profile
+        </Button>
+      </div>
     </div>
   );
 }
