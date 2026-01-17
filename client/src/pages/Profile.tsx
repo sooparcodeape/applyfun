@@ -164,7 +164,7 @@ export default function Profile() {
 
           // Upload to S3
           await uploadResume.mutateAsync({
-            resumeBase64: base64,
+            fileData: base64,
             fileName: file.name,
             mimeType: file.type,
           });
