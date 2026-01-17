@@ -197,22 +197,22 @@ export default function Profile() {
   const completion = calculateCompletion();
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-4">
-      {/* Profile Completion */}
-      <Card className="border-purple-500/30 bg-purple-500/5">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Profile Completion</CardTitle>
-            <span className="text-2xl font-bold text-purple-400">{completion}%</span>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Sticky Profile Completion Bar */}
+      <div className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-purple-500/20 px-4 py-3">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-white">Profile Completion</span>
+            <span className="text-lg font-bold text-purple-400">{completion}%</span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Progress value={completion} className="h-3" />
-          <p className="text-sm text-muted-foreground mt-2">
+          <Progress value={completion} className="h-2" />
+          <p className="text-xs text-muted-foreground mt-1">
             Complete your profile to auto-fill more application fields
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <div className="px-4 space-y-6">
 
       {/* Resume Upload */}
       <Card>
@@ -583,6 +583,7 @@ export default function Profile() {
           ) : null}
           Save Profile
         </Button>
+      </div>
       </div>
     </div>
   );
