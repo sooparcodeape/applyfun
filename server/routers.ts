@@ -206,6 +206,10 @@ export const appRouter = router({
 
 5. **Summary**: Extract professional summary/objective if present.
 
+6. **Current Position**: Identify the most recent/current job and extract:
+   - currentCompany: The company name of the most recent job (or current if still employed)
+   - currentTitle: The job title of the most recent position
+
 Be thorough and precise. If dates are ranges, preserve them. If information is missing, use empty strings.
 
 Return only valid JSON.
@@ -265,6 +269,8 @@ ${extractedText}`,
                   linkedin: { type: 'string' },
                   twitter: { type: 'string' },
                   telegram: { type: 'string' },
+                  currentCompany: { type: 'string' },
+                  currentTitle: { type: 'string' },
                 },
                 required: [],
                 additionalProperties: false,
@@ -432,6 +438,7 @@ ${extractedText}`,
         howDidYouHear: z.string().optional(),
         availableStartDate: z.string().optional(),
         willingToRelocate: z.number().optional(),
+        ableToWorkInOffice: z.number().optional(),
         // Ashby-specific fields
         university: z.string().optional(),
         sponsorshipRequired: z.number().optional(),

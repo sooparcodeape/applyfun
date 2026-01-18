@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` ADD `able_to_work_in_office` int DEFAULT 0;

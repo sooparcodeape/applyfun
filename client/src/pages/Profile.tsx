@@ -7,8 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Upload, Loader2, FileText, Download, CheckCircle2 } from "lucide-react";
+import { Upload, Loader2, FileText, Download, CheckCircle2, Info, Plus, X } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Profile() {
   const { data: profileData, isLoading, refetch } = trpc.profile.get.useQuery();
@@ -33,7 +39,8 @@ export default function Profile() {
     
     // AshbyHQ specific fields
     workAuthorization: "", // "yes" | "no"
-    willingToRelocate: 0, // 0=no, 1=yes, 2=open to relocation, 3=open to discussing
+    willingToRelocate: 0, // 0=no, 1=yes
+    ableToWorkInOffice: 0, // 0=no, 1=yes
     university: "",
     graduatedFromUniversity: 0, // 0=no, 1=yes
     sponsorshipRequired: 0, // 0=no, 1=yes, 2=not now but future
@@ -49,7 +56,13 @@ export default function Profile() {
 
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [parseCountdown, setParseCountdown] = useState(0);
+  const [writingSampleHintShown, setWritingSampleHintShown] = useState(false);
+  const [writingSampleHintVisible, setWritingSampleHintVisible] = useState(false);
+  const writingSampleRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const writingSampleInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingWritingSample, setUploadingWritingSample] = useState(false);
 
   // Calculate profile completion
   const calculateCompletion = () => {
@@ -84,6 +97,7 @@ export default function Profile() {
         yearsOfExperience: profileData.profile.yearsOfExperience || 0,
         workAuthorization: profileData.profile.workAuthorization || "",
         willingToRelocate: profileData.profile.willingToRelocate || 0,
+        ableToWorkInOffice: (profileData.profile as any).ableToWorkInOffice || 0,
         university: profileData.profile.university || "",
         graduatedFromUniversity: profileData.profile.university ? 1 : 0,
         sponsorshipRequired: profileData.profile.sponsorshipRequired || 0,
@@ -97,6 +111,42 @@ export default function Profile() {
       });
     }
   }, [profileData]);
+
+  // Countdown timer for parsing
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (parseCountdown > 0) {
+      interval = setInterval(() => {
+        setParseCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [parseCountdown]);
+
+  // Scroll observer for writing sample hint
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !writingSampleHintShown && !profileData?.profile?.writingSample) {
+            setWritingSampleHintVisible(true);
+            setWritingSampleHintShown(true);
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+              setWritingSampleHintVisible(false);
+            }, 5000);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (writingSampleRef.current) {
+      observer.observe(writingSampleRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [writingSampleHintShown, profileData?.profile?.writingSample]);
 
   const getExperienceRange = (years: number): string => {
     if (years >= 10) return "9-10+";
@@ -142,6 +192,7 @@ export default function Profile() {
 
     setUploading(true);
     setParsing(true);
+    setParseCountdown(60);
 
     try {
       // Convert to base64
@@ -157,7 +208,7 @@ export default function Profile() {
             mimeType: file.type,
           });
 
-          // Update form with parsed data
+          // Update form with parsed data - including all new fields
           if (parsed) {
             setFormData(prev => ({
               ...prev,
@@ -165,6 +216,10 @@ export default function Profile() {
               location: parsed.location || prev.location,
               linkedinUrl: parsed.linkedin || prev.linkedinUrl,
               githubUrl: parsed.github || prev.githubUrl,
+              twitterHandle: parsed.twitter || prev.twitterHandle,
+              portfolioUrl: parsed.portfolio || prev.portfolioUrl,
+              currentCompany: parsed.currentCompany || prev.currentCompany,
+              currentTitle: parsed.currentTitle || prev.currentTitle,
             }));
             toast.success("Resume parsed! Review and save your profile.");
           }
@@ -183,6 +238,7 @@ export default function Profile() {
         } finally {
           setParsing(false);
           setUploading(false);
+          setParseCountdown(0);
         }
       };
       reader.readAsDataURL(file);
@@ -190,6 +246,47 @@ export default function Profile() {
       toast.error("Failed to upload resume");
       setUploading(false);
       setParsing(false);
+      setParseCountdown(0);
+    }
+  };
+
+  const handleWritingSampleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    setUploadingWritingSample(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        try {
+          // Upload writing sample to S3
+          const result = await uploadResume.mutateAsync({
+            fileData: base64,
+            fileName: `writing-sample-${file.name}`,
+            mimeType: file.type,
+          });
+
+          toast.success("Writing sample uploaded!");
+          refetch();
+        } catch (err) {
+          console.error("Upload error:", err);
+          toast.error("Failed to upload writing sample");
+        } finally {
+          setUploadingWritingSample(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Failed to upload writing sample");
+      setUploadingWritingSample(false);
     }
   };
 
@@ -245,14 +342,24 @@ export default function Profile() {
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading || parsing}
               variant="outline"
-              className="border-pink-500 text-pink-500 hover:bg-pink-500/10"
+              className="border-pink-500 text-pink-500 hover:bg-pink-500/10 min-w-[140px]"
             >
-              {uploading || parsing ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              {parsing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {parseCountdown > 0 ? `${parseCountdown}s` : "Parsing..."}
+                </>
+              ) : uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Uploading...
+                </>
               ) : (
-                <Upload className="h-4 w-4 mr-2" />
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload File
+                </>
               )}
-              {parsing ? "Parsing..." : uploading ? "Uploading..." : "Upload File"}
             </Button>
             {profileData?.profile?.resumeUrl && (
               <div className="flex items-center gap-2 text-green-500">
@@ -300,12 +407,12 @@ export default function Profile() {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="currentCompany">Current Company *</Label>
+              <Label htmlFor="currentCompany">Current Company</Label>
               <Input
                 id="currentCompany"
                 value={formData.currentCompany}
                 onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
-                placeholder="Type here..."
+                placeholder="Acme Corp"
               />
             </div>
             <div className="space-y-2">
@@ -321,7 +428,7 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Social Links */}
+      {/* Social & Portfolio Links */}
       <Card>
         <CardHeader>
           <CardTitle>Social & Portfolio Links</CardTitle>
@@ -329,44 +436,105 @@ export default function Profile() {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="linkedinUrl">LinkedIn *</Label>
+              <Label htmlFor="linkedin">LinkedIn URL *</Label>
               <Input
-                id="linkedinUrl"
+                id="linkedin"
                 value={formData.linkedinUrl}
                 onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                placeholder="https://linkedin.com/in/..."
+                placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="githubUrl">GitHub</Label>
+              <Label htmlFor="github">GitHub URL</Label>
               <Input
-                id="githubUrl"
+                id="github"
                 value={formData.githubUrl}
                 onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                placeholder="https://github.com/..."
+                placeholder="https://github.com/username"
               />
             </div>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="twitterHandle">Twitter</Label>
+              <Label htmlFor="twitter">Twitter/X Handle</Label>
               <Input
-                id="twitterHandle"
+                id="twitter"
                 value={formData.twitterHandle}
                 onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
                 placeholder="@username"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="portfolioUrl">Website or Portfolio</Label>
+              <Label htmlFor="portfolio">Portfolio URL</Label>
               <Input
-                id="portfolioUrl"
+                id="portfolio"
                 value={formData.portfolioUrl}
                 onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
-                placeholder="https://..."
+                placeholder="https://yourportfolio.com"
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Writing Samples */}
+      <Card ref={writingSampleRef} className="relative">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Writing Samples</CardTitle>
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip open={writingSampleHintVisible}>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="p-1 rounded-full hover:bg-purple-500/20 transition-colors"
+                      onClick={() => setWritingSampleHintVisible(!writingSampleHintVisible)}
+                    >
+                      <Info className="h-5 w-5 text-purple-400" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs bg-purple-900 border-purple-500 text-white">
+                    <p>Add a writing sample so we can make resumes and cover letters that sound like you</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <input
+                type="file"
+                ref={writingSampleInputRef}
+                onChange={handleWritingSampleUpload}
+                accept=".pdf,.doc,.docx,.txt,.md"
+                className="hidden"
+              />
+              <Button
+                onClick={() => writingSampleInputRef.current?.click()}
+                disabled={uploadingWritingSample}
+                size="sm"
+                variant="outline"
+                className="border-purple-500 text-purple-500 hover:bg-purple-500/10"
+              >
+                {uploadingWritingSample ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Add Sample
+              </Button>
+            </div>
+          </div>
+          <CardDescription>
+            Upload writing samples to help us match your voice and style
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            value={profileData?.profile?.writingSample || ""}
+            onChange={(e) => {
+              // Update via mutation when changed
+            }}
+            placeholder="Paste a writing sample here, or upload a file above..."
+            rows={6}
+            className="resize-none"
+          />
         </CardContent>
       </Card>
 
@@ -377,7 +545,7 @@ export default function Profile() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
-            <Label>Are you legally authorized to work in the United States for ANY employer without ANY restrictions? *</Label>
+            <Label>Are you legally authorized to work in the United States? *</Label>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -403,25 +571,54 @@ export default function Profile() {
           </div>
 
           <div className="space-y-3">
-            <Label>Are you able to work in a hybrid role and come into a NYC office 3 days a week? *</Label>
-            <div className="space-y-2">
-              {[
-                { value: 1, label: "Yes" },
-                { value: 0, label: "No" },
-                { value: 2, label: "Open to relocation" },
-                { value: 3, label: "Open to discussing" },
-              ].map((option) => (
-                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="relocate"
-                    checked={formData.willingToRelocate === option.value}
-                    onChange={() => setFormData({ ...formData, willingToRelocate: option.value })}
-                    className="w-4 h-4"
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
+            <Label>Are you open to relocation? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="relocate"
+                  checked={formData.willingToRelocate === 1}
+                  onChange={() => setFormData({ ...formData, willingToRelocate: 1 })}
+                  className="w-4 h-4"
+                />
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="relocate"
+                  checked={formData.willingToRelocate === 0}
+                  onChange={() => setFormData({ ...formData, willingToRelocate: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Are you able to show up to this place of employment (office) during business hours? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="officeHours"
+                  checked={formData.ableToWorkInOffice === 1}
+                  onChange={() => setFormData({ ...formData, ableToWorkInOffice: 1 })}
+                  className="w-4 h-4"
+                />
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="officeHours"
+                  checked={formData.ableToWorkInOffice === 0}
+                  onChange={() => setFormData({ ...formData, ableToWorkInOffice: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
             </div>
           </div>
 

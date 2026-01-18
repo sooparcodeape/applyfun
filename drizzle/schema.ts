@@ -144,6 +144,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   howDidYouHear: varchar("how_did_you_hear", { length: 255 }), // Referral source
   availableStartDate: varchar("available_start_date", { length: 100 }), // e.g., "Immediately", "2 weeks", "1 month"
   willingToRelocate: int("willing_to_relocate").default(0), // 0 = no, 1 = yes
+  ableToWorkInOffice: int("able_to_work_in_office").default(0), // 0 = no, 1 = yes
   // Ashby-specific fields
   university: varchar("university", { length: 255 }), // University name for degree
   sponsorshipRequired: int("sponsorship_required").default(0), // 0 = no, 1 = yes
