@@ -243,39 +243,6 @@ export const ASHBY_FIELDS: ATSFieldMappings = {
     type: 'textarea',
     priority: 4,
   },
-  // EEO fields
-  gender: {
-    selectors: [
-      'select[name*="gender"]',
-      'input[name*="gender"]',
-      'select[id*="gender"]',
-      'input[id*="gender"]',
-    ],
-    type: 'text',
-    priority: 2,
-  },
-  race: {
-    selectors: [
-      'select[name*="race"]',
-      'select[name*="ethnicity"]',
-      'input[name*="race"]',
-      'input[name*="ethnicity"]',
-      'select[id*="race"]',
-      'select[id*="ethnicity"]',
-    ],
-    type: 'text',
-    priority: 2,
-  },
-  veteranStatus: {
-    selectors: [
-      'select[name*="veteran"]',
-      'input[name*="veteran"]',
-      'select[id*="veteran"]',
-      'input[id*="veteran"]',
-    ],
-    type: 'text',
-    priority: 2,
-  },
 };
 
 /**

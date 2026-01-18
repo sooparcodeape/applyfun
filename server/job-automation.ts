@@ -39,10 +39,6 @@ export interface JobApplicationData {
   sponsorshipRequired?: boolean;
   fintechExperience?: boolean;
   fintechExperienceDescription?: string;
-  // EEO fields
-  gender?: string;
-  race?: string;
-  veteranStatus?: string;
 }
 
 export interface ApplicationResult {
@@ -695,10 +691,6 @@ async function autoApplyToJobInternal(
       sponsorshipRequired: applicantData.sponsorshipRequired ? 'Yes' : 'No',
       fintechExperience: applicantData.fintechExperience ? 'Yes' : 'No',
       fintechExperienceDescription: applicantData.fintechExperienceDescription || '',
-      // EEO fields
-      gender: applicantData.gender || '',
-      race: applicantData.race || '',
-      veteranStatus: applicantData.veteranStatus || '',
     };
     
     // Sort fields by priority (higher priority first)
