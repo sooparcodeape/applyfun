@@ -213,9 +213,15 @@ export const appRouter = router({
    - GPA if mentioned
    - Relevant coursework or honors
 
-4. **Contact & Links**: Extract email, phone, LinkedIn, GitHub, portfolio, Twitter, Telegram, personal website.
+4. **Contact & Links**: Extract email, phone, LinkedIn, GitHub, portfolio, Twitter, Telegram, Instagram, personal website.
 
 5. **Summary**: Extract professional summary/objective if present.
+
+6. **Current Position**: Extract the most recent job's company name as currentCompany and job title as currentTitle.
+
+7. **Years of Experience**: Calculate total years of professional experience from all jobs.
+
+8. **Programming Languages**: Extract all programming languages mentioned (Python, Java, Go, JavaScript, C++, TypeScript, etc.).
 
 Be thorough and precise. If dates are ranges, preserve them. If information is missing, use empty strings.
 
@@ -276,8 +282,13 @@ ${extractedText}`,
                   linkedin: { type: 'string' },
                   twitter: { type: 'string' },
                   telegram: { type: 'string' },
+                  instagram: { type: 'string' },
+                  currentCompany: { type: 'string' },
+                  currentTitle: { type: 'string' },
+                  yearsOfExperience: { type: 'number' },
+                  programmingLanguages: { type: 'array', items: { type: 'string' } },
                 },
-                required: ['name', 'email', 'phone', 'location', 'skills', 'experience', 'education', 'summary', 'portfolio', 'github', 'linkedin', 'twitter', 'telegram'],
+                required: ['name', 'email', 'phone', 'location', 'skills', 'experience', 'education', 'summary', 'portfolio', 'github', 'linkedin', 'twitter', 'telegram', 'instagram', 'currentCompany', 'currentTitle', 'yearsOfExperience', 'programmingLanguages'],
                 additionalProperties: false,
               },
             },
@@ -531,6 +542,16 @@ Return JSON with these exact fields:
         sponsorshipRequired: z.number().optional(),
         fintechExperience: z.number().optional(),
         fintechExperienceDescription: z.string().optional(),
+        // New Ashby fields (Jan 18, 2026)
+        visaType: z.string().optional(),
+        pronouns: z.string().optional(),
+        instagramHandle: z.string().optional(),
+        roleType: z.enum(['marketing', 'engineering']).optional(),
+        gtmTeamReason: z.string().optional(),
+        gtmExperience: z.string().optional(),
+        yearsOfSoftwareDev: z.number().optional(),
+        techStackExperience: z.string().optional(), // JSON string
+        ableToWorkInOffice: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await upsertUserProfile({

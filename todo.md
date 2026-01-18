@@ -1081,3 +1081,15 @@
 - [x] All Ashby form fields supported: name, email, phone, company, title, linkedin, github, twitter, portfolio, workAuth, fintech, hybrid, university, sponsorship, experience, fintechDesc, whyApply, antiBot, resume
 - [x] Added EEO fields support (gender, race, veteranStatus, ableToWorkInOffice)
 - [x] Added twitterUrl to automation data passed from profile
+
+### New Profile Fields & ATS Automation (Jan 18, 2026)
+- [x] Add visa type field to database and Profile page
+- [x] Add pronouns field to database and Profile page
+- [x] Add role selector (Marketing/Engineering) with conditional questions
+- [x] Add Marketing questions (GTM team, GTM experience)
+- [x] Add Engineering questions (years experience, tech stack with checkboxes)
+- [x] Add Website/Portfolio field with "1-click personal websites coming soon!" tooltip
+- [x] Add Instagram handle field
+- [x] Update resume parsing to extract new fields (linkedin, github, twitter, instagram, years of experience)
+- [x] Add Greenhouse automation using optimized page.evaluate approach
+- [x] Add Lever automation using optimized page.evaluate approach

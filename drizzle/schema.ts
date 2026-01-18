@@ -154,6 +154,18 @@ export const userProfiles = mysqlTable("user_profiles", {
   race: varchar("race", { length: 100 }),
   veteranStatus: varchar("veteran_status", { length: 50 }),
   ableToWorkInOffice: int("able_to_work_in_office").default(0), // 0 = no, 1 = yes
+  // New Ashby fields (Jan 18, 2026)
+  visaType: varchar("visa_type", { length: 100 }), // H1B, F1-OPT, L1, O1, etc.
+  pronouns: varchar("pronouns", { length: 50 }), // he/him, she/her, they/them, etc.
+  instagramHandle: varchar("instagram_handle", { length: 100 }),
+  roleType: mysqlEnum("role_type", ["marketing", "engineering"]), // Marketing or Engineering
+  // Marketing-specific fields
+  gtmTeamReason: text("gtm_team_reason"), // Why are you right person to head up GTM team?
+  gtmExperience: text("gtm_experience"), // What experience do you have with GTM?
+  // Engineering-specific fields
+  yearsOfSoftwareDev: int("years_of_software_dev"), // Years of professional software development
+  // Tech stack experience (stored as JSON)
+  techStackExperience: text("tech_stack_experience"), // JSON: {python: 3, java: 2, react: 5, aws: 4, ...}
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

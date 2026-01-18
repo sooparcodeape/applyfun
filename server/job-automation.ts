@@ -786,6 +786,83 @@ async function autoApplyToJobInternal(
       }
     }
 
+    // Use Greenhouse-specific automation for Greenhouse forms
+    if (atsType === 'greenhouse') {
+      console.log('[AutoApply] Using optimized Greenhouse-specific automation...');
+      const { autoApplyGreenhouse } = await import('./greenhouse-automation');
+      type GreenhouseApplicationData = import('./greenhouse-automation').GreenhouseApplicationData;
+      
+      const greenhouseData: GreenhouseApplicationData = {
+        firstName: applicantData.fullName.split(' ')[0],
+        lastName: applicantData.fullName.split(' ').slice(1).join(' ') || applicantData.fullName.split(' ')[0],
+        email: applicantData.email,
+        phone: applicantData.phone,
+        location: applicantData.location || '',
+        country: 'United States',
+        linkedin: applicantData.linkedinUrl || '',
+        portfolio: applicantData.portfolioUrl || '',
+        github: applicantData.githubUrl || '',
+        twitter: applicantData.twitterUrl || '',
+        resumeUrl: applicantData.resumeUrl || '',
+        coverLetter: applicantData.coverLetter,
+        workAuthorization: applicantData.workAuthorization || 'yes',
+        requiresSponsorship: applicantData.sponsorshipRequired ? 'yes' : 'no',
+        gender: applicantData.gender || 'Decline to self-identify',
+        race: applicantData.race || 'Decline to self-identify',
+        veteranStatus: applicantData.veteranStatus || 'Decline to self-identify',
+        disabilityStatus: 'Decline to self-identify',
+        hispanicLatino: 'No',
+        yearsExperience: applicantData.yearsOfExperience,
+        whyApply: applicantData.coverLetter,
+        currentCompany: applicantData.currentCompany,
+        currentTitle: applicantData.currentTitle,
+      };
+      
+      // Get browser from current page
+      const browser = page.browser();
+      await page.close();
+      
+      const result = await autoApplyGreenhouse(browser, url, greenhouseData);
+      return {
+        success: result.success,
+        message: result.message,
+        fieldsFilledCount: result.fieldsFilledCount,
+      };
+    }
+
+    // Use Lever-specific automation for Lever forms
+    if (atsType === 'lever') {
+      console.log('[AutoApply] Using optimized Lever-specific automation...');
+      const { autoApplyLever } = await import('./lever-automation');
+      type LeverApplicationData = import('./lever-automation').LeverApplicationData;
+      
+      const leverData: LeverApplicationData = {
+        fullName: applicantData.fullName,
+        email: applicantData.email,
+        phone: applicantData.phone,
+        location: applicantData.location || '',
+        currentCompany: applicantData.currentCompany || '',
+        linkedin: applicantData.linkedinUrl || '',
+        portfolio: applicantData.portfolioUrl || '',
+        coverLetter: applicantData.coverLetter,
+        resumeUrl: applicantData.resumeUrl || '',
+        gender: applicantData.gender || 'Decline to self-identify',
+        race: applicantData.race || 'Decline to self-identify',
+        veteranStatus: applicantData.veteranStatus || 'Decline to self-identify',
+      };
+      
+      // Get browser from current page
+      const browser = page.browser();
+      await page.close();
+      
+      const result = await autoApplyLever(browser, url, leverData);
+      return {
+        success: result.success,
+        message: result.message,
+        fieldsFilledCount: result.fieldsFilledCount,
+      };
+    }
+
     // Get field mappings for detected ATS platform
     const fieldMappings: ATSFieldMappings = atsType !== 'generic' 
       ? getATSFieldMappings(atsType)

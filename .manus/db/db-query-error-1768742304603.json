@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE user_profiles \nADD COLUMN visa_type VARCHAR(100),\nADD COLUMN pronouns VARCHAR(50),\nADD COLUMN instagram_handle VARCHAR(100),\nADD COLUMN role_type ENUM('marketing', 'engineering'),\nADD COLUMN gtm_team_reason TEXT,\nADD COLUMN gtm_experience TEXT,\nADD COLUMN years_of_software_dev INT,\nADD COLUMN tech_stack_experience TEXT;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute ALTER TABLE user_profiles \nADD COLUMN visa_type VARCHAR(100),\nADD COLUMN pronouns VARCHAR(50),\nADD COLUMN instagram_handle VARCHAR(100),\nADD COLUMN role_type ENUM('marketing', 'engineering'),\nADD COLUMN gtm_team_reason TEXT,\nADD COLUMN gtm_experience TEXT,\nADD COLUMN years_of_software_dev INT,\nADD COLUMN tech_stack_experience TEXT;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1060 (42S21) at line 1: Duplicate column name 'visa_type'"
+  ]
+}

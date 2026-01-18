@@ -47,6 +47,16 @@ export default function Profile() {
     fintechExperienceDescription: "",
     whyApply: "",
     yearsOfExperienceRange: "",
+    // New Ashby fields
+    visaType: "",
+    pronouns: "",
+    instagramHandle: "",
+    roleType: "" as "" | "marketing" | "engineering",
+    gtmTeamReason: "",
+    gtmExperience: "",
+    yearsOfSoftwareDev: 0,
+    techStackExperience: {} as Record<string, number>,
+    ableToWorkInOffice: 0,
   });
 
   const [uploading, setUploading] = useState(false);
@@ -120,6 +130,16 @@ export default function Profile() {
         fintechExperienceDescription: profileData.profile.fintechExperienceDescription || "",
         whyApply: profileData.profile.howDidYouHear || "",
         yearsOfExperienceRange: getExperienceRange(profileData.profile.yearsOfExperience || 0),
+        // New Ashby fields
+        visaType: profileData.profile.visaType || "",
+        pronouns: profileData.profile.pronouns || "",
+        instagramHandle: profileData.profile.instagramHandle || "",
+        roleType: (profileData.profile.roleType || "") as "" | "marketing" | "engineering",
+        gtmTeamReason: profileData.profile.gtmTeamReason || "",
+        gtmExperience: profileData.profile.gtmExperience || "",
+        yearsOfSoftwareDev: profileData.profile.yearsOfSoftwareDev || 0,
+        techStackExperience: profileData.profile.techStackExperience ? JSON.parse(profileData.profile.techStackExperience) : {},
+        ableToWorkInOffice: profileData.profile.ableToWorkInOffice || 0,
       });
     }
   }, [profileData]);
@@ -158,6 +178,16 @@ export default function Profile() {
         fintechExperience: formData.fintechExperience,
         fintechExperienceDescription: formData.fintechExperienceDescription,
         howDidYouHear: formData.whyApply,
+        // New Ashby fields
+        visaType: formData.visaType,
+        pronouns: formData.pronouns,
+        instagramHandle: formData.instagramHandle,
+        roleType: formData.roleType || undefined,
+        gtmTeamReason: formData.gtmTeamReason,
+        gtmExperience: formData.gtmExperience,
+        yearsOfSoftwareDev: formData.yearsOfSoftwareDev,
+        techStackExperience: JSON.stringify(formData.techStackExperience),
+        ableToWorkInOffice: formData.ableToWorkInOffice,
       });
       toast.success("Profile saved!");
       refetch();
@@ -741,6 +771,15 @@ export default function Profile() {
               />
             </div>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="instagramHandle">Instagram</Label>
+            <Input
+              id="instagramHandle"
+              value={formData.instagramHandle}
+              onChange={(e) => setFormData({ ...formData, instagramHandle: e.target.value })}
+              placeholder="@username"
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -777,26 +816,78 @@ export default function Profile() {
           </div>
 
           <div className="space-y-3">
-            <Label>Are you able to work in a hybrid role and come into a NYC office 3 days a week? *</Label>
-            <div className="space-y-2">
-              {[
-                { value: 1, label: "Yes" },
-                { value: 0, label: "No" },
-                { value: 2, label: "Open to relocation" },
-                { value: 3, label: "Open to discussing" },
-              ].map((option) => (
-                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="relocate"
-                    checked={formData.willingToRelocate === option.value}
-                    onChange={() => setFormData({ ...formData, willingToRelocate: option.value })}
-                    className="w-4 h-4"
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
+            <Label>Are you open to relocation? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="relocate"
+                  checked={formData.willingToRelocate === 1}
+                  onChange={() => setFormData({ ...formData, willingToRelocate: 1 })}
+                  className="w-4 h-4"
+                />
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="relocate"
+                  checked={formData.willingToRelocate === 0}
+                  onChange={() => setFormData({ ...formData, willingToRelocate: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
             </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Are you able to show up to place of employment (office) during business hours? *</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="officeHours"
+                  checked={formData.ableToWorkInOffice === 1}
+                  onChange={() => setFormData({ ...formData, ableToWorkInOffice: 1 })}
+                  className="w-4 h-4"
+                />
+                <span>Yes</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="officeHours"
+                  checked={formData.ableToWorkInOffice === 0}
+                  onChange={() => setFormData({ ...formData, ableToWorkInOffice: 0 })}
+                  className="w-4 h-4"
+                />
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>If you are on a visa, what type of visa are you currently on?</Label>
+            <Select
+              value={formData.visaType}
+              onValueChange={(v) => setFormData({ ...formData, visaType: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select visa type (if applicable)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="not_applicable">Not applicable (US Citizen/Green Card)</SelectItem>
+                <SelectItem value="h1b">H-1B</SelectItem>
+                <SelectItem value="f1_opt">F-1 OPT</SelectItem>
+                <SelectItem value="f1_cpt">F-1 CPT</SelectItem>
+                <SelectItem value="l1">L-1</SelectItem>
+                <SelectItem value="o1">O-1</SelectItem>
+                <SelectItem value="tn">TN</SelectItem>
+                <SelectItem value="e2">E-2</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-3">
@@ -890,6 +981,138 @@ export default function Profile() {
               ))}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Pronouns & Role Type */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Additional Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>We strive to create an inclusive and respectful workplace. If you feel comfortable, please let us know your pronouns:</Label>
+            <Select
+              value={formData.pronouns}
+              onValueChange={(v) => setFormData({ ...formData, pronouns: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select pronouns (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="he_him">He/Him</SelectItem>
+                <SelectItem value="she_her">She/Her</SelectItem>
+                <SelectItem value="they_them">They/Them</SelectItem>
+                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            <Label>What type of role are you primarily applying for?</Label>
+            <Select
+              value={formData.roleType}
+              onValueChange={(v: "marketing" | "engineering" | "") => setFormData({ ...formData, roleType: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select role type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="marketing">Marketing</SelectItem>
+                <SelectItem value="engineering">Engineering</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.roleType === "marketing" && (
+            <>
+              <div className="space-y-2">
+                <Label>Why are you the right person to head up the GTM team?</Label>
+                <Textarea
+                  value={formData.gtmTeamReason}
+                  onChange={(e) => setFormData({ ...formData, gtmTeamReason: e.target.value })}
+                  placeholder="Describe your qualifications and vision..."
+                  rows={4}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>What experience do you have with GTM (please explain)?</Label>
+                <Textarea
+                  value={formData.gtmExperience}
+                  onChange={(e) => setFormData({ ...formData, gtmExperience: e.target.value })}
+                  placeholder="Describe your GTM experience..."
+                  rows={4}
+                />
+              </div>
+            </>
+          )}
+
+          {formData.roleType === "engineering" && (
+            <>
+              <div className="space-y-2">
+                <Label>Years of professional software development experience</Label>
+                <Input
+                  type="number"
+                  value={formData.yearsOfSoftwareDev || ""}
+                  onChange={(e) => setFormData({ ...formData, yearsOfSoftwareDev: parseInt(e.target.value) || 0 })}
+                  placeholder="e.g., 5"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label>Years of experience with technologies (check all that apply):</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { key: "python", label: "Python" },
+                    { key: "java", label: "Java" },
+                    { key: "go", label: "Go" },
+                    { key: "javascript", label: "JavaScript" },
+                    { key: "cpp", label: "C++" },
+                    { key: "react", label: "React" },
+                    { key: "node", label: "Node.js" },
+                    { key: "django", label: "Django" },
+                    { key: "spring", label: "Spring" },
+                    { key: "sql", label: "SQL Databases" },
+                    { key: "nosql", label: "NoSQL Databases" },
+                    { key: "aws", label: "AWS" },
+                    { key: "gcp", label: "GCP" },
+                    { key: "azure", label: "Azure" },
+                  ].map((tech) => (
+                    <div key={tech.key} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!formData.techStackExperience[tech.key]}
+                        onChange={(e) => {
+                          const newStack = { ...formData.techStackExperience };
+                          if (e.target.checked) {
+                            newStack[tech.key] = 1;
+                          } else {
+                            delete newStack[tech.key];
+                          }
+                          setFormData({ ...formData, techStackExperience: newStack });
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">{tech.label}</span>
+                      {formData.techStackExperience[tech.key] !== undefined && (
+                        <Input
+                          type="number"
+                          value={formData.techStackExperience[tech.key] || ""}
+                          onChange={(e) => {
+                            const newStack = { ...formData.techStackExperience };
+                            newStack[tech.key] = parseInt(e.target.value) || 0;
+                            setFormData({ ...formData, techStackExperience: newStack });
+                          }}
+                          placeholder="yrs"
+                          className="w-16 h-7 text-xs"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
