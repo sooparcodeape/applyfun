@@ -149,6 +149,10 @@ export const userProfiles = mysqlTable("user_profiles", {
   sponsorshipRequired: int("sponsorship_required").default(0), // 0 = no, 1 = yes
   fintechExperience: int("fintech_experience").default(0), // 0 = no, 1 = yes
   fintechExperienceDescription: text("fintech_experience_description"), // Details about fintech experience
+  // EEO fields (voluntary self-identification)
+  gender: varchar("gender", { length: 50 }), // Male, Female, Non-binary, Prefer not to say
+  race: varchar("race", { length: 100 }), // Hispanic/Latino, White, Black, Asian, etc.
+  veteranStatus: varchar("veteran_status", { length: 100 }), // Yes, No, Prefer not to say
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

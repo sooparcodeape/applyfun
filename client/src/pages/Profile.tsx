@@ -41,6 +41,10 @@ export default function Profile() {
     fintechExperienceDescription: "",
     whyApply: "", // "What made you apply to this role?"
     yearsOfExperienceRange: "", // "1-3" | "3-5" | "5-9" | "9-10+"
+    // EEO fields
+    gender: "",
+    race: "",
+    veteranStatus: "",
   });
 
   const [uploading, setUploading] = useState(false);
@@ -87,6 +91,9 @@ export default function Profile() {
         fintechExperienceDescription: profileData.profile.fintechExperienceDescription || "",
         whyApply: profileData.profile.howDidYouHear || "",
         yearsOfExperienceRange: getExperienceRange(profileData.profile.yearsOfExperience || 0),
+        gender: profileData.profile.gender || "",
+        race: profileData.profile.race || "",
+        veteranStatus: profileData.profile.veteranStatus || "",
       });
     }
   }, [profileData]);
@@ -566,6 +573,89 @@ export default function Profile() {
               placeholder="Type here..."
               rows={4}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* EEO Demographics */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Equal Employment Opportunity</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Gender */}
+          <div className="space-y-3">
+            <Label>What is your gender?</Label>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "non-binary", label: "Non-binary" },
+                { value: "prefer-not-to-say", label: "Prefer not to say" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="gender"
+                    checked={formData.gender === option.value}
+                    onChange={() => setFormData({ ...formData, gender: option.value })}
+                    className="w-4 h-4"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Race/Ethnicity */}
+          <div className="space-y-3">
+            <Label>What is your race/ethnicity?</Label>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { value: "american-indian", label: "American Indian or Alaska Native" },
+                { value: "asian", label: "Asian" },
+                { value: "black", label: "Black or African American" },
+                { value: "hispanic", label: "Hispanic or Latino" },
+                { value: "native-hawaiian", label: "Native Hawaiian or Other Pacific Islander" },
+                { value: "white", label: "White" },
+                { value: "two-or-more", label: "Two or More Races" },
+                { value: "prefer-not-to-say", label: "Prefer not to say" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="race"
+                    checked={formData.race === option.value}
+                    onChange={() => setFormData({ ...formData, race: option.value })}
+                    className="w-4 h-4"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Veteran Status */}
+          <div className="space-y-3">
+            <Label>Are you a protected veteran?</Label>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+                { value: "prefer-not-to-say", label: "Prefer not to say" },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="veteranStatus"
+                    checked={formData.veteranStatus === option.value}
+                    onChange={() => setFormData({ ...formData, veteranStatus: option.value })}
+                    className="w-4 h-4"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
