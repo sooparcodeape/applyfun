@@ -437,6 +437,10 @@ ${extractedText}`,
         sponsorshipRequired: z.number().optional(),
         fintechExperience: z.number().optional(),
         fintechExperienceDescription: z.string().optional(),
+        // EEO fields
+        gender: z.string().optional(),
+        race: z.string().optional(),
+        veteranStatus: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await upsertUserProfile({
@@ -693,6 +697,15 @@ ${extractedText}`,
               workAuthorization: userProfile?.workAuthorization || undefined,
               howDidYouHear: userProfile?.howDidYouHear || undefined,
               availableStartDate: userProfile?.availableStartDate || undefined,
+              // Ashby-specific fields
+              university: userProfile?.university || undefined,
+              sponsorshipRequired: userProfile?.sponsorshipRequired === 1,
+              fintechExperience: userProfile?.fintechExperience === 1,
+              fintechExperienceDescription: userProfile?.fintechExperienceDescription || undefined,
+              // EEO fields
+              gender: (userProfile as any)?.gender || undefined,
+              race: (userProfile as any)?.race || undefined,
+              veteranStatus: (userProfile as any)?.veteranStatus || undefined,
             },
             3, // maxRetries
             ctx.user.id,
