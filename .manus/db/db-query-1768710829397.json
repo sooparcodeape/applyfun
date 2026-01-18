@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, title, company, apply_url, source FROM jobs WHERE apply_url LIKE '%ashby%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url, source FROM jobs WHERE apply_url LIKE '%ashby%' LIMIT 10;",
+  "rows": [
+    {
+      "id": "2251610",
+      "title": "Account Manager",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251611",
+      "title": "Account Manager APAC",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251612",
+      "title": "Backend Engineer",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251613",
+      "title": "Business Development Analyst",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251614",
+      "title": "Business Development Analyst - LATAM",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251615",
+      "title": "Business Operations Analyst",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/1b21ce47-6d0c-427a-a2f5-3a90a6b7bc27/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251616",
+      "title": "Business Operations Lead",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/992d2a50-af9c-4df1-85e8-34ef51aa90f1/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251617",
+      "title": "CISO",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/bfefd59a-0f27-4201-ade3-31a8d184de40/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251618",
+      "title": "Compliance Analyst",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/ea5dacdd-8d29-4ae4-afc0-b3e41aad5f70/application",
+      "source": "Ashby-Rain"
+    },
+    {
+      "id": "2251619",
+      "title": "Compliance Analyst (AML, KYB, KYC)",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/4cbb5dd3-a448-46fa-b0c4-7e5c15c10f3f/application",
+      "source": "Ashby-Rain"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tapply_url\tsource\n2251610\tAccount Manager\tRain\thttps://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c/application\tAshby-Rain\n2251611\tAccount Manager APAC\tRain\thttps://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b/application\tAshby-Rain\n2251612\tBackend Engineer\tRain\thttps://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8/application\tAshby-Rain\n2251613\tBusiness Development Analyst\tRain\thttps://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be/application\tAshby-Rain\n2251614\tBusiness Development Analyst - LATAM\tRain\thttps://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad/application\tAshby-Rain\n2251615\tBusiness Operations Analyst\tRain\thttps://jobs.ashbyhq.com/rain/1b21ce47-6d0c-427a-a2f5-3a90a6b7bc27/application\tAshby-Rain\n2251616\tBusiness Operations Lead\tRain\thttps://jobs.ashbyhq.com/rain/992d2a50-af9c-4df1-85e8-34ef51aa90f1/application\tAshby-Rain\n2251617\tCISO\tRain\thttps://jobs.ashbyhq.com/rain/bfefd59a-0f27-4201-ade3-31a8d184de40/application\tAshby-Rain\n2251618\tCompliance Analyst\tRain\thttps://jobs.ashbyhq.com/rain/ea5dacdd-8d29-4ae4-afc0-b3e41aad5f70/application\tAshby-Rain\n2251619\tCompliance Analyst (AML, KYB, KYC)\tRain\thttps://jobs.ashbyhq.com/rain/4cbb5dd3-a448-46fa-b0c4-7e5c15c10f3f/application\tAshby-Rain\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -913,14 +913,27 @@ Return JSON with these exact fields:
               resumeUrl: userProfile?.resumeUrl || undefined,
               linkedinUrl: userProfile?.linkedinUrl || undefined,
               githubUrl: userProfile?.githubUrl || undefined,
+              twitterUrl: userProfile?.twitterHandle ? `https://twitter.com/${userProfile.twitterHandle.replace('@', '')}` : undefined,
               portfolioUrl: userProfile?.portfolioUrl || undefined,
-              // New ATS fields from profile
+              // ATS fields from profile
               currentCompany: userProfile?.currentCompany || undefined,
               currentTitle: userProfile?.currentTitle || undefined,
               yearsOfExperience: userProfile?.yearsOfExperience?.toString() || undefined,
               workAuthorization: userProfile?.workAuthorization || undefined,
               howDidYouHear: userProfile?.howDidYouHear || undefined,
               availableStartDate: userProfile?.availableStartDate || undefined,
+              // Ashby-specific fields
+              university: userProfile?.university || undefined,
+              sponsorshipRequired: userProfile?.sponsorshipRequired === 1,
+              fintechExperience: userProfile?.fintechExperience === 1,
+              fintechExperienceDescription: userProfile?.fintechExperienceDescription || undefined,
+              // EEO fields
+              gender: userProfile?.gender || undefined,
+              race: userProfile?.race || undefined,
+              veteranStatus: userProfile?.veteranStatus || undefined,
+              // Additional fields
+              openToRelocation: userProfile?.willingToRelocate === 2,
+              ableToWorkInOffice: userProfile?.ableToWorkInOffice === 1,
             },
             3, // maxRetries
             ctx.user.id,

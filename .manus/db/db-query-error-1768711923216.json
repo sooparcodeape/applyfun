@@ -1,0 +1,8 @@
+{
+  "query": "SELECT u.id, u.email, up.full_name, up.resume_url FROM users u JOIN user_profiles up ON u.id = up.user_id WHERE u.email = 'sooryarp@gmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT u.id, u.email, up.full_name, up.resume_url FROM users u JOIN user_profiles up ON u.id = up.user_id WHERE u.email = 'sooryarp@gmail.com';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'up.full_name' in 'field list'"
+  ]
+}

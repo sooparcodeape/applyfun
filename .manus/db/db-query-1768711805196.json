@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, title, company, apply_url FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url FROM jobs WHERE company = 'Rain' LIMIT 5;",
+  "rows": [
+    {
+      "id": "2251610",
+      "title": "Account Manager",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c/application"
+    },
+    {
+      "id": "2251611",
+      "title": "Account Manager APAC",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b/application"
+    },
+    {
+      "id": "2251612",
+      "title": "Backend Engineer",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8/application"
+    },
+    {
+      "id": "2251613",
+      "title": "Business Development Analyst",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be/application"
+    },
+    {
+      "id": "2251614",
+      "title": "Business Development Analyst - LATAM",
+      "company": "Rain",
+      "apply_url": "https://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad/application"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tapply_url\n2251610\tAccount Manager\tRain\thttps://jobs.ashbyhq.com/rain/12a73024-ef98-46f8-adb4-3a490613871c/application\n2251611\tAccount Manager APAC\tRain\thttps://jobs.ashbyhq.com/rain/8f61a393-82c1-499a-9d11-450715073f5b/application\n2251612\tBackend Engineer\tRain\thttps://jobs.ashbyhq.com/rain/482b165f-2ef9-41ff-8b88-87e7e6714dc8/application\n2251613\tBusiness Development Analyst\tRain\thttps://jobs.ashbyhq.com/rain/de50da20-ff31-45cb-960d-5886487246be/application\n2251614\tBusiness Development Analyst - LATAM\tRain\thttps://jobs.ashbyhq.com/rain/c66f4c1d-fddf-4efb-94cf-ad9ceb2f12ad/application\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

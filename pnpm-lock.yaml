@@ -227,6 +227,9 @@ importers:
       puppeteer:
         specifier: ^24.35.0
         version: 24.35.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      puppeteer-core:
+        specifier: ^24.35.0
+        version: 24.35.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       puppeteer-extra:
         specifier: ^3.3.6
         version: 3.3.6(puppeteer-core@24.35.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(puppeteer@24.35.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))

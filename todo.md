@@ -1070,3 +1070,14 @@
 - [x] Remove CryptoJobsList scraper (disable scraper, remove jobs from DB and UI)
 - [x] Fix Remove button on /queue page (verified working)
 - [x] Add success message "Go chill! We will take care of that for you!" on Apply All click
+
+
+### Browserless Automation - COMPLETED (Jan 18, 2026)
+- [x] Fix "Attempted to use detached Frame" error in job automation
+- [x] Optimize Ashby automation with single page.evaluate() call for speed and stability
+- [x] Successfully tested 5 different Rain/Ashby jobs with 17-18 fields filled each
+- [x] Resume upload working with Browserless API
+- [x] Anti-bot question detection and filling working
+- [x] All Ashby form fields supported: name, email, phone, company, title, linkedin, github, twitter, portfolio, workAuth, fintech, hybrid, university, sponsorship, experience, fintechDesc, whyApply, antiBot, resume
+- [x] Added EEO fields support (gender, race, veteranStatus, ableToWorkInOffice)
+- [x] Added twitterUrl to automation data passed from profile

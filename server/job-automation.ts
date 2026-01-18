@@ -27,7 +27,7 @@ export interface JobApplicationData {
   writingSample?: string;
   skills?: string[];
   experience?: string;
-  // New ATS fields from profile
+  // ATS fields from profile
   currentCompany?: string;
   currentTitle?: string;
   yearsOfExperience?: string;
@@ -39,6 +39,13 @@ export interface JobApplicationData {
   sponsorshipRequired?: boolean;
   fintechExperience?: boolean;
   fintechExperienceDescription?: string;
+  // EEO fields
+  gender?: string;
+  race?: string;
+  veteranStatus?: string;
+  // Additional fields
+  openToRelocation?: boolean;
+  ableToWorkInOffice?: boolean;
 }
 
 export interface ApplicationResult {
@@ -107,7 +114,7 @@ async function getBrowser(useProxy = true): Promise<Browser> {
     
     // Use Browserless.io in production (when API key is set)
     if (browserlessApiKey) {
-      const wsEndpoint = `wss://chrome.browserless.io?token=${browserlessApiKey}&stealth=true`;
+      const wsEndpoint = `wss://production-sfo.browserless.io/?token=${browserlessApiKey}&stealth`;
       console.log(`[AutoApply] Connecting to Browserless.io...`);
       console.log(`[AutoApply] WebSocket endpoint: wss://chrome.browserless.io?token=***&stealth=true`);
       
@@ -712,6 +719,72 @@ async function autoApplyToJobInternal(
 
     // Step 3: Fill form fields using comprehensive ATS-specific mappings
     let fieldsFilledCount = 0;
+
+    // Use Ashby-specific automation for Ashby forms
+    if (atsType === 'ashby') {
+      console.log('[AutoApply] Using optimized Ashby-specific automation...');
+      const { fillAshbyForm, submitAshbyForm } = await import('./ashby-automation');
+      
+      const ashbyData = {
+        fullName: applicantData.fullName,
+        email: applicantData.email,
+        phone: applicantData.phone,
+        location: applicantData.location || '',
+        linkedinUrl: applicantData.linkedinUrl,
+        githubUrl: applicantData.githubUrl,
+        twitterUrl: applicantData.twitterUrl,
+        portfolioUrl: applicantData.portfolioUrl,
+        currentCompany: applicantData.currentCompany,
+        currentTitle: applicantData.currentTitle,
+        university: applicantData.university,
+        resumeUrl: applicantData.resumeUrl,
+        sponsorshipRequired: applicantData.sponsorshipRequired,
+        fintechExperience: applicantData.fintechExperience,
+        fintechExperienceDescription: applicantData.fintechExperienceDescription,
+        yearsOfExperience: applicantData.yearsOfExperience,
+        whyThisRole: applicantData.fintechExperienceDescription,
+        workAuthorization: applicantData.workAuthorization === 'yes',
+        willingToRelocate: true,
+        // EEO fields
+        gender: (applicantData as any).gender,
+        race: (applicantData as any).race,
+        veteranStatus: (applicantData as any).veteranStatus,
+        // Additional fields
+        visaType: (applicantData as any).visaType,
+        pronouns: (applicantData as any).pronouns,
+        openToRelocation: (applicantData as any).openToRelocation,
+        ableToWorkInOffice: (applicantData as any).ableToWorkInOffice,
+      };
+      
+      const result = await fillAshbyForm(page, ashbyData);
+      fieldsFilledCount = result.fieldsFilledCount;
+      
+      if (fieldsFilledCount >= 5) {
+        // Submit the form
+        const submitted = await submitAshbyForm(page);
+        
+        if (submitted) {
+          await page.close();
+          return {
+            success: true,
+            message: `Successfully submitted Ashby application! Filled ${fieldsFilledCount} fields.`,
+            fieldsFilledCount,
+          };
+        }
+      }
+      
+      // If Ashby automation didn't work well, fall through to generic
+      if (fieldsFilledCount < 3) {
+        console.log('[AutoApply] Ashby automation filled few fields, trying generic...');
+      } else {
+        await page.close();
+        return {
+          success: false,
+          message: `Filled ${fieldsFilledCount} fields but could not submit. Manual review required.`,
+          fieldsFilledCount,
+        };
+      }
+    }
 
     // Get field mappings for detected ATS platform
     const fieldMappings: ATSFieldMappings = atsType !== 'generic' 
