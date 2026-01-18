@@ -65,21 +65,6 @@ export async function processRetries() {
         linkedinUrl: profileResult?.linkedinUrl || undefined,
         githubUrl: profileResult?.githubUrl || undefined,
         portfolioUrl: profileResult?.portfolioUrl || undefined,
-        // ATS fields
-        currentCompany: profileResult?.currentCompany || undefined,
-        currentTitle: profileResult?.currentTitle || undefined,
-        yearsOfExperience: profileResult?.yearsOfExperience?.toString() || undefined,
-        workAuthorization: profileResult?.workAuthorization || undefined,
-        howDidYouHear: profileResult?.howDidYouHear || undefined,
-        // Ashby-specific fields
-        university: profileResult?.university || undefined,
-        sponsorshipRequired: profileResult?.sponsorshipRequired === 1,
-        fintechExperience: profileResult?.fintechExperience === 1,
-        fintechExperienceDescription: profileResult?.fintechExperienceDescription || undefined,
-        // EEO fields
-        gender: profileResult?.gender || undefined,
-        race: profileResult?.race || undefined,
-        veteranStatus: profileResult?.veteranStatus || undefined,
       });
 
       const newRetryCount = app.retryCount + 1;

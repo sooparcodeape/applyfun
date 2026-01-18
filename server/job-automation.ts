@@ -39,10 +39,6 @@ export interface JobApplicationData {
   sponsorshipRequired?: boolean;
   fintechExperience?: boolean;
   fintechExperienceDescription?: string;
-  // EEO fields
-  gender?: string;
-  race?: string;
-  veteranStatus?: string;
 }
 
 export interface ApplicationResult {
@@ -99,40 +95,64 @@ function parseProxyUrl(proxyUrl: string): { server: string; username: string; pa
 }
 
 /**
- * Get or create browser instance with proxy
+ * Get or create browser instance - uses Browserless.io in production, local Chrome in dev
  */
 async function getBrowser(useProxy = true): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
-    const proxyUrl = useProxy ? await getProxyUrl() : null;
-    const launchArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu',
-      '--window-size=1920,1080',
-    ];
+    const browserlessApiKey = process.env.BROWSERLESS_API_KEY;
     
-    // Add proxy to browser args if configured
-    if (proxyUrl) {
-      const proxyConfig = parseProxyUrl(proxyUrl);
-      if (proxyConfig) {
-        const proxyArg = `--proxy-server=${proxyConfig.server}`;
-        launchArgs.push(proxyArg);
-        console.log(`[AutoApply] Launching Chrome with ASOCKS residential proxy: ${proxyConfig.server}`);
-      } else {
-        console.log(`[AutoApply] Failed to parse proxy URL, launching without proxy`);
+    console.log(`[AutoApply] ========== BROWSER SETUP ==========`);
+    console.log(`[AutoApply] BROWSERLESS_API_KEY configured: ${!!browserlessApiKey}`);
+    console.log(`[AutoApply] Key prefix: ${browserlessApiKey ? browserlessApiKey.substring(0, 8) + '...' : 'N/A'}`);
+    
+    // Use Browserless.io in production (when API key is set)
+    if (browserlessApiKey) {
+      const wsEndpoint = `wss://chrome.browserless.io?token=${browserlessApiKey}&stealth=true`;
+      console.log(`[AutoApply] Connecting to Browserless.io...`);
+      console.log(`[AutoApply] WebSocket endpoint: wss://chrome.browserless.io?token=***&stealth=true`);
+      
+      try {
+        browserInstance = await puppeteer.connect({
+          browserWSEndpoint: wsEndpoint,
+        });
+        console.log(`[AutoApply] ✓ Connected to Browserless.io successfully`);
+      } catch (connError: any) {
+        console.error(`[AutoApply] ✗ Browserless.io connection failed:`, connError.message);
+        throw new Error(`Browserless.io connection failed: ${connError.message}`);
       }
     } else {
-      console.log(`[AutoApply] No proxy configured, launching Chrome without proxy`);
+      // Local Chrome for development
+      const proxyUrl = useProxy ? await getProxyUrl() : null;
+      const launchArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--window-size=1920,1080',
+      ];
+      
+      // Add proxy to browser args if configured
+      if (proxyUrl) {
+        const proxyConfig = parseProxyUrl(proxyUrl);
+        if (proxyConfig) {
+          const proxyArg = `--proxy-server=${proxyConfig.server}`;
+          launchArgs.push(proxyArg);
+          console.log(`[AutoApply] Launching Chrome with ASOCKS residential proxy: ${proxyConfig.server}`);
+        } else {
+          console.log(`[AutoApply] Failed to parse proxy URL, launching without proxy`);
+        }
+      } else {
+        console.log(`[AutoApply] No proxy configured, launching Chrome without proxy`);
+      }
+      
+      browserInstance = await puppeteer.launch({
+        headless: true,
+        executablePath: '/usr/bin/chromium-browser',
+        args: launchArgs,
+      });
+      console.log(`[AutoApply] Chrome launched successfully`);
     }
-    
-    browserInstance = await puppeteer.launch({
-      headless: true,
-      executablePath: '/usr/bin/chromium-browser',
-      args: launchArgs,
-    });
-    console.log(`[AutoApply] Chrome launched successfully`);
   }
   return browserInstance;
 }
@@ -164,40 +184,72 @@ async function autoApplyToJobInternal(
   let proxyInfo = await proxyManager.getCurrentProxyInfo();
   
   try {
+    console.log(`[AutoApply] ========== STARTING APPLICATION ==========`);
+    console.log(`[AutoApply] Job URL: ${jobUrl}`);
+    console.log(`[AutoApply] Applicant: ${applicantData.fullName} (${applicantData.email})`);
+    console.log(`[AutoApply] Resume URL: ${applicantData.resumeUrl || 'NOT PROVIDED'}`);
+    
+    console.log(`[AutoApply] Step 1: Getting browser instance...`);
     const browser = await getBrowser();
+    console.log(`[AutoApply] ✓ Browser obtained`);
+    
+    console.log(`[AutoApply] Step 2: Creating new page...`);
     page = await browser.newPage();
+    console.log(`[AutoApply] ✓ New page created`);
     
     // Authenticate with proxy if configured
     const proxyUrl = await getProxyUrl();
     if (proxyUrl) {
+      console.log(`[AutoApply] Step 3: Configuring proxy authentication...`);
       const proxyConfig = parseProxyUrl(proxyUrl);
       if (proxyConfig) {
         await page.authenticate({
           username: proxyConfig.username,
           password: proxyConfig.password,
         });
-        console.log(`[AutoApply] Authenticated with ASOCKS proxy`);
+        console.log(`[AutoApply] ✓ Authenticated with ASOCKS proxy`);
       }
+    } else {
+      console.log(`[AutoApply] Step 3: No proxy configured, skipping...`);
     }
 
     // Set stealth mode - mimic real browser with random user agent
+    console.log(`[AutoApply] Step 4: Setting up stealth mode...`);
     const userAgent = getRandomUserAgent();
     await page.setUserAgent(userAgent);
-    console.log(`[AutoApply] Using user agent: ${userAgent.substring(0, 50)}...`);
+    console.log(`[AutoApply] ✓ User agent: ${userAgent.substring(0, 50)}...`);
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     });
+    console.log(`[AutoApply] ✓ Viewport and headers configured`);
 
     // Navigate to job application URL
+    console.log(`[AutoApply] Step 5: Navigating to ${jobUrl}...`);
     await page.goto(jobUrl, {
       waitUntil: 'networkidle2',
       timeout: 30000,
     });
+    const currentUrl = page.url();
+    console.log(`[AutoApply] ✓ Page loaded. Current URL: ${currentUrl}`);
 
     // Wait for dynamic content with human-like delay
     await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1500));
+    
+    // Helper to safely execute page operations (handles frame detachment)
+    const safePageOp = async <T>(operation: () => Promise<T>, fallback: T): Promise<T> => {
+      try {
+        if (!page || page.isClosed()) return fallback;
+        return await operation();
+      } catch (err: any) {
+        if (err.message?.includes('detached') || err.message?.includes('Session closed') || err.message?.includes('Target closed')) {
+          console.log('[AutoApply] Frame detached, continuing...');
+          return fallback;
+        }
+        throw err;
+      }
+    };
     
     // ENHANCED Anti-bot evasion: Extremely human-like behavior
     console.log('[AutoApply] Simulating realistic human behavior...');
@@ -233,10 +285,11 @@ async function autoApplyToJobInternal(
         await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
       }
     } catch (err: any) {
-      if (err.message.includes('Session closed') || err.message.includes('Page closed')) {
-        throw new Error('Page closed unexpectedly during human behavior simulation');
+      if (err.message?.includes('detached') || err.message?.includes('Session closed') || err.message?.includes('Page closed') || err.message?.includes('Target closed')) {
+        console.log('[AutoApply] Frame detached during human simulation, continuing...');
+      } else {
+        throw err;
       }
-      throw err;
     }
     
     // 2. Realistic scrolling behavior - Multiple small scrolls (like reading)
@@ -695,10 +748,6 @@ async function autoApplyToJobInternal(
       sponsorshipRequired: applicantData.sponsorshipRequired ? 'Yes' : 'No',
       fintechExperience: applicantData.fintechExperience ? 'Yes' : 'No',
       fintechExperienceDescription: applicantData.fintechExperienceDescription || '',
-      // EEO fields
-      gender: applicantData.gender || '',
-      race: applicantData.race || '',
-      veteranStatus: applicantData.veteranStatus || '',
     };
     
     // Sort fields by priority (higher priority first)

@@ -10,7 +10,13 @@ import {
   educations,
   InsertEducation,
   skills,
-  InsertSkill
+  InsertSkill,
+  starAchievements,
+  InsertStarAchievement,
+  writingSamples,
+  InsertWritingSample,
+  skillsWithLevels,
+  InsertSkillWithLevel
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -381,4 +387,84 @@ export async function getApplicationLogByApplicationId(applicationId: number): P
     console.error("[Database] Failed to get application log:", error);
     return null;
   }
+}
+
+
+// ==================== STAR Achievements ====================
+
+export async function getStarAchievements(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(starAchievements).where(eq(starAchievements.userId, userId));
+}
+
+export async function addStarAchievement(achievement: InsertStarAchievement) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(starAchievements).values(achievement);
+  return result;
+}
+
+export async function updateStarAchievement(id: number, userId: number, data: Partial<InsertStarAchievement>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(starAchievements)
+    .set(data)
+    .where(eq(starAchievements.id, id));
+}
+
+export async function deleteStarAchievement(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(starAchievements).where(eq(starAchievements.id, id));
+}
+
+// ==================== Writing Samples ====================
+
+export async function getWritingSamples(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(writingSamples).where(eq(writingSamples.userId, userId));
+}
+
+export async function addWritingSample(sample: InsertWritingSample) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(writingSamples).values(sample);
+  return result;
+}
+
+export async function deleteWritingSample(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(writingSamples).where(eq(writingSamples.id, id));
+}
+
+// ==================== Skills with Levels ====================
+
+export async function getSkillsWithLevels(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(skillsWithLevels).where(eq(skillsWithLevels.userId, userId));
+}
+
+export async function addSkillWithLevel(skill: InsertSkillWithLevel) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(skillsWithLevels).values(skill);
+  return result;
+}
+
+export async function updateSkillWithLevel(id: number, userId: number, data: Partial<InsertSkillWithLevel>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(skillsWithLevels)
+    .set(data)
+    .where(eq(skillsWithLevels.id, id));
+}
+
+export async function deleteSkillWithLevel(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(skillsWithLevels).where(eq(skillsWithLevels.id, id));
 }

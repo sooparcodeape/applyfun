@@ -1,0 +1,8 @@
+{
+  "query": "CREATE INDEX IF NOT EXISTS idx_jobs_job_type ON jobs(job_type); CREATE INDEX IF NOT EXISTS idx_jobs_job_type_created ON jobs(job_type, created_at DESC);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute CREATE INDEX IF NOT EXISTS idx_jobs_job_type ON jobs(job_type); CREATE INDEX IF NOT EXISTS idx_jobs_job_type_created ON jobs(job_type, created_at DESC);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1072 (42000) at line 1: column does not exist: created_at"
+  ]
+}

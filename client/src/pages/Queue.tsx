@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 
 export default function Queue() {
   const [showAutoApply, setShowAutoApply] = useState(false);
+  const [applyingMessage, setApplyingMessage] = useState(false);
   const [, setLocation] = useLocation();
   const { data: queueItems, isLoading } = trpc.queue.list.useQuery({ status: 'pending' });
   const { data: credits } = trpc.credits.balance.useQuery();
@@ -70,6 +71,9 @@ export default function Queue() {
       return;
     }
 
+    // Show success message immediately
+    setApplyingMessage(true);
+    
     // Call the backend mutation to actually create applications
     applyToJobs.mutate();
   };
@@ -103,13 +107,19 @@ export default function Queue() {
             <p className="text-sm font-medium">
               Total cost: ${(queueItems.length * 1).toFixed(2)}
             </p>
-            <Button 
-              onClick={handleApplyAll} 
-              className="mt-2"
-              disabled={applyToJobs.isPending}
-            >
-              {applyToJobs.isPending ? "Applying..." : "Apply to All"}
-            </Button>
+            <div className="flex items-center gap-3 mt-2">
+              {applyingMessage && (
+                <span className="text-sm text-green-500 font-medium">
+                  Go chill! We will take care of that for you!
+                </span>
+              )}
+              <Button 
+                onClick={handleApplyAll} 
+                disabled={applyToJobs.isPending}
+              >
+                {applyToJobs.isPending ? "Applying..." : "Apply to All"}
+              </Button>
+            </div>
           </div>
         )}
       </div>

@@ -18,7 +18,18 @@ import {
   deleteEducation,
   getUserSkills,
   addSkill,
-  deleteSkill
+  deleteSkill,
+  getStarAchievements,
+  addStarAchievement,
+  updateStarAchievement,
+  deleteStarAchievement,
+  getWritingSamples,
+  addWritingSample,
+  deleteWritingSample,
+  getSkillsWithLevels,
+  addSkillWithLevel,
+  updateSkillWithLevel,
+  deleteSkillWithLevel
 } from "./db";
 import {
   getAllJobs,
@@ -38,7 +49,7 @@ import {
 import { getDb } from "./db";
 import { jobs } from "../drizzle/schema";
 import { sql, eq } from "drizzle-orm";
-import { storagePut } from "./storage";
+import { storagePut, storageDelete } from './storage';
 import { aiRouter } from "./ai-chat";
 import { adminRouter } from "./admin-router";
 
@@ -206,10 +217,6 @@ export const appRouter = router({
 
 5. **Summary**: Extract professional summary/objective if present.
 
-6. **Current Position**: Identify the most recent/current job and extract:
-   - currentCompany: The company name of the most recent job (or current if still employed)
-   - currentTitle: The job title of the most recent position
-
 Be thorough and precise. If dates are ranges, preserve them. If information is missing, use empty strings.
 
 Return only valid JSON.
@@ -243,7 +250,7 @@ ${extractedText}`,
                         location: { type: 'string' },
                         description: { type: 'string' },
                       },
-                      required: ['title', 'company'],
+                      required: ['title', 'company', 'startDate', 'endDate', 'location', 'description'],
                       additionalProperties: false,
                     },
                   },
@@ -259,7 +266,7 @@ ${extractedText}`,
                         endDate: { type: 'string' },
                         gpa: { type: 'string' },
                       },
-                      required: ['institution'],
+                      required: ['institution', 'degree', 'fieldOfStudy', 'startDate', 'endDate', 'gpa'],
                       additionalProperties: false,
                     },
                   },
@@ -269,10 +276,8 @@ ${extractedText}`,
                   linkedin: { type: 'string' },
                   twitter: { type: 'string' },
                   telegram: { type: 'string' },
-                  currentCompany: { type: 'string' },
-                  currentTitle: { type: 'string' },
                 },
-                required: [],
+                required: ['name', 'email', 'phone', 'location', 'skills', 'experience', 'education', 'summary', 'portfolio', 'github', 'linkedin', 'twitter', 'telegram'],
                 additionalProperties: false,
               },
             },
@@ -281,6 +286,89 @@ ${extractedText}`,
 
         const content = response.choices[0]?.message?.content;
         const parsedData = typeof content === 'string' ? JSON.parse(content || '{}') : {};
+        
+        // Generate 2 STAR achievements from resume experiences
+        if (parsedData.experience && parsedData.experience.length > 0) {
+          const experiencesToUse = parsedData.experience.slice(0, 2);
+          parsedData.generatedAchievements = [];
+          
+          for (let i = 0; i < experiencesToUse.length; i++) {
+            try {
+              const starResponse = await invokeLLM({
+                messages: [
+                  {
+                    role: 'system',
+                    content: `You are an expert career coach. Generate ONE compelling STAR achievement from the resume experience provided. The achievement should be quantifiable and impressive. Make it unique and specific to this role.
+
+Return JSON with these exact fields:
+- title: A concise achievement title (e.g., "Led migration to microservices architecture")
+- situation: The context/challenge (2-3 sentences)
+- task: What you were specifically responsible for (1-2 sentences)
+- action: The specific actions you took (2-3 sentences)
+- result: Quantified outcome with numbers (1-2 sentences)
+- metricValue: The key metric (e.g., "40%", "$2M", "6 months")
+- category: One of: leadership, technical, problem_solving, communication, innovation, teamwork`,
+                  },
+                  {
+                    role: 'user',
+                    content: `Generate a STAR achievement from this experience:\n${JSON.stringify(experiencesToUse[i])}`,
+                  },
+                ],
+                response_format: {
+                  type: 'json_schema',
+                  json_schema: {
+                    name: 'star_achievement',
+                    strict: true,
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        title: { type: 'string' },
+                        situation: { type: 'string' },
+                        task: { type: 'string' },
+                        action: { type: 'string' },
+                        result: { type: 'string' },
+                        metricValue: { type: 'string' },
+                        category: { type: 'string' },
+                      },
+                      required: ['title', 'situation', 'task', 'action', 'result', 'metricValue', 'category'],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+              });
+              
+              const starContent = starResponse.choices[0]?.message?.content;
+              if (starContent && typeof starContent === 'string') {
+                const starData = JSON.parse(starContent);
+                await addStarAchievement({
+                  userId: ctx.user.id,
+                  title: starData.title,
+                  situation: starData.situation,
+                  task: starData.task,
+                  action: starData.action,
+                  result: starData.result,
+                  metricValue: starData.metricValue,
+                  category: starData.category,
+                });
+                parsedData.generatedAchievements.push(starData);
+              }
+            } catch (starError) {
+              console.error(`[Resume] Failed to generate STAR achievement ${i + 1}:`, starError);
+            }
+          }
+        }
+        
+        // Auto-save parsed profile data to database
+        await upsertUserProfile({
+          userId: ctx.user.id,
+          phone: parsedData.phone || null,
+          location: parsedData.location || null,
+          linkedinUrl: parsedData.linkedin || null,
+          githubUrl: parsedData.github || null,
+          twitterHandle: parsedData.twitter || null,
+          portfolioUrl: parsedData.portfolio || null,
+        });
+        
         return parsedData;
       }),
     updateFromParsed: protectedProcedure
@@ -438,16 +526,11 @@ ${extractedText}`,
         howDidYouHear: z.string().optional(),
         availableStartDate: z.string().optional(),
         willingToRelocate: z.number().optional(),
-        ableToWorkInOffice: z.number().optional(),
         // Ashby-specific fields
         university: z.string().optional(),
         sponsorshipRequired: z.number().optional(),
         fintechExperience: z.number().optional(),
         fintechExperienceDescription: z.string().optional(),
-        // EEO fields
-        gender: z.string().optional(),
-        race: z.string().optional(),
-        veteranStatus: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await upsertUserProfile({
@@ -457,13 +540,25 @@ ${extractedText}`,
         return { success: true };
       }),
     
-    uploadResume: protectedProcedure
+     uploadResume: protectedProcedure
       .input(z.object({
+        fileData: z.string(),
         fileName: z.string(),
-        fileData: z.string(), // base64 encoded
         mimeType: z.string(),
       }))
-      .mutation(async ({ ctx, input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Delete old resume from S3 if exists
+        const existingProfile = await getUserProfile(ctx.user.id);
+        if (existingProfile?.resumeUrl) {
+          try {
+            const oldKey = existingProfile.resumeUrl.split('/').slice(-2).join('/');
+            await storageDelete(oldKey);
+            console.log('[Resume] Deleted old resume:', oldKey);
+          } catch (e) {
+            console.error('[Resume] Failed to delete old resume:', e);
+          }
+        }
+        
         const buffer = Buffer.from(input.fileData, 'base64');
         const randomSuffix = Math.random().toString(36).substring(7);
         const fileKey = `${ctx.user.id}/resumes/${input.fileName}-${randomSuffix}`;
@@ -546,6 +641,128 @@ ${extractedText}`,
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteSkill(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // STAR Achievements for resume/cover letter generation
+  starAchievements: router({
+    list: protectedProcedure.query(({ ctx }) => getStarAchievements(ctx.user.id)),
+    
+    add: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        situation: z.string(),
+        task: z.string(),
+        action: z.string(),
+        result: z.string(),
+        metricValue: z.string().optional(),
+        metricType: z.string().optional(),
+        category: z.string().optional(),
+        skills: z.string().optional(), // JSON array
+        workExperienceId: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await addStarAchievement({
+          userId: ctx.user.id,
+          ...input,
+        });
+        return { success: true };
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        situation: z.string().optional(),
+        task: z.string().optional(),
+        action: z.string().optional(),
+        result: z.string().optional(),
+        metricValue: z.string().optional(),
+        metricType: z.string().optional(),
+        category: z.string().optional(),
+        skills: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await updateStarAchievement(id, ctx.user.id, data);
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteStarAchievement(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
+  // Writing samples to capture user's voice
+  writingSamples: router({
+    list: protectedProcedure.query(({ ctx }) => getWritingSamples(ctx.user.id)),
+    
+    add: protectedProcedure
+      .input(z.object({
+        type: z.enum(['linkedin_post', 'blog_article', 'cover_letter', 'email', 'other']),
+        title: z.string().optional(),
+        content: z.string(),
+        sourceUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await addWritingSample({
+          userId: ctx.user.id,
+          ...input,
+        });
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteWritingSample(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
+  // Skills with proficiency levels
+  skillsWithLevels: router({
+    list: protectedProcedure.query(({ ctx }) => getSkillsWithLevels(ctx.user.id)),
+    
+    add: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        category: z.string().optional(),
+        proficiencyLevel: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+        yearsUsed: z.number().optional(),
+        lastUsed: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await addSkillWithLevel({
+          userId: ctx.user.id,
+          ...input,
+        });
+        return { success: true };
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        category: z.string().optional(),
+        proficiencyLevel: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+        yearsUsed: z.number().optional(),
+        lastUsed: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { id, ...data } = input;
+        await updateSkillWithLevel(id, ctx.user.id, data);
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteSkillWithLevel(input.id, ctx.user.id);
         return { success: true };
       }),
   }),
@@ -704,15 +921,6 @@ ${extractedText}`,
               workAuthorization: userProfile?.workAuthorization || undefined,
               howDidYouHear: userProfile?.howDidYouHear || undefined,
               availableStartDate: userProfile?.availableStartDate || undefined,
-              // Ashby-specific fields
-              university: userProfile?.university || undefined,
-              sponsorshipRequired: userProfile?.sponsorshipRequired === 1,
-              fintechExperience: userProfile?.fintechExperience === 1,
-              fintechExperienceDescription: userProfile?.fintechExperienceDescription || undefined,
-              // EEO fields
-              gender: userProfile?.gender || undefined,
-              race: userProfile?.race || undefined,
-              veteranStatus: userProfile?.veteranStatus || undefined,
             },
             3, // maxRetries
             ctx.user.id,

@@ -25,7 +25,7 @@ export default function PublicJobs() {
   const [search, setSearch] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
-  const [jobType, setJobType] = useState<string>("all");
+  const [jobType, setJobType] = useState<string>("Full-time");
   const [location, setLocation] = useState<string>("all");
   const [page, setPage] = useState(1);
   const itemsPerPage = 20;

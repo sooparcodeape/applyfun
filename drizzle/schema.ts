@@ -144,16 +144,11 @@ export const userProfiles = mysqlTable("user_profiles", {
   howDidYouHear: varchar("how_did_you_hear", { length: 255 }), // Referral source
   availableStartDate: varchar("available_start_date", { length: 100 }), // e.g., "Immediately", "2 weeks", "1 month"
   willingToRelocate: int("willing_to_relocate").default(0), // 0 = no, 1 = yes
-  ableToWorkInOffice: int("able_to_work_in_office").default(0), // 0 = no, 1 = yes
   // Ashby-specific fields
   university: varchar("university", { length: 255 }), // University name for degree
   sponsorshipRequired: int("sponsorship_required").default(0), // 0 = no, 1 = yes
   fintechExperience: int("fintech_experience").default(0), // 0 = no, 1 = yes
   fintechExperienceDescription: text("fintech_experience_description"), // Details about fintech experience
-  // EEO fields (voluntary self-identification)
-  gender: varchar("gender", { length: 50 }), // Male, Female, Non-binary, Prefer not to say
-  race: varchar("race", { length: 100 }), // Hispanic/Latino, White, Black, Asian, etc.
-  veteranStatus: varchar("veteran_status", { length: 100 }), // Yes, No, Prefer not to say
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
@@ -335,3 +330,83 @@ export const applicationLogs = mysqlTable("application_logs", {
 
 export type ApplicationLog = typeof applicationLogs.$inferSelect;
 export type InsertApplicationLog = typeof applicationLogs.$inferInsert;
+
+/**
+ * STAR Achievements - Structured stories for resume/cover letter generation
+ * STAR = Situation, Task, Action, Result
+ */
+export const starAchievements = mysqlTable("star_achievements", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(), // Brief title like "Led migration to microservices"
+  situation: text("situation").notNull(), // Context/background
+  task: text("task").notNull(), // What was your responsibility
+  action: text("action").notNull(), // What did you do specifically
+  result: text("result").notNull(), // Quantified outcome
+  // Metrics for easy extraction
+  metricValue: varchar("metric_value", { length: 100 }), // e.g., "40%", "$2M", "6 months"
+  metricType: varchar("metric_type", { length: 50 }), // revenue, cost_savings, time_saved, users, performance
+  // Categorization for matching to job requirements
+  category: varchar("category", { length: 100 }), // leadership, technical, problem_solving, collaboration
+  skills: text("skills"), // JSON array of skills demonstrated
+  // Optional link to work experience
+  workExperienceId: int("work_experience_id").references(() => workExperiences.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StarAchievement = typeof starAchievements.$inferSelect;
+export type InsertStarAchievement = typeof starAchievements.$inferInsert;
+
+/**
+ * Writing samples - Capture user's natural voice for personalized generation
+ */
+export const writingSamples = mysqlTable("writing_samples", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: mysqlEnum("type", ["linkedin_post", "blog_article", "cover_letter", "email", "other"]).notNull(),
+  title: varchar("title", { length: 255 }),
+  content: text("content").notNull(),
+  sourceUrl: varchar("source_url", { length: 512 }), // Link to original if applicable
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type WritingSample = typeof writingSamples.$inferSelect;
+export type InsertWritingSample = typeof writingSamples.$inferInsert;
+
+/**
+ * Skills with proficiency levels for better job matching
+ */
+export const skillsWithLevels = mysqlTable("skills_with_levels", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  category: varchar("category", { length: 50 }), // programming, blockchain, defi, management, etc.
+  proficiencyLevel: mysqlEnum("proficiency_level", ["beginner", "intermediate", "advanced", "expert"]).notNull(),
+  yearsUsed: int("years_used"), // How many years using this skill
+  lastUsed: varchar("last_used", { length: 50 }), // "currently", "within 1 year", "1-3 years ago"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type SkillWithLevel = typeof skillsWithLevels.$inferSelect;
+export type InsertSkillWithLevel = typeof skillsWithLevels.$inferInsert;
+
+/**
+ * Generated cover letters - Track what we generate for learning/improvement
+ */
+export const generatedCoverLetters = mysqlTable("generated_cover_letters", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  jobId: int("job_id").references(() => jobs.id, { onDelete: "set null" }),
+  applicationId: int("application_id").references(() => applications.id, { onDelete: "set null" }),
+  content: text("content").notNull(),
+  // Track which achievements were used
+  achievementIds: text("achievement_ids"), // JSON array of star_achievement IDs used
+  // Feedback for learning
+  userRating: int("user_rating"), // 1-5 stars
+  gotResponse: int("got_response").default(0), // Did this lead to interview?
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type GeneratedCoverLetter = typeof generatedCoverLetters.$inferSelect;
+export type InsertGeneratedCoverLetter = typeof generatedCoverLetters.$inferInsert;

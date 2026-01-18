@@ -1,102 +1,193 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
+// Storage helpers - supports Cloudflare R2 (production) and Manus Forge (dev)
 
 import { ENV } from './_core/env';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-type StorageConfig = { baseUrl: string; apiKey: string };
+// R2 Configuration from environment
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'applyfun-storage';
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL;
 
-function getStorageConfig(): StorageConfig {
-  const baseUrl = ENV.forgeApiUrl;
-  const apiKey = ENV.forgeApiKey;
-
-  if (!baseUrl || !apiKey) {
-    throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
-    );
-  }
-
-  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
+// Check if R2 is configured
+function isR2Configured(): boolean {
+  return !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY);
 }
 
-function buildUploadUrl(baseUrl: string, relKey: string): URL {
-  const url = new URL("v1/storage/upload", ensureTrailingSlash(baseUrl));
-  url.searchParams.set("path", normalizeKey(relKey));
-  return url;
+// Check if Manus Forge is configured
+function isManusConfigured(): boolean {
+  return !!(ENV.forgeApiUrl && ENV.forgeApiKey);
 }
 
-async function buildDownloadUrl(
-  baseUrl: string,
-  relKey: string,
-  apiKey: string
-): Promise<string> {
-  const downloadApiUrl = new URL(
-    "v1/storage/downloadUrl",
-    ensureTrailingSlash(baseUrl)
-  );
-  downloadApiUrl.searchParams.set("path", normalizeKey(relKey));
-  const response = await fetch(downloadApiUrl, {
-    method: "GET",
-    headers: buildAuthHeaders(apiKey),
+// Create S3 client for R2
+function getR2Client(): S3Client {
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: R2_ACCESS_KEY_ID!,
+      secretAccessKey: R2_SECRET_ACCESS_KEY!,
+    },
   });
-  return (await response.json()).url;
 }
 
-function ensureTrailingSlash(value: string): string {
-  return value.endsWith("/") ? value : `${value}/`;
-}
+// ============ Cloudflare R2 Implementation ============
 
-function normalizeKey(relKey: string): string {
-  return relKey.replace(/^\/+/, "");
-}
-
-function toFormData(
+async function r2Put(
+  relKey: string,
   data: Buffer | Uint8Array | string,
-  contentType: string,
-  fileName: string
-): FormData {
-  const blob =
-    typeof data === "string"
-      ? new Blob([data], { type: contentType })
-      : new Blob([data as any], { type: contentType });
-  const form = new FormData();
-  form.append("file", blob, fileName || "file");
-  return form;
+  contentType = "application/octet-stream"
+): Promise<{ key: string; url: string }> {
+  const key = relKey.replace(/^\/+/, "");
+  const client = getR2Client();
+  
+  // Convert data to buffer
+  const body = typeof data === 'string' ? Buffer.from(data) : Buffer.from(data);
+  
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  });
+  
+  await client.send(command);
+  
+  // Return public URL
+  const publicUrl = R2_PUBLIC_URL 
+    ? `${R2_PUBLIC_URL.replace(/\/+$/, '')}/${key}`
+    : `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET_NAME}/${key}`;
+  
+  return { key, url: publicUrl };
 }
 
-function buildAuthHeaders(apiKey: string): HeadersInit {
-  return { Authorization: `Bearer ${apiKey}` };
+async function r2Get(relKey: string): Promise<{ key: string; url: string }> {
+  const key = relKey.replace(/^\/+/, "");
+  
+  // If public URL is configured, use it directly
+  if (R2_PUBLIC_URL) {
+    return {
+      key,
+      url: `${R2_PUBLIC_URL.replace(/\/+$/, '')}/${key}`,
+    };
+  }
+  
+  // Otherwise generate a presigned URL
+  const client = getR2Client();
+  const command = new GetObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+  });
+  
+  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+  return { key, url };
 }
+
+// ============ Manus Forge Implementation ============
+
+function getManusConfig() {
+  return { 
+    baseUrl: ENV.forgeApiUrl!.replace(/\/+$/, ""), 
+    apiKey: ENV.forgeApiKey! 
+  };
+}
+
+async function manusPut(
+  relKey: string,
+  data: Buffer | Uint8Array | string,
+  contentType = "application/octet-stream"
+): Promise<{ key: string; url: string }> {
+  const { baseUrl, apiKey } = getManusConfig();
+  const key = relKey.replace(/^\/+/, "");
+  
+  const uploadUrl = new URL("v1/storage/upload", baseUrl + "/");
+  uploadUrl.searchParams.set("path", key);
+  
+  const blob = typeof data === "string"
+    ? new Blob([data], { type: contentType })
+    : new Blob([data as any], { type: contentType });
+  
+  const form = new FormData();
+  form.append("file", blob, key.split("/").pop() ?? key);
+  
+  const response = await fetch(uploadUrl, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => response.statusText);
+    throw new Error(`Storage upload failed (${response.status}): ${message}`);
+  }
+  
+  const url = (await response.json()).url;
+  return { key, url };
+}
+
+async function manusGet(relKey: string): Promise<{ key: string; url: string }> {
+  const { baseUrl, apiKey } = getManusConfig();
+  const key = relKey.replace(/^\/+/, "");
+  
+  const downloadUrl = new URL("v1/storage/downloadUrl", baseUrl + "/");
+  downloadUrl.searchParams.set("path", key);
+  
+  const response = await fetch(downloadUrl, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  
+  const url = (await response.json()).url;
+  return { key, url };
+}
+
+// ============ Public API ============
 
 export async function storagePut(
   relKey: string,
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
-  const { baseUrl, apiKey } = getStorageConfig();
-  const key = normalizeKey(relKey);
-  const uploadUrl = buildUploadUrl(baseUrl, key);
-  const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: buildAuthHeaders(apiKey),
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(
-      `Storage upload failed (${response.status} ${response.statusText}): ${message}`
-    );
+  // Try R2 first (production), then Manus (dev)
+  if (isR2Configured()) {
+    return r2Put(relKey, data, contentType);
   }
-  const url = (await response.json()).url;
-  return { key, url };
+  
+  if (isManusConfigured()) {
+    return manusPut(relKey, data, contentType);
+  }
+  
+  throw new Error(
+    "No storage configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY for Cloudflare R2."
+  );
 }
 
-export async function storageGet(relKey: string): Promise<{ key: string; url: string; }> {
-  const { baseUrl, apiKey } = getStorageConfig();
-  const key = normalizeKey(relKey);
-  return {
-    key,
-    url: await buildDownloadUrl(baseUrl, key, apiKey),
-  };
+export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
+  if (isR2Configured()) {
+    return r2Get(relKey);
+  }
+  
+  if (isManusConfigured()) {
+    return manusGet(relKey);
+  }
+  
+  throw new Error("No storage configured.");
+}
+
+export async function storageDelete(relKey: string): Promise<void> {
+  if (isR2Configured()) {
+    const key = relKey.replace(/^\/+/, "");
+    const client = getR2Client();
+    const command = new DeleteObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+    });
+    await client.send(command);
+    return;
+  }
+  
+  // Manus doesn't support delete, just log
+  console.log('[Storage] Delete not supported for Manus, skipping:', relKey);
 }

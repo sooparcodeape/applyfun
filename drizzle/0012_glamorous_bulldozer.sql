@@ -1,1 +1,1 @@
--- Empty migration placeholder
+-- Placeholder migration

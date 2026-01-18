@@ -1,0 +1,150 @@
+{
+  "query": "SELECT id, title, company, apply_url, source FROM jobs WHERE company LIKE '%rain%' OR company LIKE '%Rain%' LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url, source FROM jobs WHERE company LIKE '%rain%' OR company LIKE '%Rain%' LIMIT 20;",
+  "rows": [
+    {
+      "id": "1831787",
+      "title": "Recruiting Coordinator",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234150-recruiting-coordinator",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831788",
+      "title": "Senior Product Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234152-senior-product-manager",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831789",
+      "title": "People Operations Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234147-people-operations-manager",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831790",
+      "title": "Senior Analytics Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234144-senior-analytics-engineer",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831791",
+      "title": "Sales Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234132-sales-engineer",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831792",
+      "title": "Senior Implementation Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234135-senior-implementation-manager",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831793",
+      "title": "Business Operations Analyst",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234141-business-operations-analyst",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831794",
+      "title": "Revenue Operations Associate",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234143-revenue-operations-associate",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831795",
+      "title": "Implementation Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234131-implementation-manager",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831796",
+      "title": "Marketing Manager LATAM",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234138-marketing-manager-latam",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831797",
+      "title": "Product Marketing Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234140-product-marketing-manager",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831798",
+      "title": "Business Development Analyst",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234124-business-development-analyst",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831799",
+      "title": "GTM Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234130-gtm-engineer",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831800",
+      "title": "Business Development Analyst - LATAM",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234126-business-development-analyst-latam",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "1831801",
+      "title": "Solutions Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234116-solutions-engineer",
+      "source": "jobs.solana.com"
+    },
+    {
+      "id": "2250188",
+      "title": "Disputes & Chargebacks Specialist",
+      "company": "Rain",
+      "apply_url": "https://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "2250189",
+      "title": "Sales Engineer",
+      "company": "Rain",
+      "apply_url": "https://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "2250200",
+      "title": "Backend Engineer",
+      "company": "Rain",
+      "apply_url": "https://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "2250201",
+      "title": "Business Development Analyst",
+      "company": "Rain",
+      "apply_url": "https://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain",
+      "source": "cryptojobslist.com"
+    },
+    {
+      "id": "2250241",
+      "title": "Business Development Analyst - LATAM",
+      "company": "Rain",
+      "apply_url": "https://cryptojobslist.com/jobs/business-development-analyst-latam-latam-at-rain",
+      "source": "cryptojobslist.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tapply_url\tsource\n1831787\tRecruiting Coordinator\train\thttps://jobs.solana.com/companies/rain/jobs/65234150-recruiting-coordinator\tjobs.solana.com\n1831788\tSenior Product Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234152-senior-product-manager\tjobs.solana.com\n1831789\tPeople Operations Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234147-people-operations-manager\tjobs.solana.com\n1831790\tSenior Analytics Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234144-senior-analytics-engineer\tjobs.solana.com\n1831791\tSales Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234132-sales-engineer\tjobs.solana.com\n1831792\tSenior Implementation Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234135-senior-implementation-manager\tjobs.solana.com\n1831793\tBusiness Operations Analyst\train\thttps://jobs.solana.com/companies/rain/jobs/65234141-business-operations-analyst\tjobs.solana.com\n1831794\tRevenue Operations Associate\train\thttps://jobs.solana.com/companies/rain/jobs/65234143-revenue-operations-associate\tjobs.solana.com\n1831795\tImplementation Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234131-implementation-manager\tjobs.solana.com\n1831796\tMarketing Manager LATAM\train\thttps://jobs.solana.com/companies/rain/jobs/65234138-marketing-manager-latam\tjobs.solana.com\n1831797\tProduct Marketing Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234140-product-marketing-manager\tjobs.solana.com\n1831798\tBusiness Development Analyst\train\thttps://jobs.solana.com/companies/rain/jobs/65234124-business-development-analyst\tjobs.solana.com\n1831799\tGTM Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234130-gtm-engineer\tjobs.solana.com\n1831800\tBusiness Development Analyst - LATAM\train\thttps://jobs.solana.com/companies/rain/jobs/65234126-business-development-analyst-latam\tjobs.solana.com\n1831801\tSolutions Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234116-solutions-engineer\tjobs.solana.com\n2250188\tDisputes & Chargebacks Specialist\tRain\thttps://cryptojobslist.com/jobs/disputes-chargebacks-specialist-new-york-usa-at-rain\tcryptojobslist.com\n2250189\tSales Engineer\tRain\thttps://cryptojobslist.com/jobs/sales-engineer-new-york-usa-at-rain\tcryptojobslist.com\n2250200\tBackend Engineer\tRain\thttps://cryptojobslist.com/jobs/backend-engineer-new-york-usa-at-rain\tcryptojobslist.com\n2250201\tBusiness Development Analyst\tRain\thttps://cryptojobslist.com/jobs/business-development-analyst-new-york-usa-at-rain\tcryptojobslist.com\n2250241\tBusiness Development Analyst - LATAM\tRain\thttps://cryptojobslist.com/jobs/business-development-analyst-latam-latam-at-rain\tcryptojobslist.com\n",
+  "stderr": "",
+  "execution_time_ms": 75
+}

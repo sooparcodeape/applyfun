@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, title, company, apply_url FROM jobs WHERE company LIKE '%rain%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 41HBMwttDW7LZLW.root --database G7Bah27Bb9yyPz9EaUBZuy --execute SELECT id, title, company, apply_url FROM jobs WHERE company LIKE '%rain%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "1831787",
+      "title": "Recruiting Coordinator",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234150-recruiting-coordinator"
+    },
+    {
+      "id": "1831788",
+      "title": "Senior Product Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234152-senior-product-manager"
+    },
+    {
+      "id": "1831789",
+      "title": "People Operations Manager",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234147-people-operations-manager"
+    },
+    {
+      "id": "1831790",
+      "title": "Senior Analytics Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234144-senior-analytics-engineer"
+    },
+    {
+      "id": "1831791",
+      "title": "Sales Engineer",
+      "company": "rain",
+      "apply_url": "https://jobs.solana.com/companies/rain/jobs/65234132-sales-engineer"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcompany\tapply_url\n1831787\tRecruiting Coordinator\train\thttps://jobs.solana.com/companies/rain/jobs/65234150-recruiting-coordinator\n1831788\tSenior Product Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234152-senior-product-manager\n1831789\tPeople Operations Manager\train\thttps://jobs.solana.com/companies/rain/jobs/65234147-people-operations-manager\n1831790\tSenior Analytics Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234144-senior-analytics-engineer\n1831791\tSales Engineer\train\thttps://jobs.solana.com/companies/rain/jobs/65234132-sales-engineer\n",
+  "stderr": "",
+  "execution_time_ms": 77
+}

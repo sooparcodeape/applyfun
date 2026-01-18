@@ -1065,11 +1065,8 @@
 - [x] Update backend jobs.list procedure to support offset/page parameter (already supported)
 - [x] Show total job count and current page
 
-### Profile Page Improvements (Jan 17, 2026)
-- [x] Add 60-second countdown to resume parsing button
-- [x] Add writing sample hint popup with (i) icon and scroll trigger
-- [x] Enhance resume parsing to fill Location, Current Company, Current Title, Social & Portfolio links
-- [x] Remove NYC office question from work authorization section
-- [x] Add "Are you open to relocation?" question with Yes/No options
-- [x] Add "Are you able to show up to place of employment during business hours?" question
-- [x] Add writing sample upload option with S3 storage
+### Urgent Fixes (Jan 17, 2026)
+- [x] Remove Web3 Careers scraper (disable scraper, remove jobs from DB and UI)
+- [x] Remove CryptoJobsList scraper (disable scraper, remove jobs from DB and UI)
+- [x] Fix Remove button on /queue page (verified working)
+- [x] Add success message "Go chill! We will take care of that for you!" on Apply All click
